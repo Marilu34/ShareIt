@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.service.CheckConsistencyService;
+import ru.practicum.shareit.user.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -16,12 +16,12 @@ public class ItemController {
     private static final String OWNER = "X-Sharer-User-Id";
     private ItemService itemService;
 
-    private CheckConsistencyService checker;
+    private UserService userService;
 
     @Autowired
-    public ItemController(ItemService itemService, CheckConsistencyService checkConsistencyService) {
+    public ItemController(ItemService itemService, UserService userService) {
         this.itemService = itemService;
-        this.checker = checkConsistencyService;
+        this.userService = userService;
     }
 
     @GetMapping("/{itemId}")
@@ -35,7 +35,7 @@ public class ItemController {
     public ItemDto create(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
         log.info("Получен POST-запрос к эндпоинту: '/items' на добавление вещи владельцем с ID={}", ownerId);
         ItemDto newItemDto = null;
-        if (checker.isExistUser(ownerId)) {
+        if (userService.isExistUser(ownerId)) {
             newItemDto = itemService.create(itemDto, ownerId);
         }
         return newItemDto;
@@ -53,7 +53,7 @@ public class ItemController {
                           @RequestHeader(OWNER) Long ownerId) {
         log.info("Получен PATCH-запрос к эндпоинту: '/items' на обновление вещи с ID={}", itemId);
         ItemDto newItemDto = null;
-        if (checker.isExistUser(ownerId)) {
+        if (userService.isExistUser(ownerId)) {
             newItemDto = itemService.update(itemDto, ownerId, itemId);
         }
         return newItemDto;

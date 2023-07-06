@@ -84,7 +84,9 @@ public class InMemoryItemStorage implements ItemStorage {
             items.remove(deleteId);
         }
     }
-
+    public void deleteItemsByUser(Long userId) {
+        deleteItemsByOwner(userId);
+    }
     @Override
     public Item getItemById(Long itemId) {
         if (!items.containsKey(itemId)) {

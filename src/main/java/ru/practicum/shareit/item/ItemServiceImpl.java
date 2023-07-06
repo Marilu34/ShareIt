@@ -14,29 +14,29 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class ItemServiceImpl implements ItemService {
     private ItemStorage itemStorage;
-    private ItemMapper mapper;
+    private ItemMapper itemMapper;
 
     @Autowired
     public ItemServiceImpl(@Qualifier("InMemoryItemStorage") ItemStorage itemStorage, ItemMapper itemMapper) {
         this.itemStorage = itemStorage;
-        this.mapper = itemMapper;
+        this.itemMapper = itemMapper;
     }
 
     @Override
     public ItemDto create(ItemDto itemDto, Long ownerId) {
-        return mapper.toItemDto(itemStorage.create(mapper.toItem(itemDto, ownerId)));
+        return itemMapper.toItemDto(itemStorage.create(itemMapper.toItem(itemDto, ownerId)));
     }
 
     @Override
     public List<ItemDto> getItemsByOwner(Long ownderId) {
         return itemStorage.getItemsByOwner(ownderId).stream()
-                .map(mapper::toItemDto)
+                .map(itemMapper::toItemDto)
                 .collect(toList());
     }
 
     @Override
     public ItemDto getItemById(Long id) {
-        return mapper.toItemDto(itemStorage.getItemById(id));
+        return itemMapper.toItemDto(itemStorage.getItemById(id));
     }
 
 
@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
         if (!oldItem.getOwnerId().equals(ownerId)) {
             throw new ItemNotFoundException("У пользователя нет такой вещи!");
         }
-        return mapper.toItemDto(itemStorage.update(mapper.toItem(itemDto, ownerId)));
+        return itemMapper.toItemDto(itemStorage.update(itemMapper.toItem(itemDto, ownerId)));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
         if (!item.getOwnerId().equals(ownerId)) {
             throw new ItemNotFoundException("У пользователя нет такой вещи!");
         }
-        return mapper.toItemDto(itemStorage.delete(itemId));
+        return itemMapper.toItemDto(itemStorage.delete(itemId));
     }
 
    @Override
@@ -71,7 +71,8 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getItemsBySearchQuery(String text) {
         text = text.toLowerCase();
         return itemStorage.getItemsBySearchQuery(text).stream()
-                .map(mapper::toItemDto)
+                .map(itemMapper::toItemDto)
                 .collect(toList());
     }
+
 }
