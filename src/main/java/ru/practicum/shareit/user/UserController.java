@@ -1,49 +1,56 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.service.CheckConsistencyService;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
+import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
-
+@Slf4j
 @RestController
-@RequestMapping("/users")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping(path = "/users")
 public class UserController {
-    private final UserService userService;
+    private UserService userService;
+    private CheckConsistencyService checker;
 
-    @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.createUser(userDto));
-    }
-
-    @GetMapping("{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable("id") @Min(1) Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(userId));
+    @Autowired
+    public UserController(UserService userService, CheckConsistencyService checkConsistencyService) {
+        this.userService = userService;
+        this.checker = checkConsistencyService;
     }
 
     @GetMapping
-    public UserDto getAllUsers() {
+    public List<UserDto> getUsers() {
         return userService.getUsers();
     }
 
-    @PatchMapping("{id}")
-    public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable("id") Long userId) {
-        return userService.updateUser(userDto, userId);
+    @GetMapping("/{userId}")
+    public UserDto getUserById(@PathVariable Long userId) {
+        return userService.getUserById(userId);
     }
 
-    @DeleteMapping("{id}")
-    public void deleteUser(@Min(1) @PathVariable("id") Long userId) {
-        userService.deleteUser(userId);
+    @ResponseBody
+    @PostMapping
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
+        log.info("Получен POST-запрос к эндпоинту: '/users' на добавление пользователя");
+        return userService.create(userDto);
     }
 
+    @ResponseBody
+    @PatchMapping("/{userId}")
+    public UserDto update(@RequestBody UserDto userDto, @PathVariable Long userId) {
+        log.info("Получен PATCH-запрос к эндпоинту: '/users' на обновление пользователя с ID={}", userId);
+        return userService.update(userDto, userId);
+    }
+
+    @DeleteMapping("/{userId}")
+    public UserDto delete(@PathVariable Long userId) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/users' на удаление пользователя с ID={}", userId);
+        UserDto userDto = userService.delete(userId);
+        checker.deleteItemsByUser(userId);
+        return userDto;
+    }
 }

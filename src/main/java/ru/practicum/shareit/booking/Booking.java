@@ -15,9 +15,8 @@ import java.time.LocalDateTime;
 public class Booking {
     private Long id;
     private LocalDateTime start;
-    @FutureOrPresent
     private LocalDateTime end;
-    private Item item;
-    private User booker;
-    private Status status;
+    private Long itemId;
+    private Long bookerId;
+    private String status;
 }

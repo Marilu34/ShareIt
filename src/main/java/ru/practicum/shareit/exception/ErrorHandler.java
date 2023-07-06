@@ -2,34 +2,36 @@ package ru.practicum.shareit.exception;
 
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.server.ResponseStatusException;
 
-@RestControllerAdvice("ru.practicum.java-shareit")
+
+
+@RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler(ResponseStatusException.class)
-    private ResponseEntity<String> handleException(ResponseStatusException e) {
-        return ResponseEntity
-                .status(e.getStatus())
-                .body(e.getMessage());
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    private ResponseEntity<String> handleException(MethodArgumentNotValidException e) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(HttpStatus.BAD_REQUEST + " " + e.getFieldError().getDefaultMessage());
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleItemNotFoundException(final ItemNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    private ResponseEntity<String> handleException(MethodArgumentTypeMismatchException e) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(HttpStatus.BAD_REQUEST + " Некорректные параметры строки " + e.getName() + "=" + e.getValue());
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleUserAlreadyExistException(final UserAlreadyExistsException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }

@@ -1,44 +1,48 @@
 package ru.practicum.shareit.user;
 
-
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.util.stream.Collectors;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserService {
-    private final UserDbStorage users;
+    private UserStorage userStorage;
+    private UserMapper mapper;
 
-    private final UserMapper mapper;
+    @Autowired
+    public UserService(@Qualifier("InMemoryUserStorage") UserStorage userStorage, UserMapper userMapper) {
+        this.userStorage = userStorage;
+        this.mapper = userMapper;
+    }
 
-
-    public UserDto createUser(UserDto user) {
-        return mapper.mapToUserDto(users.createUser(mapper.mapToUser(user)));
+    public List<UserDto> getUsers() {
+        return userStorage.getUsers().stream()
+                .map(mapper::toUserDto)
+                .collect(toList());
     }
 
 
     public UserDto getUserById(Long id) {
-        return mapper.mapToUserDto(users.getUserById(id));
+        return mapper.toUserDto(userStorage.getUserById(id));
     }
 
-
-    public UserDto getUsers() {
-        return UserDto.builder()
-                .users(users.getUsers().stream().map(mapper::mapToUserDto).collect(Collectors.toList()))
-                .build();
+    public UserDto create(UserDto userDto) {
+        return mapper.toUserDto(userStorage.create(mapper.toUser(userDto)));
     }
 
-
-    public UserDto updateUser(UserDto user, Long userId) {
-        return mapper.mapToUserDto(users.updateUser(mapper.mapToUser(user), userId));
+    public UserDto update(UserDto userDto, Long id) {
+        if (userDto.getId() == null) {
+            userDto.setId(id);
+        }
+        return mapper.toUserDto(userStorage.update(mapper.toUser(userDto)));
     }
 
-
-    public void deleteUser(Long id) {
-        users.deleteUser(id);
+    public UserDto delete(Long userId) {
+        return mapper.toUserDto(userStorage.delete(userId));
     }
 }

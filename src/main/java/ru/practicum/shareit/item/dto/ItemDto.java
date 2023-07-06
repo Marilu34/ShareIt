@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.request.ItemRequest;
@@ -14,17 +15,14 @@ import java.util.List;
  * TODO Sprint add-controllers.
  */
 @Data
-@Builder
+@AllArgsConstructor
 public class ItemDto {
     private Long id;
-    @NotBlank(message = "Имя не должно быть пустым")
+    @NotBlank
     private String name;
-    @NotBlank(message = "Описание не должно быть пустым")
+    @NotBlank
     private String description;
     @NotNull
     private Boolean available;
-    private User owner;
-    private ItemRequest request;
-  //   @JsonValue
-    private List<ItemDto> items;
+    private Long requestId;
 }
