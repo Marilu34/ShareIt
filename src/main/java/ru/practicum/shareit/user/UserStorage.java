@@ -3,11 +3,11 @@ package ru.practicum.shareit.user;
 import java.util.List;
 
 public interface UserStorage {
-    User create(User user);
+    User createUser(User user);
 
-    User update(User user);
+    User updateUser(User user);
 
-    User delete(Long userId);
+    User deleteUser(Long userId);
 
     List<User> getUsers();
 

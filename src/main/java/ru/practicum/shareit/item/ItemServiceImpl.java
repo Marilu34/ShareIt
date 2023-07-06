@@ -24,7 +24,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(ItemDto itemDto, Long ownerId) {
-        return itemMapper.toItemDto(itemStorage.create(itemMapper.toItem(itemDto, ownerId)));
+        return itemMapper.toItemDto(itemStorage.createItem(itemMapper.toItem(itemDto, ownerId)));
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
         if (!oldItem.getOwnerId().equals(ownerId)) {
             throw new ItemNotFoundException("У пользователя нет такой вещи!");
         }
-        return itemMapper.toItemDto(itemStorage.update(itemMapper.toItem(itemDto, ownerId)));
+        return itemMapper.toItemDto(itemStorage.updateItem(itemMapper.toItem(itemDto, ownerId)));
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItemsBySearchQuery(String text) {
         text = text.toLowerCase();
-        return itemStorage.getItemsBySearchQuery(text).stream()
+        return itemStorage.searchItemByQuery(text).stream()
                 .map(itemMapper::toItemDto)
                 .collect(toList());
     }

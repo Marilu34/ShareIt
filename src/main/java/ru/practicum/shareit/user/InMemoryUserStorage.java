@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.UserAlreadyExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -15,11 +14,49 @@ import java.util.Map;
 public class InMemoryUserStorage implements UserStorage {
 
     public Map<Long, User> users;
-    private Long currentId;
+    private Long id = 0L;
 
     public InMemoryUserStorage() {
-        currentId = 0L;
         users = new HashMap<>();
+    }
+
+
+    @Override
+    public User createUser(User user) {
+        if (users.values().stream().noneMatch(u -> u.getEmail().equals(user.getEmail()))) {
+            if (ifUserValid(user)) {
+                if (user.getId() == null) {
+                    user.setId(++id);
+                }
+                users.put(user.getId(), user);
+            }
+        } else {
+            throw new UserAlreadyExistsException("Пользователь с почтой =" + user.getEmail() + " уже существует");
+        }
+        return user;
+    }
+
+    @Override
+    public User updateUser(User user) {
+        validation(user);
+        if (users.values().stream()
+                .filter(u -> u.getEmail().equals(user.getEmail()))
+                .allMatch(u -> u.getId().equals(user.getId()))) {
+            if (ifUserValid(user)) {
+                users.put(user.getId(), user);
+            }
+        } else {
+            throw new UserAlreadyExistsException("Пользователь с почтой = " + user.getEmail() + " уже существует");
+        }
+        return user;
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        if (!users.containsKey(userId)) {
+            throw new UserNotFoundException("Пользователь с id = " + userId + " не найден!");
+        }
+        return users.get(userId);
     }
 
     @Override
@@ -28,69 +65,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User create(User user) {
-        if (users.values().stream().noneMatch(u -> u.getEmail().equals(user.getEmail()))) {
-            if (isValidUser(user)) {
-                //     user.setId(++currentId);
-                if (user.getId() == null) {
-                    user.setId(++currentId);
-                }
-                users.put(user.getId(), user);
-            }
-        } else {
-            throw new UserAlreadyExistsException("Пользователь с E-mail=" + user.getEmail() + " уже существует!");
-        }
-        return user;
-    }
-
-    @Override
-    public User update(User user) {
-        if (user.getId() == null) {
-            throw new ValidationException("Передан пустой аргумент!");
-        }
-        if (!users.containsKey(user.getId())) {
-            throw new UserNotFoundException("Пользователь с ID=" + user.getId() + " не найден!");
-        }
-        if (user.getName() == null) {
-            user.setName(users.get(user.getId()).getName());
-        }
-        if (user.getEmail() == null) {
-            user.setEmail(users.get(user.getId()).getEmail());
-        }
-        if (users.values().stream()
-                .filter(u -> u.getEmail().equals(user.getEmail()))
-                .allMatch(u -> u.getId().equals(user.getId()))) {
-            if (isValidUser(user)) {
-                users.put(user.getId(), user);
-            }
-        } else {
-            throw new UserAlreadyExistsException("Пользователь с E-mail=" + user.getEmail() + " уже существует!");
-        }
-        return user;
-    }
-
-    @Override
-    public User getUserById(Long userId) {
-        if (!users.containsKey(userId)) {
-            throw new UserNotFoundException("Пользователь с ID=" + userId + " не найден!");
-        }
-        return users.get(userId);
-    }
-
-    @Override
-    public User delete(Long userId) {
+    public User deleteUser(Long userId) {
         if (userId == null) {
-            throw new ValidationException("Передан пустой аргумент!");
+            throw new ValidationException("id не может быть пустым");
         }
         if (!users.containsKey(userId)) {
-            throw new UserNotFoundException("Пользователь с ID=" + userId + " не найден!");
+            throw new UserNotFoundException("Пользователь с id =" + userId + " не найден!");
         }
         return users.remove(userId);
     }
 
-    private boolean isValidUser(User user) {
+    private boolean ifUserValid(User user) {
         if (!user.getEmail().contains("@")) {
-            throw new ValidationException("Некорректный e-mail пользователя: " + user.getEmail());
+            throw new ValidationException("Некорректная почта пользователя: " + user.getEmail());
         }
         if ((user.getName().isEmpty()) || (user.getName().contains(" "))) {
             throw new ValidationException("Некорректный логин пользователя: " + user.getName());
@@ -98,4 +85,18 @@ public class InMemoryUserStorage implements UserStorage {
         return true;
     }
 
+    private void validation(User user) {
+        if (user.getId() == null) {
+            throw new ValidationException("User не найден");
+        }
+        if (!users.containsKey(user.getId())) {
+            throw new UserNotFoundException("Пользователь с id =" + user.getId() + " не найден!");
+        }
+        if (user.getName() == null) {
+            user.setName(users.get(user.getId()).getName());
+        }
+        if (user.getEmail() == null) {
+            user.setEmail(users.get(user.getId()).getEmail());
+        }
+    }
 }

@@ -20,6 +20,18 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+
+    public UserDto createUser(UserDto userDto) {
+        return userMapper.toUserDto(userStorage.createUser(userMapper.toUser(userDto)));
+    }
+
+    public UserDto updateUser(UserDto userDto, Long id) {
+        if (userDto.getId() == null) {
+            userDto.setId(id);
+        }
+        return userMapper.toUserDto(userStorage.updateUser(userMapper.toUser(userDto)));
+    }
+
     public List<UserDto> getUsers() {
         return userStorage.getUsers().stream()
                 .map(userMapper::toUserDto)
@@ -31,22 +43,12 @@ public class UserService {
         return userMapper.toUserDto(userStorage.getUserById(id));
     }
 
-    public UserDto create(UserDto userDto) {
-        return userMapper.toUserDto(userStorage.create(userMapper.toUser(userDto)));
+
+    public UserDto deleteUser(Long userId) {
+        return userMapper.toUserDto(userStorage.deleteUser(userId));
     }
 
-    public UserDto update(UserDto userDto, Long id) {
-        if (userDto.getId() == null) {
-            userDto.setId(id);
-        }
-        return userMapper.toUserDto(userStorage.update(userMapper.toUser(userDto)));
-    }
-
-    public UserDto delete(Long userId) {
-        return userMapper.toUserDto(userStorage.delete(userId));
-    }
-
-    public boolean isExistUser(Long userId) {
+    public boolean ifExistUser(Long userId) {
         boolean exist = false;
         if (getUserById(userId) != null) {
             exist = true;

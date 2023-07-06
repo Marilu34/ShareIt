@@ -13,9 +13,24 @@ import java.util.List;
 @RequestMapping(path = "/users")
 public class UserController {
     private UserService userService;
+
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @ResponseBody
+    @PostMapping
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
+        log.info("Пользователь " + userDto + " был создан");
+        return userService.createUser(userDto);
+    }
+
+    @ResponseBody
+    @PatchMapping("/{userId}")
+    public UserDto update(@RequestBody UserDto userDto, @PathVariable Long userId) {
+        log.info("Пользователь c id = " + userId + " был обновлен");
+        return userService.updateUser(userDto, userId);
     }
 
     @GetMapping
@@ -25,27 +40,14 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable Long userId) {
+        log.info("Пользователь " + userId + " был получен");
         return userService.getUserById(userId);
-    }
-
-    @ResponseBody
-    @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto userDto) {
-        log.info("Получен POST-запрос к эндпоинту: '/users' на добавление пользователя");
-        return userService.create(userDto);
-    }
-
-    @ResponseBody
-    @PatchMapping("/{userId}")
-    public UserDto update(@RequestBody UserDto userDto, @PathVariable Long userId) {
-        log.info("Получен PATCH-запрос к эндпоинту: '/users' на обновление пользователя с ID={}", userId);
-        return userService.update(userDto, userId);
     }
 
     @DeleteMapping("/{userId}")
     public UserDto delete(@PathVariable Long userId) {
-        log.info("Получен DELETE-запрос к эндпоинту: '/users' на удаление пользователя с ID={}", userId);
-        UserDto userDto = userService.delete(userId);
+        log.info("Пользователь " + userId + " был удален");
+        UserDto userDto = userService.deleteUser(userId);
         return userDto;
     }
 }

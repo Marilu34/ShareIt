@@ -3,38 +3,35 @@ package ru.practicum.shareit.item;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.ItemStorage;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
 @Component("InMemoryItemStorage")
 public class InMemoryItemStorage implements ItemStorage {
 
-    public Map<Long, Item> items;
-    private Long currentId;
+    public HashMap<Long, Item> items;
+    private Long idItem = 0L;
 
     public InMemoryItemStorage() {
-        currentId = 0L;
         items = new HashMap<>();
     }
 
     @Override
-    public Item create(Item item) {
-        if (isValidItem(item)) {
-            item.setId(++currentId);
+    public Item createItem(Item item) {
+        if (ifItemValid(item)) {
+            item.setId(++idItem);
             items.put(item.getId(), item);
         }
         return item;
     }
 
     @Override
-    public Item update(Item item) {
+    public Item updateItem(Item item) {
         if (item.getId() == null) {
             throw new ValidationException("Передан пустой аргумент!");
         }
@@ -50,7 +47,7 @@ public class InMemoryItemStorage implements ItemStorage {
         if (item.getAvailable() == null) {
             item.setAvailable(items.get(item.getId()).getAvailable());
         }
-        if (isValidItem(item)) {
+        if (ifItemValid(item)) {
             items.put(item.getId(), item);
         }
         return item;
@@ -84,9 +81,11 @@ public class InMemoryItemStorage implements ItemStorage {
             items.remove(deleteId);
         }
     }
+
     public void deleteItemsByUser(Long userId) {
         deleteItemsByOwner(userId);
     }
+
     @Override
     public Item getItemById(Long itemId) {
         if (!items.containsKey(itemId)) {
@@ -96,7 +95,7 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public List<Item> getItemsBySearchQuery(String text) {
+    public List<Item> searchItemByQuery(String text) {
         List<Item> searchItems = new ArrayList<>();
         if (!text.isBlank()) {
             searchItems = items.values().stream()
@@ -108,7 +107,7 @@ public class InMemoryItemStorage implements ItemStorage {
         return searchItems;
     }
 
-    private boolean isValidItem(Item item) {
+    private boolean ifItemValid(Item item) {
         if ((item.getName().isEmpty()) || (item.getDescription().isEmpty()) || (item.getAvailable() == null)) {
             throw new ValidationException("У вещи некорректные данные");
         }
