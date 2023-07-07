@@ -10,8 +10,6 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 public class ItemServiceImpl implements ItemService {
     private ItemStorage itemStorage;

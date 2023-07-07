@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -25,6 +26,20 @@ public class UserService {
         return userMapper.toUserDto(userStorage.createUser(userMapper.toUser(userDto)));
     }
 
+
+    public List<UserDto> getUsers() {
+        List<User> users = userStorage.getUsers();
+        List<UserDto> userDtos = new ArrayList<>();
+
+        for (User user : users) {
+            UserDto userDto = userMapper.toUserDto(user);
+            userDtos.add(userDto);
+        }
+
+        return userDtos;
+    }
+
+
     public UserDto updateUser(UserDto userDto, Long id) {
         if (userDto.getId() == null) {
             userDto.setId(id);
@@ -32,15 +47,8 @@ public class UserService {
         return userMapper.toUserDto(userStorage.updateUser(userMapper.toUser(userDto)));
     }
 
-    public List<UserDto> getUsers() {
-        return userStorage.getUsers().stream()
-                .map(userMapper::toUserDto)
-                .collect(toList());
-    }
-
-
-    public UserDto getUserById(Long id) {
-        return userMapper.toUserDto(userStorage.getUserById(id));
+    public UserDto getUserById(Long userId) {
+        return userMapper.toUserDto(userStorage.getUserById(userId));
     }
 
 
@@ -54,4 +62,5 @@ public class UserService {
             exist = true;
         }
         return exist;
-    }}
+    }
+}

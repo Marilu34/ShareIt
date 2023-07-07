@@ -9,10 +9,10 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 public class User {
-    private Long id;        // уникальный идентификатор пользователя
+    private Long id;
     @NotBlank
-    private String name;    // имя или логин пользователя
+    private String name;
     @Email
     @NotBlank
-    private String email;   // адрес электронной почты
+    private String email;
 }

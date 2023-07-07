@@ -8,13 +8,12 @@ import ru.practicum.shareit.exception.ValidationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
-    public Map<Long, User> users;
-    private Long id = 0L;
+    public HashMap<Long, User> users;
+    private Long userId = 0L;
 
     public InMemoryUserStorage() {
         users = new HashMap<>();
@@ -23,31 +22,47 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        if (users.values().stream().noneMatch(u -> u.getEmail().equals(user.getEmail()))) {
+        boolean emailExists = false;
+        for (User u : users.values()) {
+            if (u.getEmail().equals(user.getEmail())) {
+                emailExists = true;
+                break;
+            }
+        }
+        if (!emailExists) {
             if (ifUserValid(user)) {
                 if (user.getId() == null) {
-                    user.setId(++id);
+                    user.setId(++userId);
                 }
                 users.put(user.getId(), user);
             }
         } else {
-            throw new UserAlreadyExistsException("Пользователь с почтой =" + user.getEmail() + " уже существует");
+            throw new UserAlreadyExistsException("Пользователь с почтой = " + user.getEmail() + " уже существует");
         }
         return user;
     }
 
+
     @Override
     public User updateUser(User user) {
         validation(user);
-        if (users.values().stream()
-                .filter(u -> u.getEmail().equals(user.getEmail()))
-                .allMatch(u -> u.getId().equals(user.getId()))) {
+        boolean emailExists = false;
+        for (User u : users.values()) {
+            if (u.getEmail().equals(user.getEmail())) {
+                if (!u.getId().equals(user.getId())) {
+                    emailExists = true;
+                    break;
+                }
+            }
+        }
+        if (!emailExists) {
             if (ifUserValid(user)) {
                 users.put(user.getId(), user);
             }
         } else {
             throw new UserAlreadyExistsException("Пользователь с почтой = " + user.getEmail() + " уже существует");
         }
+
         return user;
     }
 
@@ -80,7 +95,7 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ValidationException("Некорректная почта пользователя: " + user.getEmail());
         }
         if ((user.getName().isEmpty()) || (user.getName().contains(" "))) {
-            throw new ValidationException("Некорректный логин пользователя: " + user.getName());
+            throw new ValidationException("логин не может быть пустым или содержать пробелы");
         }
         return true;
     }
