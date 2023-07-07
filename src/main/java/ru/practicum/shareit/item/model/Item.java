@@ -7,8 +7,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class Item {
     private Long id;
-    @NotBlank
-    private String name;
+    @NotBlank private String name;
     private String description;
     private Boolean available;
     private Long ownerId;
