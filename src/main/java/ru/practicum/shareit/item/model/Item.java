@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class Item {
 
-    private Long id;  
+    private Long id;
     @NotBlank
     private String name;
     private String description;
