@@ -9,7 +9,7 @@ public interface ItemStorage {
 
     Item updateItem(Item item);
 
-    Item delete(Long userId);
+    Item deleteItem(Long userId);
 
     List<Item> getItemsByOwner(Long ownerId);
 

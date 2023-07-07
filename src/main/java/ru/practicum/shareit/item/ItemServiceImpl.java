@@ -28,7 +28,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItemsByOwner(Long ownderId) {
+    public List<ItemDto> getOwnersItems(Long ownderId) {
         return itemStorage.getItemsByOwner(ownderId).stream()
                 .map(itemMapper::toItemDto)
                 .collect(toList());
@@ -41,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemDto update(ItemDto itemDto, Long ownerId, Long itemId) {
+    public ItemDto updateItem(ItemDto itemDto, Long ownerId, Long itemId) {
         if (itemDto.getId() == null) {
             itemDto.setId(itemId);
         }
@@ -53,12 +53,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto delete(Long itemId, Long ownerId) {
+    public ItemDto deleteItem(Long itemId, Long ownerId) {
         Item item = itemStorage.getItemById(itemId);
         if (!item.getOwnerId().equals(ownerId)) {
             throw new ItemNotFoundException("У пользователя нет такой вещи!");
         }
-        return itemMapper.toItemDto(itemStorage.delete(itemId));
+        return itemMapper.toItemDto(itemStorage.deleteItem(itemId));
     }
 
    @Override
@@ -68,7 +68,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public List<ItemDto> getItemsBySearchQuery(String text) {
+    public List<ItemDto> searchQueryItem(String text) {
         text = text.toLowerCase();
         return itemStorage.searchItemByQuery(text).stream()
                 .map(itemMapper::toItemDto)

@@ -27,7 +27,7 @@ public class ItemController {
 
     @ResponseBody
     @PostMapping
-    public ItemDto create(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
+    public ItemDto createItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
         log.info("Вещь " + itemDto + " была создана Владельцем " + ownerId);
         ItemDto newItemDto = null;
         if (userService.ifExistUser(ownerId)) {
@@ -37,9 +37,9 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByOwner(@RequestHeader(OWNER) Long ownerId) {
+    public List<ItemDto> getOwnersItems(@RequestHeader(OWNER) Long ownerId) {
         log.info("Получены все вещей владельца с id = " + ownerId);
-        return itemService.getItemsByOwner(ownerId);
+        return itemService.getOwnersItems(ownerId);
     }
 
     @GetMapping("/{itemId}")
@@ -50,25 +50,26 @@ public class ItemController {
 
     @ResponseBody
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
-                          @RequestHeader(OWNER) Long ownerId) {
+    public ItemDto updateItem(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
+                              @RequestHeader(OWNER) Long ownerId) {
         log.info("Обновление вещи с id = " + itemId);
         ItemDto newItemDto = null;
         if (userService.ifExistUser(ownerId)) {
-            newItemDto = itemService.update(itemDto, ownerId, itemId);
+            newItemDto = itemService.updateItem(itemDto, ownerId, itemId);
         }
         return newItemDto;
     }
 
     @DeleteMapping("/{itemId}")
-    public ItemDto delete(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
+    public ItemDto deleteItem(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
         log.info("Удаление вещи с id =" + itemId);
-        return itemService.delete(itemId, ownerId);
+        itemService.deleteItemsByOwner(ownerId);
+        return itemService.deleteItem(itemId, ownerId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsBySearchQuery(@RequestParam String text) {
+    public List<ItemDto> searchQueryItem(@RequestParam String text) {
         log.info("Поиск вещи с описанием = {}", text);
-        return itemService.getItemsBySearchQuery(text);
+        return itemService.searchQueryItem(text);
     }
 }
