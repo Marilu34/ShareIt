@@ -29,11 +29,11 @@ public class ItemController {
     @PostMapping
     public ItemDto createItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
         log.info("Вещь " + itemDto + " была создана Владельцем " + ownerId);
-        ItemDto newItemDto = null;
-        if (userService.ifExistUser(ownerId)) {
-            newItemDto = itemService.create(itemDto, ownerId);
+        ItemDto newItem = null;
+        if (userService.ifUserExist(ownerId)) {
+            newItem = itemService.create(itemDto, ownerId);
         }
-        return newItemDto;
+        return newItem;
     }
 
     @GetMapping
@@ -53,11 +53,11 @@ public class ItemController {
     public ItemDto updateItem(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
                               @RequestHeader(OWNER) Long ownerId) {
         log.info("Обновление вещи с id = " + itemId);
-        ItemDto newItemDto = null;
-        if (userService.ifExistUser(ownerId)) {
-            newItemDto = itemService.updateItem(itemDto, ownerId, itemId);
+        ItemDto newItem = null;
+        if (userService.ifUserExist(ownerId)) {
+            newItem = itemService.updateItem(itemDto, ownerId, itemId);
         }
-        return newItemDto;
+        return newItem;
     }
 
     @DeleteMapping("/{itemId}")

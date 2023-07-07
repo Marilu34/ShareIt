@@ -48,7 +48,7 @@ public class UserService {
         return userMapper.toUserDto(userStorage.deleteUser(userId));
     }
 
-    public boolean ifExistUser(Long userId) {
+    public boolean ifUserExist(Long userId) {
         boolean exist = false;
         if (getUserById(userId) != null) {
             exist = true;
