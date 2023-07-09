@@ -1,7 +1,6 @@
 package ru.practicum.shareit.exception;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -47,9 +46,10 @@ public class ErrorHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(Exception e) {
-        log.error("Unhandled exception occurred: {}", e.getMessage(), e);
-        return new ErrorResponse("Internal Server Error");
+        log.error("Возникло необработанное исключение: {}", e.getMessage(), e);
+        return new ErrorResponse("Внутренняя ошибка сервера");
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final MethodArgumentNotValidException e) {
