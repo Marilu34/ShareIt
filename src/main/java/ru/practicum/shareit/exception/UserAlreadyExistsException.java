@@ -1,12 +1,13 @@
 package ru.practicum.shareit.exception;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class UserAlreadyExistsException extends IllegalArgumentException {
+    private static final Logger logger = LoggerFactory.getLogger(UserAlreadyExistsException.class);
 
     public UserAlreadyExistsException(String message) {
-
-        log.error(message);
+        super(message);
+        logger.error(message);
     }
 }

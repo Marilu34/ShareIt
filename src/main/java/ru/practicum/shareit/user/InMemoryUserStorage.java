@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.UserAlreadyExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.InMemoryItemStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,8 +15,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     public HashMap<Long, User> users;
     private Long userId = 0L;
+    InMemoryItemStorage itemStorage;
 
     public InMemoryUserStorage() {
+        itemStorage =  new InMemoryItemStorage();
         users = new HashMap<>();
     }
 
@@ -87,6 +90,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(userId)) {
             throw new UserNotFoundException("Пользователь с id =" + userId + " не найден!");
         }
+        itemStorage.deleteItemsByOwner(userId);
         return users.remove(userId);
     }
 

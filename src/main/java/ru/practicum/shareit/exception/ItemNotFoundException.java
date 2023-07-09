@@ -2,10 +2,14 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-public class ItemNotFoundException extends IllegalArgumentException {
-    public ItemNotFoundException(String message) {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-        log.error(message);
+public class ItemNotFoundException extends IllegalArgumentException {
+    private static final Logger logger = LoggerFactory.getLogger(ItemNotFoundException.class);
+
+    public ItemNotFoundException(String message) {
+        super(message);
+        logger.error(message);
     }
 }

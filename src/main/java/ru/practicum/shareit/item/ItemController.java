@@ -63,7 +63,6 @@ public class ItemController {
     @DeleteMapping("/{itemId}")
     public ItemDto deleteItem(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
         log.info("Удаление вещи с id =" + itemId);
-        itemService.deleteItemsByOwner(ownerId);
         return itemService.deleteItem(itemId, ownerId);
     }
 

@@ -51,6 +51,7 @@ public class UserService {
 
 
     public UserDto deleteUser(Long userId) {
+
         return userMapper.toUserDto(userStorage.deleteUser(userId));
     }
 
