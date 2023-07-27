@@ -11,7 +11,7 @@ import java.util.List;
 public interface BookingService {
 
 
-    Booking create(long userId, BookingDto bookingDto) throws ValidationException, NotFoundException;
+    Booking create(long userId, BookingDto bookingDto) throws Exception;
 
 
     Booking confirmationOrRejection(long userId, long bookingId, Boolean approved) throws ValidationException, NotFoundException;

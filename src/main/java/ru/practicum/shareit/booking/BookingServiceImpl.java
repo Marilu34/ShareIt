@@ -35,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking create(long userId, BookingDto bookingDto) throws NotFoundException, ValidationException{
+    public Booking create(long userId, BookingDto bookingDto) throws Exception {
         Booking booking = BookingMapper.fromBookingDto(bookingDto);
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() -> new ValidationException(""));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(""));
@@ -43,6 +43,9 @@ public class BookingServiceImpl implements BookingService {
             booking.setItem(item);
             LocalDateTime now = LocalDateTime.now();
             if (item.getOwner().getId() != userId) {
+               if( bookingDto.getStart()== null || bookingDto.getEnd()== null){
+                   throw new ValidationException("Время старта или окончания не может равняться нулю");
+               }
                 if (bookingDto.getStart().isAfter(now) && bookingDto.getEnd().isAfter(now)
                         && bookingDto.getEnd().isAfter(bookingDto.getStart())) {
                     booking.setBooker(user);

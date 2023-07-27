@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -42,7 +43,6 @@ public class Booking implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column
     Status status; //статус бронирования
-
 
 
 }
