@@ -1,24 +1,20 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 
 import java.util.List;
 
 public interface ItemService {
 
-    ItemDto create(ItemDto itemDto, Long ownerId);
+    ItemDto create(long userId, ItemDto item) throws Exception;
 
-    List<ItemDto> getOwnersItems(Long ownderId);
+    ItemDto update(long userId, long itemId, ItemDto item);
 
-    ItemDto getItemById(Long id);
+    ItemWithBookingDto find(long userId, long id);
 
-    ItemDto updateItem(ItemDto itemDto, Long ownerId, Long itemId);
+    List<ItemWithBookingDto> findAll(long userId);
 
-    ItemDto deleteItem(Long itemId, Long ownerId);
-
-    void deleteItemsByOwner(Long ownderId);
-
-    List<ItemDto> searchQueryItem(String text);
-
-
+    List<ItemDto> search(String text);
 }

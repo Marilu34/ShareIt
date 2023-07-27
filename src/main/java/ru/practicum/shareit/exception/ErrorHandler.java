@@ -28,17 +28,22 @@ public class ErrorHandler {
         log.debug("Вещь не обнаружена: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
-
+    @ExceptionHandler(BookingException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleBookingException(BookingException e) {
+        log.debug("Бронирование не обнаружена: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException e) {
         log.debug("Исключение проверки: {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse( e.getMessage());
     }
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUserAlreadyExistException(UserAlreadyExistsException e) {
+    public ErrorResponse handleConflictException(ConflictException e) {
         log.debug("Пользователь уже существует: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

@@ -1,74 +1,74 @@
 package ru.practicum.shareit.item;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.comment.CommentService;
+import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 
 import javax.validation.Valid;
 import java.util.List;
+
 
 @Slf4j
 @RestController
 @RequestMapping("/items")
 public class ItemController {
-    private static final String OWNER = "X-Sharer-User-Id";
-    private ItemService itemService;
 
-    private UserService userService;
+    private final ItemService itemService;
+    private final CommentService commentService;
 
     @Autowired
-    public ItemController(ItemService itemService, UserService userService) {
+    public ItemController(ItemService itemService, CommentService commentService) {
         this.itemService = itemService;
-        this.userService = userService;
+        this.commentService = commentService;
     }
 
 
-    @ResponseBody
+    @SneakyThrows
     @PostMapping
-    public ItemDto createItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
-        log.info("Вещь " + itemDto + " была создана Владельцем " + ownerId);
-        ItemDto newItem = null;
-        if (userService.ifUserExist(ownerId)) {
-            newItem = itemService.create(itemDto, ownerId);
-        }
-        return newItem;
+    public ItemDto create(@RequestHeader("X-Sharer-User-Id") long userId, @Valid @RequestBody ItemDto itemDto) {
+        log.info("Получен запрос на добавление вещи");
+        return itemService.create(userId, itemDto);
+
+    }
+
+    @SneakyThrows
+    @PatchMapping("/{itemId}")
+    public ItemDto update(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId,
+                          @Valid @RequestBody ItemDto item) {
+        log.info("Получен запрос на изменение данных вещи");
+        return itemService.update(userId, itemId, item);
+    }
+
+    @SneakyThrows
+    @GetMapping("/{itemId}")
+    public ItemWithBookingDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
+        log.info("Получен запрос на получение данных о вещи");
+        return itemService.find(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getOwnersItems(@RequestHeader(OWNER) Long ownerId) {
-        log.info("Получены все вещей владельца с id = " + ownerId);
-        return itemService.getOwnersItems(ownerId);
-    }
-
-    @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId) {
-        log.info("Вещь с id =  " + itemId + " была получен");
-        return itemService.getItemById(itemId);
-    }
-
-    @ResponseBody
-    @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
-                              @RequestHeader(OWNER) Long ownerId) {
-        log.info("Обновление вещи с id = " + itemId);
-        ItemDto newItem = null;
-        if (userService.ifUserExist(ownerId)) {
-            newItem = itemService.updateItem(itemDto, ownerId, itemId);
-        }
-        return newItem;
-    }
-
-    @DeleteMapping("/{itemId}")
-    public ItemDto deleteItem(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
-        log.info("Удаление вещи с id =" + itemId);
-        return itemService.deleteItem(itemId, ownerId);
+    public List<ItemWithBookingDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+        log.info("Получен запрос на вывод данных о всех вещах");
+        return itemService.findAll(userId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchQueryItem(@RequestParam String text) {
-        log.info("Поиск вещи с описанием = {}", text);
-        return itemService.searchQueryItem(text);
+    public List<ItemDto> search(@RequestParam(name = "text", required = true) String text) {
+        log.info("Получен запрос на поиск вещи");
+        return itemService.search(text.toLowerCase());
+    }
+
+    @SneakyThrows
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                    @PathVariable long itemId,
+                                    @Valid @RequestBody CommentDto commentDTO) {
+        log.info("Получен запрос на добавление вещи");
+        return commentService.createComment(userId, itemId, commentDTO);
     }
 }
