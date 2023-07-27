@@ -39,14 +39,4 @@ public class ItemMapper {
                 .collect(Collectors.toList()));
         return itemWithBookingDTO;
     }
-
-    public static Item fromItemWithBookingDTO(ItemWithBookingDto itemWithBookingDTO) {
-        Item item = new Item();
-        item.setId(itemWithBookingDTO.getId());
-        item.setName(itemWithBookingDTO.getName());
-        item.setDescription(itemWithBookingDTO.getDescription());
-        item.setAvailable(itemWithBookingDTO.getAvailable());
-        return item;
-
-    }
 }

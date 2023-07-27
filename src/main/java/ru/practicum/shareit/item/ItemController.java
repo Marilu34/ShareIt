@@ -29,7 +29,6 @@ public class ItemController {
     }
 
 
-    @SneakyThrows
     @PostMapping
     public Item create(@RequestHeader("X-Sharer-User-Id") long userId, @Valid @RequestBody ItemDto itemDto) {
         log.info("Получен запрос на добавление вещи");
@@ -37,7 +36,6 @@ public class ItemController {
 
     }
 
-    @SneakyThrows
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId,
                           @Valid @RequestBody ItemDto item) {
@@ -45,7 +43,6 @@ public class ItemController {
         return itemService.update(userId, itemId, item);
     }
 
-    @SneakyThrows
     @GetMapping("/{itemId}")
     public ItemWithBookingDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
         log.info("Получен запрос на получение данных о вещи");
@@ -64,7 +61,7 @@ public class ItemController {
         return itemService.search(text.toLowerCase());
     }
 
-    @SneakyThrows
+
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId,
                                     @PathVariable long itemId,
