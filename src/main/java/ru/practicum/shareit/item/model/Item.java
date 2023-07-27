@@ -38,6 +38,7 @@ public class Item implements Serializable {
 
     @JoinColumn(name = "owner")
     @ManyToOne(fetch = FetchType.EAGER)
+    @NotNull
     User owner;  //владелец вещи
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
