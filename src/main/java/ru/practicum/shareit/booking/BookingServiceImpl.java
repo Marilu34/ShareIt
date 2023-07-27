@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.List;
 import static ru.practicum.shareit.booking.Status.*;
 
 @Service
+@AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
     @Autowired
@@ -27,17 +29,12 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
-    public BookingServiceImpl(BookingRepository bookingRepository, ItemRepository itemRepository,
-                              UserRepository userRepository) {
-        this.bookingRepository = bookingRepository;
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-    }
+
 
     @Override
     public Booking create(long userId, BookingDto bookingDto) throws Exception {
         Booking booking = BookingMapper.fromBookingDto(bookingDto);
-        Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() -> new ValidationException(""));
+        Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() -> new NotFoundException(""));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(""));
         if (item.getAvailable()) {
             booking.setItem(item);

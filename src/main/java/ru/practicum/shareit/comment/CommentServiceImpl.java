@@ -1,5 +1,6 @@
 package ru.practicum.shareit.comment;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -13,11 +14,13 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static ru.practicum.shareit.booking.Status.APPROVED;
 
 
 @Service
+@AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
     @Autowired
@@ -27,26 +30,15 @@ public class CommentServiceImpl implements CommentService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
-    public CommentServiceImpl(ItemRepository itemRepository,
-                              UserRepository userRepository,
-                              BookingRepository bookingRepository,
-                              CommentRepository commentRepository) {
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.bookingRepository = bookingRepository;
-        this.commentRepository = commentRepository;
-    }
-
     @Override
     public CommentDto createComment(Long userId, Long itemId, CommentDto commentDTO) throws ValidationException, NotFoundException {
         Comment comment = CommentMapper.fromCommentDto(commentDTO);
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(""));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(""));
-        LocalDateTime now = LocalDateTime.now();
-        if (!(bookingRepository.findBookingByItemAndUser(itemId, userId, APPROVED.name(), now)).isEmpty()) {
+
+        if (!(bookingRepository.findBookingByItemAndUser(itemId, userId, APPROVED.name(), LocalDateTime.now())).isEmpty()) {
             comment.setItemId(itemId);
             comment.setAuthor(user);
-            comment.setCreated(now);
+            comment.setCreated(LocalDateTime.now());
             return (CommentMapper.toCommentDto(commentRepository.save(comment)));
         } else throw new ValidationException("");
     }

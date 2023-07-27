@@ -29,15 +29,15 @@ public class BookingController {
         this.service = service;
     }
 
-    @SneakyThrows
+
     @PostMapping
     public Booking create(@RequestHeader("X-Sharer-User-Id") long userId,
-                          @Valid @RequestBody BookingDto bookingDto) {
+                          @Valid @RequestBody BookingDto bookingDto) throws Exception {
         log.info("Получен запрос на бронирование");
         return service.create(userId, bookingDto);
     }
 
-    @SneakyThrows
+
     @PatchMapping("/{bookingId}")
     public Booking confirmationOrRejection(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @PathVariable long bookingId,
@@ -46,7 +46,7 @@ public class BookingController {
         return service.confirmationOrRejection(userId, bookingId, approved);
     }
 
-    @SneakyThrows
+
     @GetMapping("/{bookingId}")
     public Booking find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long bookingId) {
         log.info("Получение данных о конкретном бронировании");

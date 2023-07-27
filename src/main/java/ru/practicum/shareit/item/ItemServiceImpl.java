@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -22,20 +23,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
     @Autowired
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-
     private final BookingRepository bookingRepository;
-
-    public ItemServiceImpl(ItemRepository itemRepository,
-                           UserRepository userRepository,
-                           BookingRepository bookingRepository) {
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.bookingRepository = bookingRepository;
-    }
 
 
     @Override
@@ -43,7 +36,9 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ValidationException("Не найден пользователь при добавлении вещи"));
         Item item = ItemMapper.fromItemDto(itemDto);
-
+        if (userId <= 0) {
+            throw new ValidationException("Не найден пользователь при добавлении вещи");
+        }
         if (item.getName() == null || item.getName().isBlank() || item.getName().equals("") ||
                 item.getDescription() == null || item.getDescription().isBlank()
                 || item.getDescription().equals("") || !item.getAvailable()) {

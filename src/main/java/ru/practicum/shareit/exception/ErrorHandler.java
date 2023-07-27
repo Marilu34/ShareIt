@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Objects;
+
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -49,7 +51,7 @@ public class ErrorHandler {
     public ErrorResponse handleValidationException(final MethodArgumentNotValidException e) {
         log.warn(e.getMessage());
         return new ErrorResponse(
-                e.getBindingResult().getFieldError().getDefaultMessage()
+                Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage()
         );
     }
 }

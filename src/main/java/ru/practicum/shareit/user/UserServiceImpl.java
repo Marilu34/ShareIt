@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
@@ -14,15 +15,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 
 public class UserServiceImpl implements UserService {
 
+    @Autowired
     private final UserRepository repository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository repository) {
-        this.repository = repository;
-    }
 
     public UserDto create(UserDto userDto) throws ConflictException, ValidationException {
         User user = UserMapper.fromUserDto(userDto);
