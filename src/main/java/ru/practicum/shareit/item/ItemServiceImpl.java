@@ -1,10 +1,10 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.crossstore.ChangeSetPersister;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
@@ -39,23 +39,23 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemDto create(long userId, ItemDto itemDto) throws ValidationException {
+    public Item create(long userId, ItemDto itemDto) throws ValidationException, NotFoundException {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException("Не найден пользователь при добавлении вещи"));
+                () -> new ValidationException("Не найден пользователь при добавлении вещи"));
         Item item = ItemMapper.fromItemDto(itemDto);
 
-        if (item.getName() == null || item.getName().isEmpty() ||
-                item.getDescription() == null || item.getDescription().isEmpty() ||
-                item.getAvailable() == null || !item.getAvailable()) {
-            throw new ValidationException("Некорректный запрос при создании вещи");
+        if (item.getName() == null || item.getName().isBlank() || item.getName().equals("") ||
+                item.getDescription() == null || item.getDescription().isBlank()
+                || item.getDescription().equals("") || !item.getAvailable()) {
+            throw new NotFoundException("Некорректный запрос при создании вещи");
         }
         item.setOwner(user);
-        return ItemMapper.toItemDto(itemRepository.save(item));
+        return itemRepository.save(item);
     }
 
 
     @Override
-    public ItemDto update(long userId, long itemId, ItemDto itemDto) {
+    public ItemDto update(long userId, long itemId, ItemDto itemDto) throws NotFoundException {
         Optional<Item> item = itemRepository.findById(itemId);
         if (item.isPresent()) {
             Item foundItem = item.get();
@@ -71,13 +71,13 @@ public class ItemServiceImpl implements ItemService {
                 }
                 itemRepository.save(foundItem);
                 return ItemMapper.toItemDto(foundItem);
-            } else throw new UserNotFoundException("Не найден такой владелец вещи");
+            } else throw new NotFoundException("Не найден такой владелец вещи");
         } else return null;
     }
 
     @Override
-    public ItemWithBookingDto find(long userId, long id) {
-        Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(""));
+    public ItemWithBookingDto find(long userId, long id) throws NotFoundException {
+        Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException(""));
         ItemWithBookingDto itemDTO = ItemMapper.toItemWithBookingDTO(item);
         if (item.getOwner().getId() == userId) {
             LocalDateTime now = LocalDateTime.now();
@@ -122,5 +122,6 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
+
 
 }

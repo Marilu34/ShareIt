@@ -15,30 +15,19 @@ public class ErrorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorHandler.class);
 
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(UserNotFoundException e) {
-        log.debug("Пользователь не найден: {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
 
-    @ExceptionHandler(ItemNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleItemNotFoundException(ItemNotFoundException e) {
+    public ErrorResponse handleItemNotFoundException(NotFoundException e) {
         log.debug("Вещь не обнаружена: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
-    @ExceptionHandler(BookingException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleBookingException(BookingException e) {
-        log.debug("Бронирование не обнаружена: {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
+
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException e) {
         log.debug("Исключение проверки: {}", e.getMessage());
-        return new ErrorResponse( e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(ConflictException.class)

@@ -5,8 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -39,10 +38,10 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDto createComment(Long userId, Long itemId, CommentDto commentDTO) throws ValidationException {
+    public CommentDto createComment(Long userId, Long itemId, CommentDto commentDTO) throws ValidationException, NotFoundException {
         Comment comment = CommentMapper.fromCommentDto(commentDTO);
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException(""));
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(""));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(""));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(""));
         LocalDateTime now = LocalDateTime.now();
         if (!(bookingRepository.findBookingByItemAndUser(itemId, userId, APPROVED.name(), now)).isEmpty()) {
             comment.setItemId(itemId);

@@ -7,6 +7,8 @@ import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -23,12 +25,15 @@ public class Item implements Serializable {
     private Long id; //уникальный идентификатор вещи
 
     @Column(name = "name", nullable = false)
+    @NotNull
     String name; // краткое название
 
     @Column(name = "description", nullable = false)
+    @NotNull
     String description; //развёрнутое описание
 
     @Column(name = "available", nullable = false)
+    @NotNull
     Boolean available; //статус о том, доступна или нет вещь для аренды
 
     @JoinColumn(name = "owner")
