@@ -9,14 +9,14 @@ import java.util.List;
 
 public interface UserService {
 
-    UserDto create(UserDto user) throws ConflictException, ValidationException;
+    UserDto createUser(UserDto user) throws ConflictException, ValidationException;
 
-    UserDto update(long userId, UserDto userDto) throws NotFoundException;
+    UserDto updateUser(Long userId, UserDto userDto) throws NotFoundException;
 
-    UserDto find(long id) throws NotFoundException;
+    UserDto getUser(Long id) throws NotFoundException;
 
-    List<UserDto> findAll();
+    List<UserDto> getAllUsers();
 
-    void delete(long userId);
+    void deleteUser(Long userId);
 
 }

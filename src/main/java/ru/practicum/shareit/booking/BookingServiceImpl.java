@@ -30,7 +30,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public Booking create(long userId, BookingDto bookingDto) throws Exception {
+    public Booking createBooking(Long userId, BookingDto bookingDto) throws ValidationException, NotFoundException {
         Booking booking = BookingMapper.fromBookingDto(bookingDto);
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() -> new NotFoundException(""));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(""));
@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public Booking confirmationOrRejection(long userId, long bookingId, Boolean approved) throws ValidationException, NotFoundException {
+    public Booking confirmationOrRejectionBooking(Long userId, Long bookingId, Boolean approved) throws ValidationException, NotFoundException {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException(""));
         if (itemRepository.getReferenceById(booking.getItem().getId()).getOwner().getId() == userId) {
             if (booking.getStatus() == WAITING) {
@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public Booking find(long userId, long bookingId) throws NotFoundException {
+    public Booking getBooking(Long userId,Long bookingId) throws NotFoundException {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Не найдено"));
         if (booking.getBooker().getId() == userId ||
                 itemRepository.getReferenceById(booking.getItem().getId()).getOwner().getId() == userId) {
@@ -81,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAll(long userId, State state) throws NotFoundException {
+    public List<Booking> getAllBooking(Long userId, State state) throws NotFoundException {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         List<Booking> bookings = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
@@ -109,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> allUserItems(long userId, State state) throws NotFoundException {
+    public List<Booking> getAllUsersItems(Long userId, State state) throws NotFoundException {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         List<Booking> bookings = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();

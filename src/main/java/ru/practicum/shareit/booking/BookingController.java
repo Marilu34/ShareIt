@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionFailedException;
@@ -19,37 +20,33 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(path = "/bookings")
+@AllArgsConstructor
 public class BookingController {
 
+    @Autowired
     private final BookingService service;
 
-    @Autowired
-    public BookingController(BookingService service) {
-        this.service = service;
-    }
-
-
     @PostMapping
-    public Booking create(@RequestHeader("X-Sharer-User-Id") long userId,
+    public Booking create(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @Valid @RequestBody BookingDto bookingDto) throws Exception {
         log.info("Получен запрос на бронирование");
-        return service.create(userId, bookingDto);
+        return service.createBooking(userId, bookingDto);
     }
 
 
     @PatchMapping("/{bookingId}")
-    public Booking confirmationOrRejection(@RequestHeader("X-Sharer-User-Id") long userId,
-                                           @PathVariable long bookingId,
+    public Booking confirmationOrRejection(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                           @PathVariable Long bookingId,
                                            @RequestParam(name = "approved", required = true) Boolean approved) {
         log.info("Подтверждение или отклонение запроса на бронирование");
-        return service.confirmationOrRejection(userId, bookingId, approved);
+        return service.confirmationOrRejectionBooking(userId, bookingId, approved);
     }
 
 
     @GetMapping("/{bookingId}")
     public Booking find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long bookingId) {
         log.info("Получение данных о конкретном бронировании");
-        return service.find(userId, bookingId);
+        return service.getBooking(userId, bookingId);
     }
 
 
@@ -58,16 +55,16 @@ public class BookingController {
                                  @RequestParam(name = "state", defaultValue = "ALL") State state)
             throws NotFoundException {
         log.info("Получение данных о всех бронированиях");
-        return service.findAll(userId, state);
+        return service.getAllBooking(userId, state);
     }
 
 
     @GetMapping("/owner")
     public List<Booking> allUserItems(@RequestHeader("X-Sharer-User-Id") long userId,
                                       @RequestParam(name = "state", defaultValue = "ALL") State state)
-            throws NotFoundException{
+            throws NotFoundException {
         log.info("Получение списка бронирований для всех вещей текущего пользователя.");
-        return service.allUserItems(userId, state);
+        return service.getAllUsersItems(userId, state);
     }
 
 
@@ -75,7 +72,7 @@ public class BookingController {
     public ResponseEntity<ErrorResponse> handleException(ConversionFailedException exc) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(
-                new ErrorResponse( "Unknown state: UNSUPPORTED_STATUS"), status
+                new ErrorResponse("Unknown state: UNSUPPORTED_STATUS"), status
         );
     }
 }

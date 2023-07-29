@@ -16,6 +16,8 @@ import ru.practicum.shareit.user.model.User;
 
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,25 +33,27 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public Item create(long userId, ItemDto itemDto) throws ValidationException, NotFoundException {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ValidationException("Не найден пользователь при добавлении вещи"));
-        Item item = ItemMapper.fromItemDto(itemDto);
+    public Item createItem(Long userId, ItemDto itemDto) throws ValidationException, NotFoundException {
         if (userId <= 0) {
             throw new ValidationException("Не найден пользователь при добавлении вещи");
         }
-        if (item.getName() == null || item.getName().isBlank() || item.getName().equals("") ||
-                item.getDescription() == null || item.getDescription().isBlank()
-                || item.getDescription().equals("") || !item.getAvailable()) {
-            throw new NotFoundException("Некорректный запрос при создании вещи");
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ValidationException("Не найден пользователь при добавлении вещи"));
+
+        Item item = ItemMapper.fromItemDto(itemDto);
+
+        if (item.getName() == null || item.getName().isBlank() || item.getDescription() == null || item.getDescription().isBlank() || !item.getAvailable()) {
+            throw new ValidationException("Некорректный запрос при создании вещи");
         }
+
         item.setOwner(user);
         return itemRepository.save(item);
     }
 
 
     @Override
-    public ItemDto update(long userId, long itemId, ItemDto itemDto) throws NotFoundException {
+    public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) throws NotFoundException {
         Optional<Item> item = itemRepository.findById(itemId);
         if (item.isPresent()) {
             Item foundItem = item.get();
@@ -70,36 +74,55 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemWithBookingDto find(long userId, long id) throws NotFoundException {
+    public ItemWithBookingDto getItem(Long userId, Long id) throws NotFoundException {
         Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException(""));
         ItemWithBookingDto itemDTO = ItemMapper.toItemWithBookingDTO(item);
-        if (item.getOwner().getId() == userId) {
-            LocalDateTime now = LocalDateTime.now();
-            List<Booking> lastBookings = bookingRepository.findByItemIdAndEndBeforeOrderByEndDesc(id, now);
-            if (!lastBookings.isEmpty()) {
-                itemDTO.setLastBooking(BookingMapper.toBookingDto(lastBookings.get(0)));
-            }
-            List<Booking> nextBookings = bookingRepository.findByItemIdAndStartAfterOrderByStartAsc(id, now);
-            if (!nextBookings.isEmpty()) {
-                itemDTO.setNextBooking(BookingMapper.toBookingDto(nextBookings.get(0)));
-            }
+
+        if (item.getOwner().getId() != userId) {
+            itemDTO.setLastBooking(null);
+            itemDTO.setNextBooking(null);
+            return itemDTO;
         }
+
+
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime currentDateTimeUTC = currentDateTime.atOffset(ZoneOffset.UTC).toLocalDateTime();
+
+        List<Booking> lastBookings = bookingRepository.findByItemIdAndEndBeforeOrderByEndDesc(id, currentDateTimeUTC);
+        if (!lastBookings.isEmpty()) {
+            itemDTO.setLastBooking(BookingMapper.toBookingDto(lastBookings.get(0)));
+        } else {
+            itemDTO.setLastBooking(null);
+        }
+
+        List<Booking> nextBookings = bookingRepository.findByItemIdAndStartAfterOrderByStartAsc(id, currentDateTimeUTC);
+        if (!nextBookings.isEmpty()) {
+            itemDTO.setNextBooking(BookingMapper.toBookingDto(nextBookings.get(0)));
+        } else {
+            itemDTO.setNextBooking(null);
+        }
+
         return itemDTO;
     }
 
+
     @Override
-    public List<ItemWithBookingDto> findAll(long userId) {
+    public List<ItemWithBookingDto> getAllItems(Long userId) {
         List<ItemWithBookingDto> items = itemRepository.findAllByOwnerIdOrderByIdAsc(userId)
                 .stream()
                 .map(ItemMapper::toItemWithBookingDTO)
                 .collect(Collectors.toList());
         for (ItemWithBookingDto item : items) {
-            LocalDateTime now = LocalDateTime.now();
-            List<Booking> bookings = bookingRepository.findByItemIdAndEndBeforeOrderByEndDesc(item.getId(), now);
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            LocalDateTime currentDateTimeUTC = currentDateTime.atOffset(ZoneOffset.UTC).toLocalDateTime();
+            List<Booking> bookings = bookingRepository.findByItemIdAndEndBeforeOrderByEndDesc(item.getId(), currentDateTimeUTC);
+            if (item.getLastBooking() == null) {
+                item.setNextBooking(null);
+            }
             if (!bookings.isEmpty()) {
                 item.setLastBooking(BookingMapper.toBookingDto(bookings.get(0)));
             }
-            bookings = bookingRepository.findByItemIdAndStartAfterOrderByStartAsc(item.getId(), now);
+            bookings = bookingRepository.findByItemIdAndStartAfterOrderByStartAsc(item.getId(), currentDateTimeUTC);
             if (!bookings.isEmpty()) {
                 item.setNextBooking(BookingMapper.toBookingDto(bookings.get(0)));
             }
@@ -108,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> searchItem(String text) {
         if (text.isEmpty()) {
             return new ArrayList<ItemDto>();
         } else return itemRepository.search(text)

@@ -9,6 +9,8 @@ import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.dto.ItemWithBookingDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -32,6 +34,8 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto createComment(Long userId, Long itemId, CommentDto commentDTO) throws ValidationException, NotFoundException {
         Comment comment = CommentMapper.fromCommentDto(commentDTO);
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(""));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new ValidationException(""));
+
 
         if (!(bookingRepository.findBookingByItemAndUser(itemId, userId, APPROVED.name(), LocalDateTime.now())).isEmpty()) {
             comment.setItemId(itemId);

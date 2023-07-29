@@ -5,6 +5,7 @@ import lombok.Setter;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.comment.dto.CommentDto;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Getter

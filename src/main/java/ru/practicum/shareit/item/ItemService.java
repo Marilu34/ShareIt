@@ -10,13 +10,13 @@ import java.util.List;
 
 public interface ItemService {
 
-    Item create(long userId, ItemDto item) throws ValidationException, NotFoundException;
+    Item createItem(Long userId, ItemDto item) throws ValidationException, NotFoundException;
 
-    ItemDto update(long userId, long itemId, ItemDto item) throws NotFoundException;
+    ItemDto updateItem(Long userId, Long itemId, ItemDto item) throws NotFoundException;
 
-    ItemWithBookingDto find(long userId, long id) throws NotFoundException;
+    ItemWithBookingDto getItem(Long userId, Long id) throws NotFoundException;
 
-    List<ItemWithBookingDto> findAll(long userId);
+    List<ItemWithBookingDto> getAllItems(Long userId);
 
-    List<ItemDto> search(String text);
+    List<ItemDto> searchItem(String text);
 }

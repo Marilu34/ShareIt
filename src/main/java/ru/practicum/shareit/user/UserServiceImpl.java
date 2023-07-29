@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
 
-    public UserDto create(UserDto userDto) throws ConflictException, ValidationException {
+    public UserDto createUser(UserDto userDto) throws ConflictException, ValidationException {
         User user = UserMapper.fromUserDto(userDto);
         if (!UserValidator.isName(user.getName()) || !UserValidator.isEmail(user.getEmail())) {
             throw new ValidationException("Некорректный запрос при добавлении пользователя");
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto update(long userId, UserDto userDto) throws NotFoundException {
+    public UserDto updateUser(Long userId, UserDto userDto) throws NotFoundException {
         User user = repository.getReferenceById(userId);
         User newUser = UserMapper.fromUserDto(userDto);
         if (user != null) {
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto find(long id) throws NotFoundException {
+    public UserDto getUser(Long id) throws NotFoundException {
         Optional<User> user = repository.findById(id);
         if (user.isEmpty()) {
             throw new NotFoundException("");
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> findAll() {
+    public List<UserDto> getAllUsers() {
         return repository.findAll()
                 .stream()
                 .map(UserMapper::toUserDto)
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(long userId) {
+    public void deleteUser(Long userId) {
         repository.delete(repository.getReferenceById(userId));
     }
 
