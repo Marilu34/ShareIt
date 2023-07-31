@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.shareit.booking.repository.BookingIdAndBookerIdOnly;
+import ru.practicum.shareit.booking.dto.ShortBookingDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.model.Booking;
@@ -80,8 +80,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemWithBookingsAndCommentsDto getByItemId(Long itemId, Long requestFromUserId) {
         Item item = getItemById(itemId);
-        BookingIdAndBookerIdOnly lastBooking = null;
-        BookingIdAndBookerIdOnly nextBooking = null;
+        ShortBookingDto lastBooking = null;
+        ShortBookingDto nextBooking = null;
         if (item.getOwner().getId() == requestFromUserId) {
             LocalDateTime now = LocalDateTime.now();
             lastBooking = bookingRepository.findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(itemId, now, Status.APPROVED);
@@ -106,9 +106,9 @@ public class ItemServiceImpl implements ItemService {
         LocalDateTime now = LocalDateTime.now();
         for (Item item : items) {
             long itemId = item.getId();
-            BookingIdAndBookerIdOnly lastBooking = bookingRepository
+            ShortBookingDto lastBooking = bookingRepository
                     .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(itemId, now, Status.APPROVED);
-            BookingIdAndBookerIdOnly nextBooking = bookingRepository
+            ShortBookingDto nextBooking = bookingRepository
                     .findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(itemId, now, Status.REJECTED);
             itemWithBookingsDtos.add(ItemMapper.mapToItemWithBookingsDto(item, lastBooking, nextBooking));
         }

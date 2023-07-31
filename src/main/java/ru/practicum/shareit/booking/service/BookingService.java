@@ -1,13 +1,13 @@
 package ru.practicum.shareit.booking.service;
 
 import ru.practicum.shareit.booking.State;
-import ru.practicum.shareit.booking.dto.BookingCreationDto;
+import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
 import java.util.List;
 
 public interface BookingService {
-    BookingDto create(BookingCreationDto bookingCreationDto);
+    BookingDto create(CreationBooking creationBooking);
 
     BookingDto ownerAcceptation(long bookingId, long ownerId, boolean approved);
 

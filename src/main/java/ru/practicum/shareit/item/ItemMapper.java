@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.booking.repository.BookingIdAndBookerIdOnly;
+import ru.practicum.shareit.booking.dto.ShortBookingDto;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemWithBookingsAndCommentsDto;
@@ -32,14 +32,14 @@ public class ItemMapper {
     }
 
     public static ItemWithBookingsDto mapToItemWithBookingsDto(Item item,
-                                                               BookingIdAndBookerIdOnly lastBooking,
-                                                               BookingIdAndBookerIdOnly nextBooking) {
+                                                               ShortBookingDto lastBooking,
+                                                               ShortBookingDto nextBooking) {
         return new ItemWithBookingsDto(mapToItemDto(item), lastBooking, nextBooking);
     }
 
     public static ItemWithBookingsAndCommentsDto mapToItemWithBookingsAndCommentsDto(Item item,
-                                                                                     BookingIdAndBookerIdOnly lastBooking,
-                                                                                     BookingIdAndBookerIdOnly nextBooking,
+                                                                                     ShortBookingDto lastBooking,
+                                                                                     ShortBookingDto nextBooking,
                                                                                      List<CommentDto> comments) {
         return new ItemWithBookingsAndCommentsDto(mapToItemWithBookingsDto(item, lastBooking, nextBooking), comments);
     }

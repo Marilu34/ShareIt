@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingCreationDto;
+import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.UnknownStateException;
@@ -20,10 +20,10 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto create(@RequestBody BookingCreationDto bookingCreationDto,
+    public BookingDto create(@RequestBody CreationBooking creationBooking,
                              @RequestHeader("X-Sharer-User-Id") long bookerId) {
-        bookingCreationDto.setBookerId(bookerId);
-        BookingDto bookingDto = bookingService.create(bookingCreationDto);
+        creationBooking.setBookerId(bookerId);
+        BookingDto bookingDto = bookingService.create(creationBooking);
         log.info("Created new booking {}", bookingDto);
         return bookingDto;
     }

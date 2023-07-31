@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
-import ru.practicum.shareit.booking.dto.BookingCreationDto;
+import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -41,20 +41,20 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto create(BookingCreationDto bookingCreationDto) {
-        validate(bookingCreationDto);
-        Item item = itemRepository.findById(bookingCreationDto.getItemId())
+    public BookingDto create(CreationBooking creationBooking) {
+        validate(creationBooking);
+        Item item = itemRepository.findById(creationBooking.getItemId())
                 .orElseThrow(() -> new NotFoundException("bookingCreationDto.getItemId()"));
         if (!item.isAvailable()) {
-            throw new ItemNotAvailableException(bookingCreationDto.getItemId());
+            throw new ItemNotAvailableException(creationBooking.getItemId());
         }
         //TODO not logged
-        if (item.getOwner().getId() == bookingCreationDto.getBookerId()) {
+        if (item.getOwner().getId() == creationBooking.getBookerId()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner cannot book own item");
         }
-        User booker = userRepository.findById(bookingCreationDto.getBookerId())
+        User booker = userRepository.findById(creationBooking.getBookerId())
                 .orElseThrow(() -> new NotFoundException("bookingCreationDto.getBookerId()"));
-        Booking booking = bookingRepository.save(BookingMapper.mapCreationDtoToBooking(bookingCreationDto, item, booker));
+        Booking booking = bookingRepository.save(BookingMapper.mapCreationDtoToBooking(creationBooking, item, booker));
 
         return BookingMapper.mapBookingToDto(booking);
     }
@@ -159,8 +159,8 @@ public class BookingServiceImpl implements BookingService {
         return bookingStream.map(BookingMapper::mapBookingToDto).collect(Collectors.toUnmodifiableList());
     }
 
-    private void validate(BookingCreationDto bookingCreationDto) {
-        Set<ConstraintViolation<BookingCreationDto>> violations = validator.validate(bookingCreationDto);
+    private void validate(CreationBooking creationBooking) {
+        Set<ConstraintViolation<CreationBooking>> violations = validator.validate(creationBooking);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }

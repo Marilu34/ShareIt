@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.repository;
+package ru.practicum.shareit.booking.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class BookingIdAndBookerIdOnly {
+public class ShortBookingDto {
     long id;
     long bookerId;
 }

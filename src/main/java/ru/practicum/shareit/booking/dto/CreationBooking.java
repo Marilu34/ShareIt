@@ -16,7 +16,7 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingCreationDto {
+public class CreationBooking {
     long itemId;
 
     @NotNull
@@ -28,7 +28,7 @@ public class BookingCreationDto {
 
     long bookerId;
 
-   // @AssertTrue(message = "Start must be before end")
+    @AssertTrue(message = "Начало должно быть раньше окончания")
     private boolean isStartBeforeEnd() {  //Any method name is ok as long as it begins with `is`
         return Objects.nonNull(start) && Objects.nonNull(end) && start.isBefore(end);
     }
