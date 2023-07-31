@@ -3,8 +3,8 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.booking.repository.BookingIdAndBookerIdOnly;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingsAndCommentsDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
+import ru.practicum.shareit.item.itemBooking.ItemWithBookingsAndCommentsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemWithBookingsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 

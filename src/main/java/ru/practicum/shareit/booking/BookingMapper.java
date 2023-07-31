@@ -16,7 +16,7 @@ public class BookingMapper {
         booking.setItem(item);
         booking.setStart(bookingCreationDto.getStart());
         booking.setEnd(bookingCreationDto.getEnd());
-        booking.setStatus(BookingStatus.WAITING);
+        booking.setStatus(Status.WAITING);
         return booking;
     }
 

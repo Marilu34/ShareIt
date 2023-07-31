@@ -1,8 +1,9 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item.itemBooking.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.repository.BookingIdAndBookerIdOnly;
+import ru.practicum.shareit.item.dto.ItemDto;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

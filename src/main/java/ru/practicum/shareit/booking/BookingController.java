@@ -61,9 +61,9 @@ public class BookingController {
         return bookings;
     }
 
-    private BookingSearchState getBookingSearchState(String state) {
+    private State getBookingSearchState(String state) {
         try {
-            return BookingSearchState.valueOf(state);
+            return State.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new UnknownStateException(state);
         }

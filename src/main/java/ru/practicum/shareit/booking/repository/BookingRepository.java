@@ -3,9 +3,8 @@ package ru.practicum.shareit.booking.repository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repository.BookingIdAndBookerIdOnly;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +20,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Stream<Booking> findAllByBookerId(long bookerId, Sort sort);
 
-    Stream<Booking> findAllByBookerIdAndStatusIs(long bookerId, BookingStatus bookingStatus, Sort sort);
+    Stream<Booking> findAllByBookerIdAndStatusIs(long bookerId, Status status, Sort sort);
 
     Stream<Booking> findAllByBookerIdAndEndIsBefore(long bookerId, LocalDateTime now, Sort sort);
 
@@ -35,7 +34,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND :now BETWEEN b.start AND b.end")
     Stream<Booking> findAllCurrentBookerBookings(long bookerId, LocalDateTime now, Sort sort);
 
-    Stream<Booking> findAllByItemOwnerIdAndStatusIs(long ownerId, BookingStatus bookingStatus, Sort sort);
+    Stream<Booking> findAllByItemOwnerIdAndStatusIs(long ownerId, Status status, Sort sort);
 
     Stream<Booking> findAllByItemOwnerIdAndStartIsAfter(long ownerId, LocalDateTime now, Sort sort);
 
@@ -54,14 +53,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // find next booking
     BookingIdAndBookerIdOnly findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(long itemId,
                                                                                        LocalDateTime now,
-                                                                                       BookingStatus status);
+                                                                                       Status status);
 
     // find last booking
     BookingIdAndBookerIdOnly findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(long itemId,
                                                                                       LocalDateTime now,
-                                                                                      BookingStatus status);
+                                                                                      Status status);
 
     List<Booking> findAllByItemIdAndBookerIdAndStatusIsAndEndBefore(long itemId, long bookerId,
-                                                                    BookingStatus bookingStatus, LocalDateTime now);
+                                                                    Status status, LocalDateTime now);
 
 }

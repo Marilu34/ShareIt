@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -42,7 +42,7 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(10) default 'WAITING'")
-    BookingStatus status;
+    Status status;
 
     @Override
     public boolean equals(Object o) {
