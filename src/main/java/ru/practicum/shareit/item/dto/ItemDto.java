@@ -1,13 +1,20 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+@Data
+@Builder(toBuilder = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemDto {
-
-    long id;  //уникальный идентификатор вещи
-    String name; // краткое название
-    String description; //развёрнутое описание
-    Boolean available; //статус о том, доступна или нет вещь для аренды
+    Long id;
+    @NotNull Boolean available;
+    @NotBlank @Size(max = 64) String name;
+    @NotBlank @Size(max = 256) String description;
 }

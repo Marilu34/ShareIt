@@ -1,23 +1,22 @@
 package ru.practicum.shareit.booking.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
-import ru.practicum.shareit.booking.Status;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
-
-import java.time.LocalDateTime;
-
-@Getter
-@Setter
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 public class BookingDto {
-
-    private Long id;  //уникальный идентификатор бронирования
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    LocalDateTime start; //дата и время начала бронирования
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    LocalDateTime end; //дата и время конца бронирования
-    Long itemId; //вещь, которую пользователь бронирует
-    Long bookerId; //пользователь, который осуществляет бронирование
-    Status status; //статус бронирования
+    long id;
+    String start;
+    String end;
+    String status;
+    UserDto booker;
+    ItemDto item;
 }

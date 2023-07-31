@@ -1,34 +1,41 @@
 package ru.practicum.shareit.user.model;
 
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
-import java.io.Serializable;
+import java.util.Objects;
 
+@Entity
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email", name = "EMAIL_UNIQUE"))
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "users",
-        uniqueConstraints = {@UniqueConstraint(columnNames = "email")}
-)
-public class User implements Serializable {
-
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    long id;
 
-    @Column(name = "name")
-    @NotBlank(message = "Имя не может быть пустым!")
-    private String name; //имя или логин пользователя
+    @Column(nullable = false, length = 256)
+    String email;
 
-    @Column(name = "email")
-    @Email(message = "Электронная почта не может быть пустой и должна содержать символ @!")
-    private String email; //адрес электронной почты
+    @Column(nullable = false, length = 128)
+    String name;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id != 0 && id == user.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

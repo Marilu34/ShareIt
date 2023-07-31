@@ -1,49 +1,36 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import ru.practicum.shareit.comment.model.Comment;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.util.List;
 
+@Entity
+@Table(name = "items")
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "items")
-public class Item implements Serializable {
-
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id; //уникальный идентификатор вещи
+    long id;
 
-    @Column(name = "name", nullable = false)
-    @NotNull
-    String name; // краткое название
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id") // такое бы и создалось наименование, написал для уч целей
+    @ToString.Exclude // чтобы не было случайных обращений к базе например при выводе в лог
+    User owner;
 
-    @Column(name = "description", nullable = false)
-    @NotNull
-    String description; //развёрнутое описание
 
-    @Column(name = "available", nullable = false)
-    @NotNull
-    Boolean available; //статус о том, доступна или нет вещь для аренды
+    boolean available; // user intention to share the item
 
-    @JoinColumn(name = "owner")
-    @ManyToOne(fetch = FetchType.EAGER)
-    @NotNull
-    User owner;  //владелец вещи
+    @Column(nullable = false, length = 64)
+    String name;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "item_id")
-    List<Comment> comments;
-
-    @Column(name = "request")
-    long request; //ссылка на запрос
+    @Column(nullable = false, length = 256)
+    String description;
 }

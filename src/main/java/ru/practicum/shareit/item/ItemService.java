@@ -1,22 +1,24 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingDto;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.ItemWithBookingsAndCommentsDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface ItemService {
+    ItemDto create(Long userId, ItemDto itemDto);
 
-    Item createItem(Long userId, ItemDto item) throws ValidationException, NotFoundException;
+    ItemDto update(Long userId, ItemDto itemDto);
 
-    ItemDto updateItem(Long userId, Long itemId, ItemDto item) throws NotFoundException;
 
-    ItemWithBookingDto getItem(Long userId, Long id) throws NotFoundException;
+    ItemWithBookingsAndCommentsDto getByItemId(Long itemId, Long requestFromUserId);
 
-    List<ItemWithBookingDto> getAllItems(Long userId);
+    Collection<ItemWithBookingsDto> getByUserId(Long userId);
 
-    List<ItemDto> searchItem(String text);
+    Collection<ItemDto> findByText(String text);
+
+
+    CommentDto postCommentForItemFromAuthor(String text, Long itemId, Long authorId);
 }

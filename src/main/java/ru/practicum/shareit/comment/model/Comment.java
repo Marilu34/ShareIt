@@ -1,34 +1,53 @@
 package ru.practicum.shareit.comment.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
+@Entity
+@Table(name = "comments",
+        uniqueConstraints = {@UniqueConstraint(name = "ONE_USER_ONE_COMMENT", columnNames = {"item_id", "author_id"})})
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "comments")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id; //уникальный идентификатор комментария
+    long id;
 
-    @Column(name = "text", nullable = false)
-    String text; // содержимое комментария
+    @Column(length = 2024, nullable = false)
+    String text;
 
-    @Column(name = "item_id")
-    long itemId; //вещь, к которой относится комментарий
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    Item item;
 
-    @JoinColumn(name = "author_id")
-    @ManyToOne(fetch = FetchType.EAGER)
-    User author; //автор комментария;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    User author;
 
-    @Column(name = "created", nullable = false)
-    LocalDateTime created; //дата создания комментария
+    @Column(nullable = false)
+    LocalDateTime created = LocalDateTime.now();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Comment comment = (Comment) o;
+        return id != 0 && id == comment.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

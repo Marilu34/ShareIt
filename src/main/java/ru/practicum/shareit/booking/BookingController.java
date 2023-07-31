@@ -1,78 +1,71 @@
 package ru.practicum.shareit.booking;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingCreationDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.exception.ErrorResponse;
-import ru.practicum.shareit.exception.NotFoundException;
-
-import javax.validation.Valid;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.UnknownStateException;
 
 import java.util.List;
-
 
 @Slf4j
 @RestController
 @RequestMapping(path = "/bookings")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BookingController {
-
-    @Autowired
-    private final BookingService service;
+    private final BookingService bookingService;
 
     @PostMapping
-    public Booking create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @Valid @RequestBody BookingDto bookingDto) throws Exception {
-        log.info("Получен запрос на бронирование");
-        return service.createBooking(userId, bookingDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookingDto create(@RequestBody BookingCreationDto bookingCreationDto,
+                             @RequestHeader("X-Sharer-User-Id") long bookerId) {
+        bookingCreationDto.setBookerId(bookerId);
+        BookingDto bookingDto = bookingService.create(bookingCreationDto);
+        log.info("Created new booking {}", bookingDto);
+        return bookingDto;
     }
-
 
     @PatchMapping("/{bookingId}")
-    public Booking confirmationOrRejection(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                           @PathVariable Long bookingId,
-                                           @RequestParam(name = "approved", required = true) Boolean approved) {
-        log.info("Подтверждение или отклонение запроса на бронирование");
-        return service.confirmationOrRejectionBooking(userId, bookingId, approved);
+    public BookingDto ownerAcceptation(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                       @PathVariable long bookingId,
+                                       @RequestParam boolean approved) {
+        BookingDto bookingDto = bookingService.ownerAcceptation(bookingId, ownerId, approved);
+        log.info("User {} booking {}", approved ? "approved" : "rejected", bookingId);
+        return bookingDto;
     }
-
 
     @GetMapping("/{bookingId}")
-    public Booking find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long bookingId) {
-        log.info("Получение данных о конкретном бронировании");
-        return service.getBooking(userId, bookingId);
+    public BookingDto getBookingByOwnerOrBooker(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                @PathVariable long bookingId) {
+        BookingDto bookingDto = bookingService.findBookingByOwnerOrBooker(bookingId, userId);
+        log.info("Was given booking {} for user {}", bookingId, userId);
+        return bookingDto;
     }
-
 
     @GetMapping
-    public List<Booking> findAll(@RequestHeader("X-Sharer-User-Id") long userId,
-                                 @RequestParam(name = "state", defaultValue = "ALL") State state)
-            throws NotFoundException {
-        log.info("Получение данных о всех бронированиях");
-        return service.getAllBooking(userId, state);
+    public List<BookingDto> findBookingsOfBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
+                                                 @RequestParam(defaultValue = "ALL") String state) {
+        List<BookingDto> bookings = bookingService.findAllBookingsOfBooker(bookerId, getBookingSearchState(state));
+        log.info("For booker {} was found {} bookings with state {}", bookerId, bookings.size(), state);
+        return bookings;
     }
-
 
     @GetMapping("/owner")
-    public List<Booking> allUserItems(@RequestHeader("X-Sharer-User-Id") long userId,
-                                      @RequestParam(name = "state", defaultValue = "ALL") State state)
-            throws NotFoundException {
-        log.info("Получение списка бронирований для всех вещей текущего пользователя.");
-        return service.getAllUsersItems(userId, state);
+    public List<BookingDto> findBookingsOfOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                                @RequestParam(defaultValue = "ALL") String state) {
+        List<BookingDto> bookings = bookingService.findAllBookingsOfOwner(ownerId, getBookingSearchState(state));
+        log.info("For owner {} was found {} bookings with state {}", ownerId, bookings.size(), state);
+        return bookings;
     }
 
-
-    @ExceptionHandler({ConversionFailedException.class})
-    public ResponseEntity<ErrorResponse> handleException(ConversionFailedException exc) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(
-                new ErrorResponse("Unknown state: UNSUPPORTED_STATUS"), status
-        );
+    private BookingSearchState getBookingSearchState(String state) {
+        try {
+            return BookingSearchState.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new UnknownStateException(state);
+        }
     }
 }

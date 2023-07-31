@@ -1,28 +1,33 @@
 package ru.practicum.shareit.booking;
 
-import ru.practicum.shareit.booking.dto.*;
+import ru.practicum.shareit.booking.dto.BookingCreationDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.model.User;
 
 public class BookingMapper {
 
-    public static BookingDto toBookingDto(Booking booking) {
-        BookingDto bookingDto = new BookingDto();
-        bookingDto.setId(booking.getId());
-        bookingDto.setStart(booking.getStart());
-        bookingDto.setEnd(booking.getEnd());
-        bookingDto.setItemId(booking.getItem().getId());
-        bookingDto.setBookerId(booking.getBooker().getId());
-        bookingDto.setStatus(booking.getStatus());
-        return bookingDto;
-    }
-
-    public static Booking fromBookingDto(BookingDto bookingDto) {
+    public static Booking mapCreationDtoToBooking(BookingCreationDto bookingCreationDto, Item item, User booker) {
         Booking booking = new Booking();
-        booking.setId(bookingDto.getId());
-        booking.setStart(bookingDto.getStart());
-        booking.setEnd(bookingDto.getEnd());
-        booking.setStatus(bookingDto.getStatus());
+        booking.setBooker(booker);
+        booking.setItem(item);
+        booking.setStart(bookingCreationDto.getStart());
+        booking.setEnd(bookingCreationDto.getEnd());
+        booking.setStatus(BookingStatus.WAITING);
         return booking;
     }
 
+    public static BookingDto mapBookingToDto(Booking booking) {
+        return new BookingDto(
+                booking.getId(),
+                booking.getStart().toString(),
+                booking.getEnd().toString(),
+                booking.getStatus().name(),
+                UserMapper.mapToUserDto(booking.getBooker()),
+                ItemMapper.mapToItemDto(booking.getItem())
+        );
+    }
 }

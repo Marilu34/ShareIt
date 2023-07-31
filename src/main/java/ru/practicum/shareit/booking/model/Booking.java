@@ -1,49 +1,59 @@
 package ru.practicum.shareit.booking.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.shareit.booking.Status;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-
+@Entity
+@Table(name = "bookings")
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "bookings")
-public class Booking implements Serializable {
-
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;  //уникальный идентификатор бронирования
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "start_date")
-    LocalDateTime start; //дата и время начала бронирования
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "end_date")
-    LocalDateTime end; //дата и время конца бронирования
+    long id;
 
-    @JoinColumn(name = "item_id")
-    @ManyToOne(fetch = FetchType.EAGER)
-    Item item; //вещь, которую пользователь бронирует
+    @Column(name = "stat_date", nullable = false)
+    LocalDateTime start;
 
-    @JoinColumn(name = "booker_id")
-    @ManyToOne(fetch = FetchType.EAGER)
-    User booker; //пользователь, который осуществляет бронирование
+    @Column(name = "end_date", nullable = false)
+    LocalDateTime end;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
+    @ToString.Exclude
+    Item item;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booker_id", nullable = false)
+    @ToString.Exclude
+    User booker;
 
     @Enumerated(EnumType.STRING)
-    @Column
-    Status status; //статус бронирования
+    @Column(columnDefinition = "varchar(10) default 'WAITING'")
+    BookingStatus status;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Booking booking = (Booking) o;
+        return id != 0 && id == booking.id;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

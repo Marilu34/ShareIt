@@ -2,22 +2,27 @@ package ru.practicum.shareit.comment;
 
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
-public class CommentMapper {
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
-    public static CommentDto toCommentDto(Comment comment) {
-        CommentDto commentDTO = new CommentDto();
-        commentDTO.setId(comment.getId());
-        commentDTO.setText(comment.getText());
-        commentDTO.setAuthorName(comment.getAuthor().getName());
-        commentDTO.setCreated(comment.getCreated());
-        return commentDTO;
+import java.time.LocalDateTime;
+
+public class CommentMapper {
+    public static CommentDto mapToDto(Comment comment) {
+        return new CommentDto(
+                comment.getId(),
+                comment.getText(),
+                comment.getAuthor().getName(),
+                comment.getCreated()
+        );
     }
 
-    public static Comment fromCommentDto(CommentDto commentDTO) {
+    public static Comment mapToComment(String text, User author, Item item) {
         Comment comment = new Comment();
-        comment.setId(commentDTO.getId());
-        comment.setText(commentDTO.getText());
-        comment.setCreated(commentDTO.getCreated());
+        comment.setCreated(LocalDateTime.now());
+        comment.setText(text);
+        comment.setAuthor(author);
+        comment.setItem(item);
         return comment;
     }
 }

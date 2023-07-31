@@ -1,20 +1,26 @@
 package ru.practicum.shareit.comment.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentDto {
+    long id;
 
-    private Long id; //уникальный идентификатор комментария
-    @NotBlank
-    String text; // содержимое комментария
-    String authorName; //автор комментария;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    LocalDateTime created; //дата создания комментария
+    String text;
+
+    String authorName;
+
+    LocalDateTime created;
+
+    public CommentDto(long id, String text, String authorName, LocalDateTime created) {
+        this.id = id;
+        this.text = text;
+        this.authorName = authorName;
+        this.created = created;
+    }
 }

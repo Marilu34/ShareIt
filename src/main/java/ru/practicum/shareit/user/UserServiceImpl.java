@@ -1,76 +1,77 @@
 package ru.practicum.shareit.user;
 
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.List;
-import java.util.Optional;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.Validator;
+import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
-
 public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
+    private final Validator validator;
 
-    @Autowired
-    private final UserRepository repository;
-
-
-    public UserDto createUser(UserDto userDto) throws ConflictException, ValidationException {
-        User user = UserMapper.fromUserDto(userDto);
-        if (!UserValidator.isName(user.getName()) || !UserValidator.isEmail(user.getEmail())) {
-            throw new ValidationException("Некорректный запрос при добавлении пользователя");
-        }
-        user = repository.save(user);
-        if (user == null) {
-            throw new ConflictException("Конфликт, пользователь с таким Email существует");
-        }
-        return UserMapper.toUserDto(user);
+    public UserServiceImpl(UserRepository userRepository, Validator validator) {
+        this.userRepository = userRepository;
+        this.validator = validator;
     }
 
-    @Override
-    public UserDto updateUser(Long userId, UserDto userDto) throws NotFoundException {
-        User user = repository.getReferenceById(userId);
-        User newUser = UserMapper.fromUserDto(userDto);
-        if (user != null) {
-            if (UserValidator.isName(newUser.getName())) {
-                user.setName(newUser.getName());
-            }
-            if (UserValidator.isEmail(newUser.getEmail())) {
-                user.setEmail(newUser.getEmail());
-            }
-        } else throw new NotFoundException("Пользователь не найден");
-        user = repository.save(user);
-        return UserMapper.toUserDto(user);
+
+    public UserDto create(UserDto userDto) {
+        validate(userDto);
+        User user = userRepository.save(UserMapper.mapToUser(userDto));
+        return UserMapper.mapToUserDto(user);
     }
 
-    @Override
-    public UserDto getUser(Long id) throws NotFoundException {
-        Optional<User> user = repository.findById(id);
-        if (user.isEmpty()) {
-            throw new NotFoundException("");
+    @Transactional(readOnly = true)
+    public UserDto get(long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        return UserMapper.mapToUserDto(user);
+    }
+
+    @Transactional
+    public UserDto updateUserFields(UserDto userDto) {
+        UserDto userDtoForUpdate = get(userDto.getId());
+
+        if (userDto.getName() != null) {
+            userDtoForUpdate.setName(userDto.getName());
         }
-        return UserMapper.toUserDto(user.get());
+        if (userDto.getEmail() != null) {
+            userDtoForUpdate.setEmail(userDto.getEmail());
+        }
+        validate(userDtoForUpdate);
+
+        User user = userRepository.save(UserMapper.mapToUser(userDtoForUpdate));
+        return UserMapper.mapToUserDto(user);
     }
 
-    @Override
-    public List<UserDto> getAllUsers() {
-        return repository.findAll()
-                .stream()
-                .map(UserMapper::toUserDto)
+    @Transactional
+    public void delete(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException(userId);
+        }
+        userRepository.deleteById(userId);
+    }
+
+    public Collection<UserDto> getAll() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public void deleteUser(Long userId) {
-        repository.delete(repository.getReferenceById(userId));
+    private void validate(@Valid UserDto userDto) {
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        // email must be unique - checks in DB
     }
-
-
 }

@@ -1,55 +1,53 @@
 package ru.practicum.shareit.user;
 
-
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import lombok.SneakyThrows;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
-@AllArgsConstructor
+@RequestMapping(path = "/users")
+@RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private final UserService service;
+    private final UserService userService;
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto userDto) throws ConflictException {
-        log.info("Получен запрос на добавление пользователя");
-        return service.createUser(userDto);
-    }
-
-
-    @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable Long userId, @Valid @RequestBody UserDto user) {
-        log.info("Получен запрос на изменение данных пользователя");
-        return service.updateUser(userId, user);
-    }
-
-
-    @GetMapping("/{id}")
-    public UserDto get(@PathVariable Long id) {
-        log.info("Получен запрос на вывод данных пользователя");
-        return service.getUser(id);
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserDto createNewUser(@RequestBody UserDto userDto) {
+        UserDto dto = userService.create(userDto);
+        log.info("Created user {}", dto);
+        return dto;
     }
 
     @GetMapping
-    public List<UserDto> getAll() {
-        return service.getAllUsers();
+    public Collection<UserDto> getAll() {
+        Collection<UserDto> all = userService.getAll();
+        log.info("Given all {} existing users", all.size());
+        return all;
+    }
+
+    @GetMapping("/{userId}")
+    public UserDto findUserById(@PathVariable Long userId) {
+        UserDto dto = userService.get(userId);
+        log.info("Given user {}", dto);
+        return dto;
+    }
+
+    @PatchMapping("/{userId}")
+    public UserDto updateUserFields(@PathVariable Long userId, @RequestBody UserDto userDto) {
+        userDto.setId(userId);
+        UserDto dto = userService.updateUserFields(userDto);
+        log.info("Updated user {}", dto);
+        return dto;
     }
 
     @DeleteMapping("/{userId}")
-    public void delete(@PathVariable Long userId) {
-        log.info("Получен запрос на удаление пользователя");
-        service.deleteUser(userId);
+    public void deleteUser(@PathVariable Long userId) {
+        userService.delete(userId);
+        log.info("Deleted user {}", userId);
     }
 }
