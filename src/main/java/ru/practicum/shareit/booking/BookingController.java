@@ -23,7 +23,7 @@ public class BookingController {
     public BookingDto create(@RequestBody CreationBooking creationBooking,
                              @RequestHeader("X-Sharer-User-Id") long bookerId) {
         creationBooking.setBookerId(bookerId);
-        BookingDto bookingDto = bookingService.create(creationBooking);
+        BookingDto bookingDto = bookingService.createBooking(creationBooking);
         log.info("Created new booking {}", bookingDto);
         return bookingDto;
     }
@@ -32,7 +32,7 @@ public class BookingController {
     public BookingDto ownerAcceptation(@RequestHeader("X-Sharer-User-Id") long ownerId,
                                        @PathVariable long bookingId,
                                        @RequestParam boolean approved) {
-        BookingDto bookingDto = bookingService.ownerAcceptation(bookingId, ownerId, approved);
+        BookingDto bookingDto = bookingService.confirmationBooking(bookingId, ownerId, approved);
         log.info("User {} booking {}", approved ? "approved" : "rejected", bookingId);
         return bookingDto;
     }
@@ -40,7 +40,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingDto getBookingByOwnerOrBooker(@RequestHeader("X-Sharer-User-Id") long userId,
                                                 @PathVariable long bookingId) {
-        BookingDto bookingDto = bookingService.findBookingByOwnerOrBooker(bookingId, userId);
+        BookingDto bookingDto = bookingService.getBookingById(bookingId, userId);
         log.info("Was given booking {} for user {}", bookingId, userId);
         return bookingDto;
     }
@@ -48,7 +48,7 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> findBookingsOfBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
                                                  @RequestParam(defaultValue = "ALL") String state) {
-        List<BookingDto> bookings = bookingService.findAllBookingsOfBooker(bookerId, getBookingSearchState(state));
+        List<BookingDto> bookings = bookingService.getAllBookingsByBooker(bookerId, getBookingSearchState(state));
         log.info("For booker {} was found {} bookings with state {}", bookerId, bookings.size(), state);
         return bookings;
     }
@@ -56,7 +56,7 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> findBookingsOfOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
                                                 @RequestParam(defaultValue = "ALL") String state) {
-        List<BookingDto> bookings = bookingService.findAllBookingsOfOwner(ownerId, getBookingSearchState(state));
+        List<BookingDto> bookings = bookingService.getAllBookingsByOwner(ownerId, getBookingSearchState(state));
         log.info("For owner {} was found {} bookings with state {}", ownerId, bookings.size(), state);
         return bookings;
     }

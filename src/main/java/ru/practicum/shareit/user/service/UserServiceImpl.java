@@ -7,7 +7,6 @@ import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -30,14 +29,14 @@ public class UserServiceImpl implements UserService {
 
     public UserDto create(UserDto userDto) {
         validate(userDto);
-        User user = userRepository.save(UserMapper.mapToUser(userDto));
-        return UserMapper.mapToUserDto(user);
+        User user = userRepository.save(UserMapper.fromUserDto(userDto));
+        return UserMapper.toUserDto(user);
     }
 
     @Transactional(readOnly = true)
     public UserDto get(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("userId"));
-        return UserMapper.mapToUserDto(user);
+        return UserMapper.toUserDto(user);
     }
 
     @Transactional
@@ -52,8 +51,8 @@ public class UserServiceImpl implements UserService {
         }
         validate(userDtoForUpdate);
 
-        User user = userRepository.save(UserMapper.mapToUser(userDtoForUpdate));
-        return UserMapper.mapToUserDto(user);
+        User user = userRepository.save(UserMapper.fromUserDto(userDtoForUpdate));
+        return UserMapper.toUserDto(user);
     }
 
     @Transactional
@@ -66,7 +65,7 @@ public class UserServiceImpl implements UserService {
 
     public Collection<UserDto> getAll() {
         return userRepository.findAll().stream()
-                .map(UserMapper::mapToUserDto)
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 

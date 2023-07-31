@@ -14,7 +14,7 @@ import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.ItemNotAvailableException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -25,6 +25,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,55 +42,52 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto create(CreationBooking creationBooking) {
-        validate(creationBooking);
+    public BookingDto createBooking(CreationBooking creationBooking) {
+        validation(creationBooking);
         Item item = itemRepository.findById(creationBooking.getItemId())
-                .orElseThrow(() -> new NotFoundException("bookingCreationDto.getItemId()"));
+                .orElseThrow(() -> new NotFoundException("объект Item не найден в репозитории"));
         if (!item.isAvailable()) {
-            throw new ItemNotAvailableException(creationBooking.getItemId());
+            throw new ValidationException("Объект Item не доступен");
         }
-        //TODO not logged
         if (item.getOwner().getId() == creationBooking.getBookerId()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner cannot book own item");
+            throw new NotFoundException("Владелец не может забронировать собственную вещь");
         }
         User booker = userRepository.findById(creationBooking.getBookerId())
-                .orElseThrow(() -> new NotFoundException("bookingCreationDto.getBookerId()"));
-        Booking booking = bookingRepository.save(BookingMapper.mapCreationDtoToBooking(creationBooking, item, booker));
+                .orElseThrow(() -> new NotFoundException("объект User не найден в репозитории"));
+        Booking booking = bookingRepository.save(BookingMapper.fromBookingDto(creationBooking, item, booker));
 
-        return BookingMapper.mapBookingToDto(booking);
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Transactional
     @Override
-    public BookingDto ownerAcceptation(long bookingId, long ownerId, boolean approved) {
+    public BookingDto confirmationBooking(long bookingId, long ownerId, boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("bookingId"));
-
-        //TODO Данные ошибки не логируются
+                .orElseThrow(() -> new NotFoundException("объект Booking не найден в репозитории"));
         if (booking.getItem().getOwner().getId() != ownerId) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Only owner allowed operation");
+            throw new NotFoundException("Только владелец может подтвердить бронирование");
         }
         if (!booking.getStatus().equals(Status.WAITING)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking has status different from WAITING");
+            throw new ValidationException("Объект Booking имеет отличный статус от WAITING");
         }
 
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-        return BookingMapper.mapBookingToDto(booking);
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public BookingDto findBookingByOwnerOrBooker(long bookingId, long userId) {
+    public BookingDto getBookingById(long bookingId, long userId) {
         Booking booking = bookingRepository.findBookingByOwnerOrBooker(bookingId, userId)
-                .orElseThrow(() -> new NotFoundException("bookingId"));
-        return BookingMapper.mapBookingToDto(booking);
+                .orElseThrow(() -> new NotFoundException("объект Booking не найден в репозитории"));
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDto> findAllBookingsOfBooker(long bookerId, State state) {
+    public List<BookingDto> getAllBookingsByBooker(long bookerId, State state) {
         if (!userRepository.existsById(bookerId)) {
-            throw new NotFoundException("bookerId");
+            throw new NotFoundException("объект Booker не найден в репозитории");
         }
         Stream<Booking> bookingStream;
         final Sort sort = Sort.sort(Booking.class).by(Booking::getStart).descending();
@@ -119,14 +117,14 @@ public class BookingServiceImpl implements BookingService {
                 throw new NotYetImplementedException();
 
         }
-        return bookingStream.map(BookingMapper::mapBookingToDto).collect(Collectors.toUnmodifiableList());
+        return bookingStream.map(BookingMapper::toBookingDto).collect(Collectors.toUnmodifiableList());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDto> findAllBookingsOfOwner(long ownerId, State state) {
+    public List<BookingDto> getAllBookingsByOwner(long ownerId, State state) {
         if (!userRepository.existsById(ownerId)) {
-            throw new NotFoundException("ownerId");
+            throw new NotFoundException("объект Владелец не найден в репозитории");
         }
         Stream<Booking> bookingStream;
         final Sort sort = Sort.sort(Booking.class).by(Booking::getStart).descending();
@@ -156,13 +154,20 @@ public class BookingServiceImpl implements BookingService {
                 throw new NotYetImplementedException();
 
         }
-        return bookingStream.map(BookingMapper::mapBookingToDto).collect(Collectors.toUnmodifiableList());
+        return bookingStream.map(BookingMapper::toBookingDto).collect(Collectors.toUnmodifiableList());
     }
 
-    private void validate(CreationBooking creationBooking) {
-        Set<ConstraintViolation<CreationBooking>> violations = validator.validate(creationBooking);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
+    private void validation(CreationBooking creationBooking) {
+       List<String> mistakes = new ArrayList<>();
+
+        validator.validate(creationBooking).forEach(mistake -> {
+            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
+            mistakes.add(message);
+        });
+
+        if (!mistakes.isEmpty()) {
+            throw new ValidationException("Ошибки: " + mistakes);
         }
     }
+
 }

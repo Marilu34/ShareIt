@@ -17,7 +17,7 @@ import java.util.Map;
 @Slf4j
 public class ErrorHandler {
 
-    @ExceptionHandler({ConstraintViolationException.class, ItemNotAvailableException.class})
+    @ExceptionHandler({ConstraintViolationException.class, ValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected String handleConstraintViolationException(final RuntimeException e) {
         log.warn(e.toString());
