@@ -24,6 +24,12 @@ public class ErrorHandler {
         return e.getMessage();
     }
 
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Exception e) {
+        log.error("Возникло необработанное исключение: {}", e.getMessage(), e);
+        return new ErrorResponse("Внутренняя ошибка сервера");
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -41,31 +47,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.CONFLICT)
-    protected String handleDataIntegrityViolation(final DataIntegrityViolationException e) {
-        String message = e.getMostSpecificCause().getMessage();
-        if (message.contains("EMAIL_UNIQUE")) {
-            message = "Email is already registered for another user";
-        } else {
-            message = "Conflict with server rules";
-        }
-        log.warn(message);
-
-        return message;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected String handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
-        log.warn(e.toString());
-        return e.getLocalizedMessage();
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected Map<String, String> handleUnknownStateException(final UnknownStateException e) {
         log.warn(e.toString());
         return Map.of("error", "Unknown state: " + e.getMessage());
     }
-
 }

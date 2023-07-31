@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemWithBookingsAndCommentsDto;
 import ru.practicum.shareit.item.itemBooking.dto.ItemWithBookingsDto;
@@ -65,12 +65,9 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto postCommentForItem(@RequestHeader("X-Sharer-User-id") Long authorId,
                                          @PathVariable Long itemId,
-                                         @RequestBody @Valid @NotBlank Map<String, String> requestBody) {
+                                         @RequestBody @Valid @NotBlank Map<String, String> requestBody)  {
         if (!requestBody.containsKey("text") || requestBody.get("text").isBlank()) {
-            RuntimeException e = new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Body must have not be empty text property");
-            log.warn(e.getMessage());
-            throw e;
+            throw new ValidationException("");
         }
         CommentDto commentDto = itemService.postCommentForItemFromAuthor(requestBody.get("text"), itemId, authorId);
         log.info("Author {} added comment for item {}", authorId, itemId);
