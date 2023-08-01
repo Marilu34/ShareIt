@@ -8,7 +8,7 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 public class CommentMapper {
-    public static CommentDto mapToDto(Comment comment) {
+    public static CommentDto toCommentDto(Comment comment) {
         return new CommentDto(
                 comment.getId(),
                 comment.getText(),
@@ -17,7 +17,7 @@ public class CommentMapper {
         );
     }
 
-    public static Comment mapToComment(String text, User author, Item item) {
+    public static Comment toComment(String text, User author, Item item) {
         Comment comment = new Comment();
         comment.setCreated(LocalDateTime.now());
         comment.setText(text);

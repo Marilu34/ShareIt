@@ -21,18 +21,13 @@ import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,9 +44,9 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         validate(itemDto);
         User owner = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("объект Owner не найден в репозитории"));
-        Item item = ItemMapper.mapToItem(itemDto, owner);
+        Item item = ItemMapper.fromItemDto(itemDto, owner);
         item = itemRepository.save(item);
-        return ItemMapper.mapToItemDto(item);
+        return ItemMapper.toItemDto(item);
     }
 
     private void validate(ItemDto itemDto) {
@@ -88,9 +83,9 @@ public class ItemServiceImpl implements ItemService {
             item.setDescription(itemDto.getDescription());
         }
 
-        validate(ItemMapper.mapToItemDto(item));
+        validate(ItemMapper.toItemDto(item));
         item = itemRepository.save(item);
-        return ItemMapper.mapToItemDto(item);
+        return ItemMapper.toItemDto(item);
     }
 
 
@@ -107,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
 
         List<CommentDto> comments = commentRepository.findAllByItemId(itemId);
 
-        return ItemMapper.mapToItemWithBookingsAndCommentsDto(item, lastBooking, nextBooking, comments);
+        return ItemMapper.toItemCommentDto(item, lastBooking, nextBooking, comments);
     }
 
     @Transactional(readOnly = true)
@@ -126,7 +121,7 @@ public class ItemServiceImpl implements ItemService {
                     .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(itemId, now, Status.APPROVED);
             ShortBookingDto nextBooking = bookingRepository
                     .findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(itemId, now, Status.REJECTED);
-            itemBookingsDtos.add(ItemMapper.mapToItemWithBookingsDto(item, lastBooking, nextBooking));
+            itemBookingsDtos.add(ItemMapper.toItemBookingsDto(item, lastBooking, nextBooking));
         }
 
         return itemBookingsDtos;
@@ -139,7 +134,7 @@ public class ItemServiceImpl implements ItemService {
             return List.of();
         }
         return itemRepository.findAllByAvailableTrueAndNameContainsOrDescriptionContainsAllIgnoreCase(text)
-                .map(ItemMapper::mapToItemDto)
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -152,12 +147,12 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("объект Item не найден в репозитории");
         }
         Booking booking = items.get(0);
-        Comment comment = CommentMapper.mapToComment(text,
+        Comment comment = CommentMapper.toComment(text,
                 booking.getBooker(),
                 booking.getItem());
 
         comment = commentRepository.save(comment);
-        return CommentMapper.mapToDto(comment);
+        return CommentMapper.toCommentDto(comment);
     }
 
 

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -16,14 +17,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final Validator validator;
-
-    public UserServiceImpl(UserRepository userRepository, Validator validator) {
-        this.userRepository = userRepository;
-        this.validator = validator;
-    }
 
 
     public UserDto createUser(UserDto userDto) {

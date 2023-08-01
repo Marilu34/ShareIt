@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemMapper {
-    public static ItemDto mapToItemDto(Item item) {
+    public static ItemDto toItemDto(Item item) {
         return ItemDto.builder()
                 .id(item.getId())
                 .available(item.isAvailable())
@@ -21,7 +21,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public static Item mapToItem(ItemDto itemDto, User owner) {
+    public static Item fromItemDto(ItemDto itemDto, User owner) {
         return Item.builder()
                 .id(Optional.ofNullable(itemDto.getId()).orElse(0L))
                 .available(itemDto.getAvailable())
@@ -31,17 +31,17 @@ public class ItemMapper {
                 .build();
     }
 
-    public static ItemBookingsDto mapToItemWithBookingsDto(Item item,
-                                                           ShortBookingDto lastBooking,
-                                                           ShortBookingDto nextBooking) {
-        return new ItemBookingsDto(mapToItemDto(item), lastBooking, nextBooking);
+    public static ItemBookingsDto toItemBookingsDto(Item item,
+                                                    ShortBookingDto lastBooking,
+                                                    ShortBookingDto nextBooking) {
+        return new ItemBookingsDto(toItemDto(item), lastBooking, nextBooking);
     }
 
-    public static ItemCommentsDto mapToItemWithBookingsAndCommentsDto(Item item,
-                                                                      ShortBookingDto lastBooking,
-                                                                      ShortBookingDto nextBooking,
-                                                                      List<CommentDto> comments) {
-        return new ItemCommentsDto(mapToItemWithBookingsDto(item, lastBooking, nextBooking), comments);
+    public static ItemCommentsDto toItemCommentDto(Item item,
+                                                   ShortBookingDto lastBooking,
+                                                   ShortBookingDto nextBooking,
+                                                   List<CommentDto> comments) {
+        return new ItemCommentsDto(toItemBookingsDto(item, lastBooking, nextBooking), comments);
     }
 }
 

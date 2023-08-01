@@ -33,8 +33,8 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestBody ItemDto itemDto,
-                                    @PathVariable Long itemId,
-                                    @RequestHeader("X-Sharer-User-Id") Long userId) {
+                              @PathVariable Long itemId,
+                              @RequestHeader("X-Sharer-User-Id") Long userId) {
         itemDto.setId(itemId);
         itemDto = itemService.updateItem(userId, itemDto);
         log.info("Пользователь {} обновил Вещь {}", userId, itemDto);
@@ -64,8 +64,8 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentDto postComment(@RequestHeader("X-Sharer-User-id") Long authorId,
-                                         @PathVariable Long itemId,
-                                         @RequestBody @Valid @NotBlank Map<String, String> requestBody)  {
+                                  @PathVariable Long itemId,
+                                  @RequestBody @Valid @NotBlank Map<String, String> requestBody) {
         if (!requestBody.containsKey("text") || requestBody.get("text").isBlank()) {
             throw new ValidationException("Ошибка с комментарием");
         }
