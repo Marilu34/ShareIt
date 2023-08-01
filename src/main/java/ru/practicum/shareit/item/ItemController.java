@@ -58,7 +58,7 @@ public class ItemController {
     @GetMapping("/search")
     public Collection<ItemDto> findByText(@RequestParam() String text) {
         Collection<ItemDto> collection = itemService.getItemByComment(text);
-        log.info("It has been found {} items with text \"{}\"", collection.size(), text);
+        log.info("Вещи {} по описанию {}", collection.size(), text);
         return collection;
     }
 
@@ -70,7 +70,7 @@ public class ItemController {
             throw new ValidationException("");
         }
         CommentDto commentDto = itemService.postCommentForItemFromAuthor(requestBody.get("text"), itemId, authorId);
-        log.info("Author {} added comment for item {}", authorId, itemId);
+        log.info("Пользователь {} для Вещи {} добавил комментарий", authorId, itemId);
         return commentDto;
 
     }
