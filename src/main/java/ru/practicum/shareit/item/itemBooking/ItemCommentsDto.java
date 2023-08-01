@@ -4,7 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemWithBookingsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemWithBookingsAndCommentsDto extends ItemWithBookingsDto {
+public class ItemCommentsDto extends ItemBookingsDto {
     List<CommentDto> comments;
 
-    public ItemWithBookingsAndCommentsDto(ItemWithBookingsDto itemWithBookingsDto, List<CommentDto> comments) {
-        super((ItemDto) itemWithBookingsDto, itemWithBookingsDto.getLastBooking(), itemWithBookingsDto.getNextBooking());
+    public ItemCommentsDto(ItemBookingsDto itemBookingsDto, List<CommentDto> comments) {
+        super((ItemDto) itemBookingsDto, itemBookingsDto.getLastBooking(), itemBookingsDto.getNextBooking());
         this.comments = comments;
     }
 }

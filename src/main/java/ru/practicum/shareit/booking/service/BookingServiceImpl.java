@@ -3,10 +3,8 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
@@ -21,13 +19,10 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,10 +35,11 @@ public class BookingServiceImpl implements BookingService {
 
     private final Validator validator;
 
+
     @Transactional
     @Override
     public BookingDto createBooking(CreationBooking creationBooking) {
-        validation(creationBooking);
+        validate(creationBooking);
         Item item = itemRepository.findById(creationBooking.getItemId())
                 .orElseThrow(() -> new NotFoundException("объект Item не найден в репозитории"));
         if (!item.isAvailable()) {
@@ -59,20 +55,18 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(booking);
     }
 
-    @Transactional
-    @Override
-    public BookingDto confirmationBooking(long bookingId, long ownerId, boolean approved) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("объект Booking не найден в репозитории"));
-        if (booking.getItem().getOwner().getId() != ownerId) {
-            throw new NotFoundException("Только владелец может подтвердить бронирование");
-        }
-        if (!booking.getStatus().equals(Status.WAITING)) {
-            throw new ValidationException("Объект Booking имеет отличный статус от WAITING");
-        }
 
-        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-        return BookingMapper.toBookingDto(booking);
+    private void validate(CreationBooking creationBooking) {
+        List<String> mistakes = new ArrayList<>();
+
+        validator.validate(creationBooking).forEach(mistake -> {
+            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
+            mistakes.add(message);
+        });
+
+        if (!mistakes.isEmpty()) {
+            throw new ValidationException("Ошибки: " + mistakes);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -157,17 +151,20 @@ public class BookingServiceImpl implements BookingService {
         return bookingStream.map(BookingMapper::toBookingDto).collect(Collectors.toUnmodifiableList());
     }
 
-    private void validation(CreationBooking creationBooking) {
-       List<String> mistakes = new ArrayList<>();
-
-        validator.validate(creationBooking).forEach(mistake -> {
-            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
-            mistakes.add(message);
-        });
-
-        if (!mistakes.isEmpty()) {
-            throw new ValidationException("Ошибки: " + mistakes);
+    @Transactional
+    @Override
+    public BookingDto confirmationBooking(long bookingId, long ownerId, boolean approved) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("объект Booking не найден в репозитории"));
+        if (booking.getItem().getOwner().getId() != ownerId) {
+            throw new NotFoundException("Только владелец может подтвердить бронирование");
         }
+        if (!booking.getStatus().equals(Status.WAITING)) {
+            throw new ValidationException("Объект Booking имеет отличный статус от WAITING");
+        }
+
+        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
+        return BookingMapper.toBookingDto(booking);
     }
 
 }

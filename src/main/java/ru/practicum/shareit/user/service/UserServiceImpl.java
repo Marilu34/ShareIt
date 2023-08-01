@@ -27,21 +27,21 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    public UserDto create(UserDto userDto) {
+    public UserDto createUser(UserDto userDto) {
         validate(userDto);
         User user = userRepository.save(UserMapper.fromUserDto(userDto));
         return UserMapper.toUserDto(user);
     }
 
     @Transactional(readOnly = true)
-    public UserDto get(long userId) {
+    public UserDto getUserById(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("userId"));
         return UserMapper.toUserDto(user);
     }
 
     @Transactional
-    public UserDto updateUserFields(UserDto userDto) {
-        UserDto userDtoForUpdate = get(userDto.getId());
+    public UserDto updateUser(UserDto userDto) {
+        UserDto userDtoForUpdate = getUserById(userDto.getId());
 
         if (userDto.getName() != null) {
             userDtoForUpdate.setName(userDto.getName());
@@ -56,14 +56,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public void delete(Long userId) {
+    public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("userId");
         }
         userRepository.deleteById(userId);
     }
 
-    public Collection<UserDto> getAll() {
+    public Collection<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());

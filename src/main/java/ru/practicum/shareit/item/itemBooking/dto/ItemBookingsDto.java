@@ -11,12 +11,12 @@ import ru.practicum.shareit.item.dto.ItemDto;
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemWithBookingsDto extends ItemDto {
+public class ItemBookingsDto extends ItemDto {
     ShortBookingDto lastBooking;
     ShortBookingDto nextBooking;
 
 
-    public ItemWithBookingsDto(ItemDto itemDto, ShortBookingDto lastBooking, ShortBookingDto nextBooking) {
+    public ItemBookingsDto(ItemDto itemDto, ShortBookingDto lastBooking, ShortBookingDto nextBooking) {
         super(itemDto.getId(), itemDto.getAvailable(), itemDto.getName(), itemDto.getDescription());
         this.lastBooking = lastBooking;
         this.nextBooking = nextBooking;

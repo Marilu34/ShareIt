@@ -19,8 +19,8 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.itemBooking.ItemWithBookingsAndCommentsDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemWithBookingsDto;
+import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -47,7 +47,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
-    public ItemDto create(Long userId, ItemDto itemDto) {
+    public ItemDto createItem(Long userId, ItemDto itemDto) {
         validate(itemDto);
         User owner = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("userId"));
         Item item = ItemMapper.mapToItem(itemDto, owner);
@@ -57,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemDto update(Long userId, ItemDto itemDto) {
+    public ItemDto updateItem(Long userId, ItemDto itemDto) {
         Item item = getItemById(itemDto.getId());
 
         if (userId != item.getOwner().getId()) {
@@ -79,7 +79,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemWithBookingsAndCommentsDto getByItemId(Long itemId, Long requestFromUserId) {
+    public ItemCommentsDto getByItemId(Long itemId, Long requestFromUserId) {
         Item item = getItemById(itemId);
         ShortBookingDto lastBooking = null;
         ShortBookingDto nextBooking = null;
@@ -96,14 +96,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public Collection<ItemWithBookingsDto> getByUserId(Long userId) {
+    public Collection<ItemBookingsDto> getItemsByUserId(Long userId) {
         // check if user exists
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("userId");
         }
 
         Collection<Item> items = itemRepository.findAllByOwnerId(userId).collect(Collectors.toUnmodifiableList());
-        Collection<ItemWithBookingsDto> itemWithBookingsDtos = new ArrayList<>(items.size());
+        Collection<ItemBookingsDto> itemBookingsDtos = new ArrayList<>(items.size());
         LocalDateTime now = LocalDateTime.now();
         for (Item item : items) {
             long itemId = item.getId();
@@ -111,15 +111,15 @@ public class ItemServiceImpl implements ItemService {
                     .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(itemId, now, Status.APPROVED);
             ShortBookingDto nextBooking = bookingRepository
                     .findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(itemId, now, Status.REJECTED);
-            itemWithBookingsDtos.add(ItemMapper.mapToItemWithBookingsDto(item, lastBooking, nextBooking));
+            itemBookingsDtos.add(ItemMapper.mapToItemWithBookingsDto(item, lastBooking, nextBooking));
         }
 
-        return itemWithBookingsDtos;
+        return itemBookingsDtos;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Collection<ItemDto> findByText(String text) {
+    public Collection<ItemDto> getItemByComment(String text) {
         if (text.isBlank()) {
             return List.of();
         }

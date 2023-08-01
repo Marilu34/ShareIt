@@ -21,12 +21,12 @@ public class Item {
     long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id") // такое бы и создалось наименование, написал для уч целей
-    @ToString.Exclude // чтобы не было случайных обращений к базе например при выводе в лог
+    @JoinColumn(name = "owner_id")
+    @ToString.Exclude
     User owner;
 
 
-    boolean available; // user intention to share the item
+    boolean available;
 
     @Column(nullable = false, length = 64)
     String name;

@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.util.Objects;
 
 @Entity
@@ -20,10 +21,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    @Column(nullable = false, length = 256)
+    @Column(nullable = false)
+    @Email(message = "Электронная почта не может быть пустой и должна содержать символ @!")
     String email;
 
-    @Column(nullable = false, length = 128)
+    @Column(nullable = false)
     String name;
 
     @Override

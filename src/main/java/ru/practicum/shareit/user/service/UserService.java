@@ -6,14 +6,14 @@ import java.util.Collection;
 
 public interface UserService {
 
-    UserDto create(UserDto userDto);
+    UserDto createUser(UserDto userDto);
 
-    UserDto get(long userId);
+    UserDto getUserById(long userId);
 
-    UserDto updateUserFields(UserDto userDto);
+    UserDto updateUser(UserDto userDto);
 
-    void delete(Long userId);
+    void deleteUser(Long userId);
 
-    Collection<UserDto> getAll();
+    Collection<UserDto> getAllUsers();
 
 }

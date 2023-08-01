@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.itemBooking.ItemWithBookingsAndCommentsDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemWithBookingsDto;
+import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -26,8 +26,8 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createNewItem(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        itemDto = itemService.create(userId, itemDto);
-        log.info("User {} created item {}", userId, itemDto);
+        itemDto = itemService.createItem(userId, itemDto);
+        log.info("Пользователь {} создал Вещь {}", userId, itemDto);
         return itemDto;
     }
 
@@ -36,28 +36,28 @@ public class ItemController {
                                     @PathVariable Long itemId,
                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
         itemDto.setId(itemId);
-        itemDto = itemService.update(userId, itemDto);
-        log.info("User {} updated item {}", userId, itemDto);
+        itemDto = itemService.updateItem(userId, itemDto);
+        log.info("Пользователь {} обновил Вещь {}", userId, itemDto);
         return itemDto;
     }
 
     @GetMapping("/{itemId}")
-    public ItemWithBookingsAndCommentsDto getByItemId(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        ItemWithBookingsAndCommentsDto itemDto = itemService.getByItemId(itemId, userId);
-        log.info("User {} got item {}", userId, itemDto);
+    public ItemCommentsDto getByItemId(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        ItemCommentsDto itemDto = itemService.getByItemId(itemId, userId);
+        log.info("Пользователь {} имеет следующие Вещи {}", userId, itemDto);
         return itemDto;
     }
 
     @GetMapping
-    public Collection<ItemWithBookingsDto> getAllUsersItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        Collection<ItemWithBookingsDto> collection = itemService.getByUserId(userId);
-        log.info("Given {} items belong to user {}", collection.size(), userId);
+    public Collection<ItemBookingsDto> getAllUsersItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        Collection<ItemBookingsDto> collection = itemService.getItemsByUserId(userId);
+        log.info("Данные {} Вещи принадлежат пользователю{}", collection.size(), userId);
         return collection;
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> findByText(@RequestParam() String text) {
-        Collection<ItemDto> collection = itemService.findByText(text);
+        Collection<ItemDto> collection = itemService.getItemByComment(text);
         log.info("It has been found {} items with text \"{}\"", collection.size(), text);
         return collection;
     }

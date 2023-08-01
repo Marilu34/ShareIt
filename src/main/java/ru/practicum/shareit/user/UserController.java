@@ -19,21 +19,21 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto createNewUser(@RequestBody UserDto userDto) {
-        UserDto dto = userService.create(userDto);
+        UserDto dto = userService.createUser(userDto);
         log.info("Created user {}", dto);
         return dto;
     }
 
     @GetMapping
     public Collection<UserDto> getAll() {
-        Collection<UserDto> all = userService.getAll();
+        Collection<UserDto> all = userService.getAllUsers();
         log.info("Given all {} existing users", all.size());
         return all;
     }
 
     @GetMapping("/{userId}")
     public UserDto findUserById(@PathVariable Long userId) {
-        UserDto dto = userService.get(userId);
+        UserDto dto = userService.getUserById(userId);
         log.info("Given user {}", dto);
         return dto;
     }
@@ -41,14 +41,14 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto updateUserFields(@PathVariable Long userId, @RequestBody UserDto userDto) {
         userDto.setId(userId);
-        UserDto dto = userService.updateUserFields(userDto);
+        UserDto dto = userService.updateUser(userDto);
         log.info("Updated user {}", dto);
         return dto;
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
-        userService.delete(userId);
+        userService.deleteUser(userId);
         log.info("Deleted user {}", userId);
     }
 }

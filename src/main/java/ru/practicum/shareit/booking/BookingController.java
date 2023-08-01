@@ -20,45 +20,47 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto create(@RequestBody CreationBooking creationBooking,
-                             @RequestHeader("X-Sharer-User-Id") long bookerId) {
+    public BookingDto createBooking(@RequestBody CreationBooking creationBooking,
+                                    @RequestHeader("X-Sharer-User-Id") long bookerId) {
         creationBooking.setBookerId(bookerId);
         BookingDto bookingDto = bookingService.createBooking(creationBooking);
-        log.info("Created new booking {}", bookingDto);
-        return bookingDto;
-    }
-
-    @PatchMapping("/{bookingId}")
-    public BookingDto ownerAcceptation(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                       @PathVariable long bookingId,
-                                       @RequestParam boolean approved) {
-        BookingDto bookingDto = bookingService.confirmationBooking(bookingId, ownerId, approved);
-        log.info("User {} booking {}", approved ? "approved" : "rejected", bookingId);
+        log.info("Создано новое бронирование {}", bookingDto);
         return bookingDto;
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto getBookingByOwnerOrBooker(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                @PathVariable long bookingId) {
+    public BookingDto getBookingById(@RequestHeader("X-Sharer-User-Id") long userId,
+                                     @PathVariable long bookingId) {
         BookingDto bookingDto = bookingService.getBookingById(bookingId, userId);
-        log.info("Was given booking {} for user {}", bookingId, userId);
+        log.info("Было предоставлено бронирование {} для пользователя {}", bookingId, userId);
         return bookingDto;
     }
 
     @GetMapping
-    public List<BookingDto> findBookingsOfBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                                 @RequestParam(defaultValue = "ALL") String state) {
+    public List<BookingDto> getAllBookingsByBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
+                                                   @RequestParam(defaultValue = "ALL") String state) {
         List<BookingDto> bookings = bookingService.getAllBookingsByBooker(bookerId, getBookingSearchState(state));
-        log.info("For booker {} was found {} bookings with state {}", bookerId, bookings.size(), state);
+        log.info("Для букера {} было найдено {} бронирование с состоянием {}", bookerId, bookings.size(), state);
         return bookings;
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> findBookingsOfOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                                @RequestParam(defaultValue = "ALL") String state) {
+    public List<BookingDto> getAllBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                                  @RequestParam(defaultValue = "ALL") String state) {
         List<BookingDto> bookings = bookingService.getAllBookingsByOwner(ownerId, getBookingSearchState(state));
-        log.info("For owner {} was found {} bookings with state {}", ownerId, bookings.size(), state);
+        log.info("Для Владельца {} было найдено {} бронирование с состоянием {}", ownerId, bookings.size(), state);
         return bookings;
+    }
+
+
+    @PatchMapping("/{bookingId}")
+    public BookingDto confirmationBooking(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                          @PathVariable long bookingId,
+                                          @RequestParam boolean approved) {
+        BookingDto bookingDto = bookingService.confirmationBooking(bookingId, ownerId, approved);
+        String action = approved ? "подтвердил" : "отменил";
+        log.info("Пользователь {} {} бронирование {}", ownerId, action, bookingId);
+        return bookingDto;
     }
 
     private State getBookingSearchState(String state) {

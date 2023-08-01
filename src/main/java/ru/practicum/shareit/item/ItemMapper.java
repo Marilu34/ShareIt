@@ -3,8 +3,8 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.booking.dto.ShortBookingDto;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.itemBooking.ItemWithBookingsAndCommentsDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemWithBookingsDto;
+import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -31,17 +31,17 @@ public class ItemMapper {
                 .build();
     }
 
-    public static ItemWithBookingsDto mapToItemWithBookingsDto(Item item,
-                                                               ShortBookingDto lastBooking,
-                                                               ShortBookingDto nextBooking) {
-        return new ItemWithBookingsDto(mapToItemDto(item), lastBooking, nextBooking);
+    public static ItemBookingsDto mapToItemWithBookingsDto(Item item,
+                                                           ShortBookingDto lastBooking,
+                                                           ShortBookingDto nextBooking) {
+        return new ItemBookingsDto(mapToItemDto(item), lastBooking, nextBooking);
     }
 
-    public static ItemWithBookingsAndCommentsDto mapToItemWithBookingsAndCommentsDto(Item item,
-                                                                                     ShortBookingDto lastBooking,
-                                                                                     ShortBookingDto nextBooking,
-                                                                                     List<CommentDto> comments) {
-        return new ItemWithBookingsAndCommentsDto(mapToItemWithBookingsDto(item, lastBooking, nextBooking), comments);
+    public static ItemCommentsDto mapToItemWithBookingsAndCommentsDto(Item item,
+                                                                      ShortBookingDto lastBooking,
+                                                                      ShortBookingDto nextBooking,
+                                                                      List<CommentDto> comments) {
+        return new ItemCommentsDto(mapToItemWithBookingsDto(item, lastBooking, nextBooking), comments);
     }
 }
 
