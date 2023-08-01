@@ -18,5 +18,5 @@ public interface ItemService {
 
     ItemDto updateItem(Long userId, ItemDto itemDto);
 
-    CommentDto postCommentForItemFromAuthor(String text, Long itemId, Long authorId);
+    CommentDto postComment(String comment, Long itemId, Long authorId);
 }

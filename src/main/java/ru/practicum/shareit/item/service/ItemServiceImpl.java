@@ -144,7 +144,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentDto postCommentForItemFromAuthor(String text, Long itemId, Long authorId) {
+    public CommentDto postComment(String text, Long itemId, Long authorId) {
         LocalDateTime now = LocalDateTime.now();
         List<Booking> items = bookingRepository
                 .findAllByItemIdAndBookerIdAndStatusIsAndEndBefore(itemId, authorId, Status.APPROVED, now);

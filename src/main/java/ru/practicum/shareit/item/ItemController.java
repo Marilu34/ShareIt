@@ -25,14 +25,14 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto createNewItem(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemDto createItem(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
         itemDto = itemService.createItem(userId, itemDto);
         log.info("Пользователь {} создал Вещь {}", userId, itemDto);
         return itemDto;
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItemFields(@RequestBody ItemDto itemDto,
+    public ItemDto updateItem(@RequestBody ItemDto itemDto,
                                     @PathVariable Long itemId,
                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
         itemDto.setId(itemId);
@@ -49,27 +49,27 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemBookingsDto> getAllUsersItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Collection<ItemBookingsDto> getItemsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
         Collection<ItemBookingsDto> collection = itemService.getItemsByUserId(userId);
-        log.info("Данные {} Вещи принадлежат пользователю{}", collection.size(), userId);
+        log.info("Данные {} Вещи принадлежат пользователю {}", collection.size(), userId);
         return collection;
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> findByText(@RequestParam() String text) {
+    public Collection<ItemDto> getItemByComment(@RequestParam() String text) {
         Collection<ItemDto> collection = itemService.getItemByComment(text);
         log.info("Вещи {} по описанию {}", collection.size(), text);
         return collection;
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto postCommentForItem(@RequestHeader("X-Sharer-User-id") Long authorId,
+    public CommentDto postComment(@RequestHeader("X-Sharer-User-id") Long authorId,
                                          @PathVariable Long itemId,
                                          @RequestBody @Valid @NotBlank Map<String, String> requestBody)  {
         if (!requestBody.containsKey("text") || requestBody.get("text").isBlank()) {
-            throw new ValidationException("");
+            throw new ValidationException("Ошибка с комментарием");
         }
-        CommentDto commentDto = itemService.postCommentForItemFromAuthor(requestBody.get("text"), itemId, authorId);
+        CommentDto commentDto = itemService.postComment(requestBody.get("text"), itemId, authorId);
         log.info("Пользователь {} для Вещи {} добавил комментарий", authorId, itemId);
         return commentDto;
 
