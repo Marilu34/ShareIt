@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         validate(itemDto);
-        User owner = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("userId"));
+        User owner = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("объект Owner не найден в репозитории"));
         Item item = ItemMapper.mapToItem(itemDto, owner);
         item = itemRepository.save(item);
         return ItemMapper.mapToItemDto(item);
@@ -61,14 +61,17 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemDto.getId());
 
         if (userId != item.getOwner().getId()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only owner allowed operation");
+            throw new IllegalStateException("Только владелец мжет обновить данные о Вещи");
         }
+
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
+
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
+
         if (itemDto.getDescription() != null) {
             item.setDescription(itemDto.getDescription());
         }
@@ -77,6 +80,7 @@ public class ItemServiceImpl implements ItemService {
         item = itemRepository.save(item);
         return ItemMapper.mapToItemDto(item);
     }
+
 
     @Override
     public ItemCommentsDto getByItemId(Long itemId, Long requestFromUserId) {
@@ -97,9 +101,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     @Override
     public Collection<ItemBookingsDto> getItemsByUserId(Long userId) {
-        // check if user exists
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("userId");
+            throw new NotFoundException("объект Пользователь не найден в репозитории");
         }
 
         Collection<Item> items = itemRepository.findAllByOwnerId(userId).collect(Collectors.toUnmodifiableList());
@@ -134,7 +137,7 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> items = bookingRepository
                 .findAllByItemIdAndBookerIdAndStatusIsAndEndBefore(itemId, authorId, Status.APPROVED, now);
         if (items.isEmpty()) {
-            throw new ValidationException("");
+            throw new ValidationException("объект Item не найден в репозитории");
         }
         Booking booking = items.get(0);
         Comment comment = CommentMapper.mapToComment(text,
@@ -153,7 +156,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Item getItemById(long itemId) {
-        return itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("itemId"));
+        return itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("объект Item не найден"));
     }
 
 }
