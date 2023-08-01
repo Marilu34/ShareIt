@@ -3,17 +3,16 @@ package ru.practicum.shareit.user.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
 import javax.validation.Validator;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     public UserDto getUserById(long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("userId"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("объект Пользователь не найден в репозитории"));
         return UserMapper.toUserDto(user);
     }
 
@@ -58,7 +57,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("userId");
+            throw new NotFoundException("объект Пользователь не найден");
         }
         userRepository.deleteById(userId);
     }
@@ -69,11 +68,17 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    private void validate(@Valid UserDto userDto) {
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
+    private void validate(UserDto userDto) {
+        List<String> mistakes = new ArrayList<>();
+
+        validator.validate(userDto).forEach(mistake -> {
+            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
+            mistakes.add(message);
+        });
+
+        if (!mistakes.isEmpty()) {
+            throw new ValidationException("Ошибки: " + mistakes);
         }
-        // email must be unique - checks in DB
     }
+
 }

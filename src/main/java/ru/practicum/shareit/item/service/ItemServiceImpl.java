@@ -59,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemDto.getId());
 
         if (userId != item.getOwner().getId()) {
-            throw new IllegalStateException("Только владелец мжет обновить данные о Вещи");
+            throw new IllegalStateException("Только владелец может обновить данные о Вещи");
         }
 
         if (itemDto.getAvailable() != null) {
