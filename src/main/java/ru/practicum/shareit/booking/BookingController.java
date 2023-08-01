@@ -39,7 +39,7 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getAllBookingsByBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
                                                    @RequestParam(defaultValue = "ALL") String state) {
-        List<BookingDto> bookings = bookingService.getAllBookingsByBooker(bookerId, getBookingSearchState(state));
+        List<BookingDto> bookings = bookingService.getAllBookingsByBooker(bookerId, checkState(state));
         log.info("Для букера {} было найдено {} бронирование с состоянием {}", bookerId, bookings.size(), state);
         return bookings;
     }
@@ -47,7 +47,7 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
                                                   @RequestParam(defaultValue = "ALL") String state) {
-        List<BookingDto> bookings = bookingService.getAllBookingsByOwner(ownerId, getBookingSearchState(state));
+        List<BookingDto> bookings = bookingService.getAllBookingsByOwner(ownerId, checkState(state));
         log.info("Для Владельца {} было найдено {} бронирование с состоянием {}", ownerId, bookings.size(), state);
         return bookings;
     }
@@ -63,7 +63,7 @@ public class BookingController {
         return bookingDto;
     }
 
-    private State getBookingSearchState(String state) {
+    private State checkState(String state) {
         try {
             return State.valueOf(state);
         } catch (IllegalArgumentException e) {

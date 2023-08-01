@@ -41,7 +41,7 @@ public class Booking {
     User booker;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(10) default 'WAITING'")
+    @Column(columnDefinition = "varchar(10) default 'WAITING'")//по умолчанию
     Status status;
 
     @Override

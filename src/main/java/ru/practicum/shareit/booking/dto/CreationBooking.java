@@ -29,7 +29,7 @@ public class CreationBooking {
     long bookerId;
 
     @AssertTrue(message = "Начало должно быть раньше окончания")
-    private boolean isStartBeforeEnd() {  //Any method name is ok as long as it begins with `is`
+    private boolean isStartBeforeEnd() {  //Без этого метода валятся тесты
         return Objects.nonNull(start) && Objects.nonNull(end) && start.isBefore(end);
     }
 }

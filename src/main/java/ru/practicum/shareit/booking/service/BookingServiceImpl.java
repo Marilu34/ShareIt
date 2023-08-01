@@ -162,7 +162,6 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getStatus().equals(Status.WAITING)) {
             throw new ValidationException("Объект Booking имеет отличный статус от WAITING");
         }
-
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         return BookingMapper.toBookingDto(booking);
     }
