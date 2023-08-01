@@ -18,37 +18,39 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createNewUser(@RequestBody UserDto userDto) {
+    public UserDto createUser(@RequestBody UserDto userDto) {
         UserDto dto = userService.createUser(userDto);
-        log.info("Created user {}", dto);
+        log.info("Пользователь создан {}", dto);
         return dto;
     }
 
+
+    @PatchMapping("/{userId}")
+    public UserDto updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
+        userDto.setId(userId);
+        UserDto dto = userService.updateUser(userDto);
+        log.info("Пользователь обновлен {}", dto);
+        return dto;
+    }
+
+
     @GetMapping
-    public Collection<UserDto> getAll() {
+    public Collection<UserDto> getAllUsers() {
         Collection<UserDto> all = userService.getAllUsers();
-        log.info("Given all {} existing users", all.size());
+        log.info("Получены все Пользователи {}", all.size());
         return all;
     }
 
     @GetMapping("/{userId}")
-    public UserDto findUserById(@PathVariable Long userId) {
+    public UserDto getUserById(@PathVariable Long userId) {
         UserDto dto = userService.getUserById(userId);
-        log.info("Given user {}", dto);
-        return dto;
-    }
-
-    @PatchMapping("/{userId}")
-    public UserDto updateUserFields(@PathVariable Long userId, @RequestBody UserDto userDto) {
-        userDto.setId(userId);
-        UserDto dto = userService.updateUser(userDto);
-        log.info("Updated user {}", dto);
+        log.info("Получен Пользователь {}", dto);
         return dto;
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
-        log.info("Deleted user {}", userId);
+        log.info("Пользователь удален {}", userId);
     }
 }

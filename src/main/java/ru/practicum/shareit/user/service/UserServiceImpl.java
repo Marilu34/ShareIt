@@ -32,6 +32,21 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(user);
     }
 
+
+    private void validate(UserDto userDto) {
+        List<String> mistakes = new ArrayList<>();
+
+        validator.validate(userDto).forEach(mistake -> {
+            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
+            mistakes.add(message);
+        });
+
+        if (!mistakes.isEmpty()) {
+            throw new ValidationException("Ошибки: " + mistakes);
+        }
+    }
+
+
     @Transactional(readOnly = true)
     public UserDto getUserById(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("объект Пользователь не найден в репозитории"));
@@ -40,17 +55,17 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public UserDto updateUser(UserDto userDto) {
-        UserDto userDtoForUpdate = getUserById(userDto.getId());
+        UserDto userUpdate = getUserById(userDto.getId());
 
         if (userDto.getName() != null) {
-            userDtoForUpdate.setName(userDto.getName());
+            userUpdate.setName(userDto.getName());
         }
         if (userDto.getEmail() != null) {
-            userDtoForUpdate.setEmail(userDto.getEmail());
+            userUpdate.setEmail(userDto.getEmail());
         }
-        validate(userDtoForUpdate);
+        validate(userUpdate);
 
-        User user = userRepository.save(UserMapper.fromUserDto(userDtoForUpdate));
+        User user = userRepository.save(UserMapper.fromUserDto(userUpdate));
         return UserMapper.toUserDto(user);
     }
 
@@ -67,18 +82,4 @@ public class UserServiceImpl implements UserService {
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
-
-    private void validate(UserDto userDto) {
-        List<String> mistakes = new ArrayList<>();
-
-        validator.validate(userDto).forEach(mistake -> {
-            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
-            mistakes.add(message);
-        });
-
-        if (!mistakes.isEmpty()) {
-            throw new ValidationException("Ошибки: " + mistakes);
-        }
-    }
-
 }

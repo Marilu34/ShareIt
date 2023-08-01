@@ -21,6 +21,7 @@ import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.ConstraintViolation;
@@ -51,6 +52,19 @@ public class ItemServiceImpl implements ItemService {
         Item item = ItemMapper.mapToItem(itemDto, owner);
         item = itemRepository.save(item);
         return ItemMapper.mapToItemDto(item);
+    }
+
+    private void validate(ItemDto itemDto) {
+        List<String> mistakes = new ArrayList<>();
+
+        validator.validate(itemDto).forEach(mistake -> {
+            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
+            mistakes.add(message);
+        });
+
+        if (!mistakes.isEmpty()) {
+            throw new ValidationException("Ошибки: " + mistakes);
+        }
     }
 
     @Transactional
@@ -146,12 +160,6 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.mapToDto(comment);
     }
 
-    private void validate(@Valid ItemDto itemDto) {
-        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-    }
 
     private Item getItemById(long itemId) {
         return itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("объект Item не найден"));
