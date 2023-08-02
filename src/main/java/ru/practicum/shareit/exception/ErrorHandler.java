@@ -26,7 +26,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(Exception e) {
         log.error("Возникло необработанное исключение: {}", e.getMessage(), e);
-        return new ErrorResponse("Внутренняя ошибка сервера");
+        return new ErrorResponse("Внутренняя ошибка сервера" + e.getMessage());
     }
 
     @ExceptionHandler

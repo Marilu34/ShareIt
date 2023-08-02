@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -109,23 +110,23 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemBookingsDto> getItemsByUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("объект Пользователь не найден в репозитории");
+            throw new NotFoundException("Объект Пользователь не найден в репозитории");
         }
 
-        Collection<Item> items = itemRepository.findAllByOwnerId(userId).collect(Collectors.toUnmodifiableList());
-        Collection<ItemBookingsDto> itemBookingsDtos = new ArrayList<>(items.size());
         LocalDateTime now = LocalDateTime.now();
-        for (Item item : items) {
-            long itemId = item.getId();
-            ShortBookingDto lastBooking = bookingRepository
-                    .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(itemId, now, Status.APPROVED);
-            ShortBookingDto nextBooking = bookingRepository
-                    .findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(itemId, now, Status.REJECTED);
-            itemBookingsDtos.add(ItemMapper.toItemBookingsDto(item, lastBooking, nextBooking));
-        }
 
-        return itemBookingsDtos;
+        return itemRepository.findAllByOwnerId(userId)
+                .flatMap(item -> {
+                    long itemId = item.getId();
+                    ShortBookingDto lastBooking = bookingRepository
+                            .findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(itemId, now, Status.APPROVED);
+                    ShortBookingDto nextBooking = bookingRepository
+                            .findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(itemId, now, Status.REJECTED);
+                    return Stream.of(ItemMapper.toItemBookingsDto(item, lastBooking, nextBooking));
+                })
+                .collect(Collectors.toList());
     }
+
 
     @Transactional(readOnly = true)
     @Override
