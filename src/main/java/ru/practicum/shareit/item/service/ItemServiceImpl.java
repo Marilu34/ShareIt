@@ -114,7 +114,7 @@ public class ItemServiceImpl implements ItemService {
             nextBooking = bookingRepository.findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(itemId, now, Status.REJECTED);
         }
 
-        List<CommentDto> comments = commentRepository.findAllByItemId(itemId);
+        List<CommentDto> comments = commentRepository.getAllCommentsByItems(itemId);
 
         return ItemMapper.toItemCommentDto(item, lastBooking, nextBooking, comments);
     }
@@ -130,7 +130,6 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     @Override
     public Collection<ItemBookingsDto> getItemsByUserId(Long userId, int from, int size) {
-        // Проверяем, существует ли пользователь
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Объект Пользователь не найден в репозитории");
         }
@@ -181,8 +180,9 @@ public class ItemServiceImpl implements ItemService {
         comment = commentRepository.save(comment);
         return CommentMapper.toCommentDto(comment);
     }
+
     @Override
-    public Collection<ItemDto> findByText(String text, int from, int size) {
+    public Collection<ItemDto> getItemByText(String text, int from, int size) {
         if (text.isBlank()) {
             return List.of();
         }
@@ -195,5 +195,4 @@ public class ItemServiceImpl implements ItemService {
     private Item getItemById(long itemId) {
         return itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("объект Item не найден"));
     }
-
 }

@@ -11,8 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.ItemRequestController;
-import ru.practicum.shareit.item.dto.AddItemRequestDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemRequestWithItemsDto;
+import ru.practicum.shareit.item.dto.ShortRequestDto;
+import ru.practicum.shareit.item.itemBooking.dto.RequestList;
 import ru.practicum.shareit.item.service.ItemRequestService;
 
 import java.util.List;
@@ -35,12 +35,12 @@ class ItemRequestControllerTest {
     @MockBean
     private ItemRequestService itemRequestService;
     @Captor
-    private ArgumentCaptor<AddItemRequestDto> addItemRequestDtoArgumentCaptor;
+    private ArgumentCaptor<ShortRequestDto> addItemRequestDtoArgumentCaptor;
 
     @SneakyThrows
     @Test
     void createShouldPassCorrectDescriptionAndRequesterIdAndStatusIsOk() {
-        AddItemRequestDto itemRequestDtoToCreate = new AddItemRequestDto();
+        ShortRequestDto itemRequestDtoToCreate = new ShortRequestDto();
         itemRequestDtoToCreate.setDescription("some description");
         long requesterId = 1L;
 
@@ -49,8 +49,8 @@ class ItemRequestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(itemRequestDtoToCreate)))
                 .andExpect(status().isOk());
-        verify(itemRequestService, times(1)).create(addItemRequestDtoArgumentCaptor.capture());
-        AddItemRequestDto actual = addItemRequestDtoArgumentCaptor.getValue();
+        verify(itemRequestService, times(1)).createRequests(addItemRequestDtoArgumentCaptor.capture());
+        ShortRequestDto actual = addItemRequestDtoArgumentCaptor.getValue();
         assertEquals(requesterId, actual.getRequesterId());
         assertEquals("some description", actual.getDescription());
     }
@@ -64,7 +64,7 @@ class ItemRequestControllerTest {
                         .header("X-Sharer-User-id", requesterId))
                 .andExpect(status().isOk());
 
-        verify(itemRequestService).findAllRequesterRequests(requesterId);
+        verify(itemRequestService).getAllRequestsBySearcher(requesterId);
         verifyNoMoreInteractions(itemRequestService);
 
 
@@ -92,9 +92,9 @@ class ItemRequestControllerTest {
         long requesterId = 1L;
         Integer from = 0;
         Integer size = 3;
-        List<ItemRequestWithItemsDto> expectedList = List.of(new ItemRequestWithItemsDto(), new ItemRequestWithItemsDto());
+        List<RequestList> expectedList = List.of(new RequestList(), new RequestList());
 
-        when(itemRequestService.findAllPageable(requesterId, from, size))
+        when(itemRequestService.getAllRequests(requesterId, from, size))
                 .thenReturn(expectedList);
 
         String responseBody = mockMvc.perform(get("/requests/all")

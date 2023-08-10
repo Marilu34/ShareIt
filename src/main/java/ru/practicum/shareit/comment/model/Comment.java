@@ -37,17 +37,4 @@ public class Comment {
 
     @Column(nullable = false)
     LocalDateTime created = LocalDateTime.now();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Comment comment = (Comment) o;
-        return id != 0 && id == comment.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

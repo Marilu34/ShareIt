@@ -10,12 +10,12 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemRequestDto {
+public class RequestDto {
     long id;
     String description;
     String created;
 
-    public ItemRequestDto(ItemRequestDto obj) {
+    public RequestDto(RequestDto obj) {
         this.id = obj.id;
         this.description = obj.description;
         this.created = obj.created;

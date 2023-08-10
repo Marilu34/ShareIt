@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.item.dto.AddItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemRequestDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemRequestWithItemsDto;
+import ru.practicum.shareit.item.dto.ShortRequestDto;
+import ru.practicum.shareit.item.dto.RequestDto;
+import ru.practicum.shareit.item.itemBooking.dto.RequestList;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ItemRequestMapper {
-    public static ItemRequest mapToItemRequest(AddItemRequestDto itemRequestDto, User requester) {
+    public static ItemRequest mapToItemRequest(ShortRequestDto itemRequestDto, User requester) {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setRequester(requester);
         itemRequest.setDescription(itemRequestDto.getDescription());
@@ -21,16 +21,16 @@ public class ItemRequestMapper {
         return itemRequest;
     }
 
-    public static ItemRequestDto mapToItemRequestDto(ItemRequest itemRequest) {
+    public static RequestDto mapToItemRequestDto(ItemRequest itemRequest) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        return ItemRequestDto.of(itemRequest.getId(),
+        return RequestDto.of(itemRequest.getId(),
                 itemRequest.getDescription(),
                 formatter.format(itemRequest.getCreated()));
     }
 
-    public static ItemRequestWithItemsDto mapToItemRequestWithItemsDto(ItemRequest itemRequest,
-                                                                       List<Item> items) {
-        return new ItemRequestWithItemsDto(ItemRequestMapper.mapToItemRequestDto(itemRequest),
+    public static RequestList mapToItemRequestWithItemsDto(ItemRequest itemRequest,
+                                                           List<Item> items) {
+        return new RequestList(ItemRequestMapper.mapToItemRequestDto(itemRequest),
                 items.stream().map(ItemMapper::toItemDto).collect(Collectors.toUnmodifiableList()));
     }
 }

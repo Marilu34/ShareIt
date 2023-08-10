@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
-import ru.practicum.shareit.item.dto.AddItemRequestDto;
+import ru.practicum.shareit.item.dto.ShortRequestDto;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -19,16 +19,16 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @JsonTest
-class AddItemRequestDtoTest {
+class ShortRequestDtoTest {
 
     @Autowired
-    private JacksonTester<AddItemRequestDto> json;
+    private JacksonTester<ShortRequestDto> json;
 
-    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
     void shouldNotAcceptBlankDescription() {
-        AddItemRequestDto dto = new AddItemRequestDto();
+        ShortRequestDto dto = new ShortRequestDto();
         //null case
         assertThrows(ConstraintViolationException.class, () -> validate(dto));
 
@@ -44,7 +44,7 @@ class AddItemRequestDtoTest {
 
     @Test
     void shouldNotAcceptLongerThan2048CharsDescription() {
-        AddItemRequestDto dto = new AddItemRequestDto();
+        ShortRequestDto dto = new ShortRequestDto();
         dto.setDescription("a".repeat(2024));
         assertDoesNotThrow(() -> validate(dto));
 
@@ -55,18 +55,18 @@ class AddItemRequestDtoTest {
     @SneakyThrows
     @Test
     void shouldDeserializeCorrectly() {
-        AddItemRequestDto dto = new AddItemRequestDto();
+        ShortRequestDto dto = new ShortRequestDto();
         dto.setDescription("description");
         dto.setRequesterId(5L);
 
-        JsonContent<AddItemRequestDto> result = json.write(dto);
+        JsonContent<ShortRequestDto> result = json.write(dto);
 
         assertThat(result).extractingJsonPathNumberValue("$.requesterId").isEqualTo(5);
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo(dto.getDescription());
     }
 
-    private void validate(AddItemRequestDto o) {
-        Set<ConstraintViolation<AddItemRequestDto>> violations = validator.validate(o);
+    private void validate(ShortRequestDto o) {
+        Set<ConstraintViolation<ShortRequestDto>> violations = validator.validate(o);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }

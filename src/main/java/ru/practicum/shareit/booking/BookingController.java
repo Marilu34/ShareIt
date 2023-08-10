@@ -32,36 +32,36 @@ public class BookingController {
         return bookingDto;
     }
     @GetMapping("/{bookingId}")
-    public BookingDto getBookingByOwnerOrBooker(@RequestHeader("X-Sharer-User-Id") long userId,
+    public BookingDto getBookingById(@RequestHeader("X-Sharer-User-Id") long userId,
                                                 @PathVariable long bookingId) {
         BookingDto bookingDto = bookingService.getBookingById(bookingId, userId);
-        log.info("Was given booking {} for user {}", bookingId, userId);
+        log.info("Было предоставлено бронирование {} для пользователя {}", bookingId, userId);
         return bookingDto;
     }
 
     @GetMapping
-    public List<BookingDto> findBookingsOfBooker(
+    public List<BookingDto> getAllBookingsByBooker(
             @RequestHeader("X-Sharer-User-Id") long bookerId,
             @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from cannot be negative") int from,
-            @RequestParam(defaultValue = "10") @Positive(message = "size must be positive") int size
+            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from должен быть больше нуля") int from,
+            @RequestParam(defaultValue = "10") @Positive(message = "size должен быть больше нуля") int size
     ) {
         List<BookingDto> bookings = bookingService
                 .getAllBookingsByBooker(bookerId, checkState(state), from, size);
-        log.info("For booker {} was found {} bookings with state {}", bookerId, bookings.size(), state);
+        log.info("Для букера {} было найдено {} бронирование с состоянием {}", bookerId, bookings.size(), state);
         return bookings;
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> findBookingsOfOwner(
+    public List<BookingDto> getAllBookingsByOwner(
             @RequestHeader("X-Sharer-User-Id") long ownerId,
             @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from cannot be negative") int from,
-            @RequestParam(defaultValue = "10") @Positive(message = "size must be positive") int size
+            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from должен быть больше нуля") int from,
+            @RequestParam(defaultValue = "10") @Positive(message = "size должен быть больше нуля") int size
     ) {
         List<BookingDto> bookings = bookingService
                 .getAllBookingsByOwner(ownerId, checkState(state), from, size);
-        log.info("For owner {} was found {} bookings with state {}", ownerId, bookings.size(), state);
+        log.info("Для Владельца {} было найдено {} бронирование с состоянием {}", ownerId, bookings.size(), state);
         return bookings;
     }
 

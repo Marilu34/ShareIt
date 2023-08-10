@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getAllBookingsByBooker(long bookerId, State state, int from, int size) {
         if (!userRepository.existsById(bookerId)) {
-            throw new NotFoundException("bookerId");
+            throw new NotFoundException("объект Booker не найден в репозитории");
         }
         Stream<Booking> bookingStream;
         final Sort sort = Sort.sort(Booking.class).by(Booking::getStart).descending();
@@ -125,7 +125,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getAllBookingsByOwner(long ownerId, State state, int from, int size) {
         if (!userRepository.existsById(ownerId)) {
-            throw new NotFoundException("ownerId");
+            throw new NotFoundException("объект Владелец  не найден в репозитории");
         }
         Stream<Booking> bookingStream;
         final Sort sort = Sort.sort(Booking.class).by(Booking::getStart).descending();

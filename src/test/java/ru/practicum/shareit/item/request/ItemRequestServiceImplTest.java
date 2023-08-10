@@ -13,13 +13,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemRequestRepository;
-import ru.practicum.shareit.item.dto.AddItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemRequestDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemRequestWithItemsDto;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.RequestDto;
+import ru.practicum.shareit.item.dto.ShortRequestDto;
+import ru.practicum.shareit.item.itemBooking.dto.RequestList;
 import ru.practicum.shareit.item.model.ItemRequest;
 import ru.practicum.shareit.item.service.ItemRequestServiceImpl;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -56,11 +56,11 @@ class ItemRequestServiceImplTest {
     @Captor
     private ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
 
-    private AddItemRequestDto goodDto;
+    private ShortRequestDto goodDto;
 
     @BeforeEach
     public void before() {
-        goodDto = new AddItemRequestDto();
+        goodDto = new ShortRequestDto();
         goodDto.setRequesterId(1);
         goodDto.setDescription("Description");
     }
@@ -70,22 +70,22 @@ class ItemRequestServiceImplTest {
         long requesterId = goodDto.getRequesterId();
         when(userRepository.findById(requesterId)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> service.create(goodDto));
+        assertThrows(NotFoundException.class, () -> service.createRequests(goodDto));
 
         verifyNoInteractions(itemRepository, itemRepository);
     }
 
     @Test
     void create_shouldThrowConstraintViolationException_whenDescriptionIsNullOrBlank() {
-        AddItemRequestDto wrongDto = new AddItemRequestDto();
+        ShortRequestDto wrongDto = new ShortRequestDto();
         wrongDto.setDescription("  ");
         Validator realValidator = Validation.buildDefaultValidatorFactory().getValidator();
         ReflectionTestUtils.setField(service, "validator", realValidator);
 
-        assertThrows(ConstraintViolationException.class, () -> service.create(wrongDto));
+        assertThrows(ConstraintViolationException.class, () -> service.createRequests(wrongDto));
 
         wrongDto.setDescription(null);
-        assertThrows(ConstraintViolationException.class, () -> service.create(wrongDto));
+        assertThrows(ConstraintViolationException.class, () -> service.createRequests(wrongDto));
 
         verifyNoInteractions(itemRepository, userRepository, itemRepository);
 
@@ -108,7 +108,7 @@ class ItemRequestServiceImplTest {
                     return ir;
                 });
 
-        ItemRequestDto actual = service.create(goodDto);
+        RequestDto actual = service.createRequests(goodDto);
 
         LocalDateTime pointAfter = LocalDateTime.now();
 
@@ -125,7 +125,7 @@ class ItemRequestServiceImplTest {
     void findAllRequesterRequests_shouldThrowUserNotFoundException_whenUserNotExists() {
         when(userRepository.existsById(anyLong())).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () -> service.findAllRequesterRequests(anyLong()));
+        assertThrows(NotFoundException.class, () -> service.getAllRequestsBySearcher(anyLong()));
         verifyNoInteractions(itemRequestRepository, itemRepository);
     }
 
@@ -136,7 +136,7 @@ class ItemRequestServiceImplTest {
         when(itemRequestRepository.findAllByRequesterId(requesterId, Sort.by("created")))
                 .thenReturn(List.of());
 
-        List<ItemRequestWithItemsDto> actual = service.findAllRequesterRequests(requesterId);
+        List<RequestList> actual = service.getAllRequestsBySearcher(requesterId);
 
         assertEquals(0, actual.size());
     }
@@ -147,7 +147,7 @@ class ItemRequestServiceImplTest {
         when(itemRequestRepository.findAllByRequesterIdNot(anyLong(), pageRequestArgumentCaptor.capture()))
                 .thenReturn(Page.empty());
 
-        service.findAllPageable(1, 0, 1);
+        service.getAllRequests(1, 0, 1);
 
         PageRequest actualRequest = pageRequestArgumentCaptor.getValue();
         assertEquals(Sort.sort(ItemRequest.class).by(ItemRequest::getCreated).descending(), actualRequest.getSort());
@@ -176,7 +176,7 @@ class ItemRequestServiceImplTest {
         when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.of(expectedRequest));
         when(itemRepository.findAllByRequestId(anyLong())).thenReturn(expectedItems);
 
-        ItemRequestWithItemsDto actual = service.getRequestById(1, 1);
+        RequestList actual = service.getRequestById(1, 1);
 
         assertEquals(expectedRequest.getId(), actual.getId());
         assertEquals(expectedRequest.getCreated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), actual.getCreated());

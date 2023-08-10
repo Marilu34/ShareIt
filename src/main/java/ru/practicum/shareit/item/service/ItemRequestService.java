@@ -1,17 +1,17 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.item.dto.AddItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemRequestDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemRequestWithItemsDto;
+import ru.practicum.shareit.item.dto.ShortRequestDto;
+import ru.practicum.shareit.item.dto.RequestDto;
+import ru.practicum.shareit.item.itemBooking.dto.RequestList;
 
 import java.util.List;
 
 public interface ItemRequestService {
-    ItemRequestDto create(AddItemRequestDto itemRequestDto);
+    RequestDto createRequests(ShortRequestDto itemRequestDto);
 
-    List<ItemRequestWithItemsDto> findAllRequesterRequests(long requesterId);
+    List<RequestList> getAllRequestsBySearcher(long requesterId);
 
-    List<ItemRequestWithItemsDto> findAllPageable(long userId, int from, int size);
+    List<RequestList> getAllRequests(long userId, int from, int size);
 
-    ItemRequestWithItemsDto getRequestById(long userId, long requestId);
+    RequestList getRequestById(long userId, long requestId);
 }

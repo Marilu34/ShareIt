@@ -10,9 +10,9 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemRequestMapper;
 import ru.practicum.shareit.item.ItemRequestRepository;
-import ru.practicum.shareit.item.dto.AddItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemRequestDto;
-import ru.practicum.shareit.item.itemBooking.dto.ItemRequestWithItemsDto;
+import ru.practicum.shareit.item.dto.ShortRequestDto;
+import ru.practicum.shareit.item.dto.RequestDto;
+import ru.practicum.shareit.item.itemBooking.dto.RequestList;
 import ru.practicum.shareit.item.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -35,7 +35,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Transactional
     @Override
-    public ItemRequestDto create(AddItemRequestDto itemRequestDto) {
+    public RequestDto createRequests(ShortRequestDto itemRequestDto) {
         validate(itemRequestDto);
         User requester = userRepository.findById(itemRequestDto.getRequesterId())
                 .orElseThrow(() -> new NotFoundException("Объект Пользователь не найден в репозитории"));
@@ -46,7 +46,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemRequestWithItemsDto> findAllRequesterRequests(long requesterId) {
+    public List<RequestList> getAllRequestsBySearcher(long requesterId) {
         ifUserNotExistsThenThrowUserNotFoundException(requesterId);
         List<ItemRequest> dtoList = itemRequestRepository.findAllByRequesterId(requesterId, sort);
         return dtoList.stream()
@@ -56,7 +56,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemRequestWithItemsDto> findAllPageable(long userId, int from, int size) {
+    public List<RequestList> getAllRequests(long userId, int from, int size) {
         ifUserNotExistsThenThrowUserNotFoundException(userId);
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "created");
         Page<ItemRequest> page = itemRequestRepository.findAllByRequesterIdNot(userId, pageRequest);
@@ -67,7 +67,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Transactional(readOnly = true)
     @Override
-    public ItemRequestWithItemsDto getRequestById(long userId, long requestId) {
+    public RequestList getRequestById(long userId, long requestId) {
         ifUserNotExistsThenThrowUserNotFoundException(userId);
         ItemRequest request = itemRequestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос на поиск Item не найден"));
@@ -79,8 +79,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (!userRepository.existsById(userId)) throw new NotFoundException("Объект Пользователь не найден");
     }
 
-    private void validate(AddItemRequestDto itemRequestDto) {
-        Set<ConstraintViolation<AddItemRequestDto>> violations = validator.validate(itemRequestDto);
+    private void validate(ShortRequestDto itemRequestDto) {
+        Set<ConstraintViolation<ShortRequestDto>> violations = validator.validate(itemRequestDto);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
