@@ -10,11 +10,14 @@ import java.util.Collection;
 public interface ItemService {
     ItemDto createItem(Long userId, ItemDto itemDto);
 
-    ItemCommentsDto getByItemId(Long itemId, Long requestFromUserId);
+    ItemDto getByItemId(Long itemId);
 
-    Collection<ItemBookingsDto> getItemsByUserId(Long userId);
+    Collection<ItemBookingsDto> getItemsByUserId(Long userId, int from, int size);
 
     Collection<ItemDto> getItemByComment(String text);
+    ItemCommentsDto getByItemId(Long itemId, Long requestFromUserId);
+
+    Collection<ItemDto> findByText(String text, int from, int size);
 
     ItemDto updateItem(Long userId, ItemDto itemDto);
 

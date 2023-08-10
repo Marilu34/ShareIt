@@ -13,6 +13,8 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 import java.util.Map;
 
@@ -43,17 +45,21 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemCommentsDto getByItemId(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        ItemCommentsDto itemDto = itemService.getByItemId(itemId, userId);
-        log.info("Пользователь {} имеет следующие Вещи {}", userId, itemDto);
+        ItemCommentsDto itemDto = itemService.getByItemId(itemId,userId);
+        log.info("Получен Item по ID {}", itemDto);
         return itemDto;
     }
 
     @GetMapping
-    public Collection<ItemBookingsDto> getItemsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        Collection<ItemBookingsDto> collection = itemService.getItemsByUserId(userId);
+    public Collection<ItemBookingsDto> getItemsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                        @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from cannot be negative") int from,
+                                                        @RequestParam(defaultValue = "10") @Positive(message = "size must be positive") int size
+    ) {
+        Collection<ItemBookingsDto> collection = itemService.getItemsByUserId(userId, from, size);
         log.info("Данные {} Вещи принадлежат пользователю {}", collection.size(), userId);
         return collection;
     }
+
 
     @GetMapping("/search")
     public Collection<ItemDto> getItemByComment(@RequestParam() String text) {

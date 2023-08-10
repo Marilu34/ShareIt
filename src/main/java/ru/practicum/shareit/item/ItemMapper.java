@@ -6,6 +6,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -18,30 +19,50 @@ public class ItemMapper {
                 .available(item.isAvailable())
                 .name(item.getName())
                 .description(item.getDescription())
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
                 .build();
     }
 
-    public static Item fromItemDto(ItemDto itemDto, User owner) {
+    public static Item fromItemDto(ItemDto itemDto, User owner, ItemRequest request) {
         return Item.builder()
                 .id(Optional.ofNullable(itemDto.getId()).orElse(0L))
                 .available(itemDto.getAvailable())
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .owner(owner)
+                .request(request)
                 .build();
     }
 
     public static ItemBookingsDto toItemBookingsDto(Item item,
                                                     ShortBookingDto lastBooking,
                                                     ShortBookingDto nextBooking) {
-        return new ItemBookingsDto(toItemDto(item), lastBooking, nextBooking);
+        ItemBookingsDto result = new ItemBookingsDto();
+        result.setId(item.getId());
+        result.setName(item.getName());
+        result.setDescription(item.getDescription());
+        result.setAvailable(item.isAvailable());
+        result.setLastBooking(lastBooking);
+        result.setNextBooking(nextBooking);
+        result.setRequestId(item.getRequest() != null ? item.getRequest().getId() : null);
+        return result;
     }
+
 
     public static ItemCommentsDto toItemCommentDto(Item item,
                                                    ShortBookingDto lastBooking,
                                                    ShortBookingDto nextBooking,
                                                    List<CommentDto> comments) {
-        return new ItemCommentsDto(toItemBookingsDto(item, lastBooking, nextBooking), comments);
+        ItemCommentsDto result = new ItemCommentsDto();
+        result.setId(item.getId());
+        result.setName(item.getName());
+        result.setDescription(item.getDescription());
+        result.setAvailable(item.isAvailable());
+        result.setLastBooking(lastBooking);
+        result.setNextBooking(nextBooking);
+        result.setComments(comments);
+        result.setRequestId(item.getRequest() != null ? item.getRequest().getId() : null);
+        return result;
     }
 }
 
