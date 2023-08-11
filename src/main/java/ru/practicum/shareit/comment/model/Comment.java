@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "comments",
         uniqueConstraints = {
-        @UniqueConstraint(name = "ONE_USER_ONE_COMMENT",
-                columnNames = {"item_id", "author_id"})})
+                @UniqueConstraint(name = "ONE_USER_ONE_COMMENT",
+                        columnNames = {"item_id", "author_id"})})
 @Getter
 @Setter
 @ToString
