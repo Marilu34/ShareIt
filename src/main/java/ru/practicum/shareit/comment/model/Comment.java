@@ -11,6 +11,7 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "comments",
         uniqueConstraints = {
