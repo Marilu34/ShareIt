@@ -1,74 +1,78 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
+import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import java.util.List;
+import javax.validation.constraints.NotBlank;
+import java.util.Collection;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/items")
+@RequiredArgsConstructor
 public class ItemController {
-    private static final String OWNER = "X-Sharer-User-Id";
-    private ItemService itemService;
+    private final ItemService itemService;
 
-    private UserService userService;
-
-    @Autowired
-    public ItemController(ItemService itemService, UserService userService) {
-        this.itemService = itemService;
-        this.userService = userService;
-    }
-
-
-    @ResponseBody
     @PostMapping
-    public ItemDto createItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
-        log.info("Вещь " + itemDto + " была создана Владельцем " + ownerId);
-        ItemDto newItem = null;
-        if (userService.ifUserExist(ownerId)) {
-            newItem = itemService.create(itemDto, ownerId);
-        }
-        return newItem;
+    @ResponseStatus(HttpStatus.CREATED)
+    public ItemDto createItem(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        itemDto = itemService.createItem(userId, itemDto);
+        log.info("Пользователь {} создал Вещь {}", userId, itemDto);
+        return itemDto;
     }
 
-    @GetMapping
-    public List<ItemDto> getOwnersItems(@RequestHeader(OWNER) Long ownerId) {
-        log.info("Получены все вещей владельца с id = " + ownerId);
-        return itemService.getOwnersItems(ownerId);
+    @PatchMapping("/{itemId}")
+    public ItemDto updateItem(@RequestBody ItemDto itemDto,
+                              @PathVariable Long itemId,
+                              @RequestHeader("X-Sharer-User-Id") Long userId) {
+        itemDto.setId(itemId);
+        itemDto = itemService.updateItem(userId, itemDto);
+        log.info("Пользователь {} обновил Вещь {}", userId, itemDto);
+        return itemDto;
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId) {
-        log.info("Вещь с id =  " + itemId + " была получен");
-        return itemService.getItemById(itemId);
+    public ItemCommentsDto getByItemId(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        ItemCommentsDto itemDto = itemService.getByItemId(itemId, userId);
+        log.info("Пользователь {} имеет следующие Вещи {}", userId, itemDto);
+        return itemDto;
     }
 
-    @ResponseBody
-    @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
-                              @RequestHeader(OWNER) Long ownerId) {
-        log.info("Обновление вещи с id = " + itemId);
-        ItemDto newItem = null;
-        if (userService.ifUserExist(ownerId)) {
-            newItem = itemService.updateItem(itemDto, ownerId, itemId);
-        }
-        return newItem;
-    }
-
-    @DeleteMapping("/{itemId}")
-    public ItemDto deleteItem(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
-        log.info("Удаление вещи с id =" + itemId);
-        return itemService.deleteItem(itemId, ownerId);
+    @GetMapping
+    public Collection<ItemBookingsDto> getItemsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        Collection<ItemBookingsDto> collection = itemService.getItemsByUserId(userId);
+        log.info("Данные {} Вещи принадлежат пользователю {}", collection.size(), userId);
+        return collection;
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchQueryItem(@RequestParam String text) {
-        log.info("Поиск вещи с описанием = {}", text);
-        return itemService.searchQueryItem(text);
+    public Collection<ItemDto> getItemByComment(@RequestParam() String text) {
+        Collection<ItemDto> collection = itemService.getItemByComment(text);
+        log.info("Вещи {} по описанию {}", collection.size(), text);
+        return collection;
     }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto postComment(@RequestHeader("X-Sharer-User-id") Long authorId,
+                                  @PathVariable Long itemId,
+                                  @RequestBody @Valid @NotBlank Map<String, String> requestBody) {
+        if (!requestBody.containsKey("text") || requestBody.get("text").isBlank()) {
+            throw new ValidationException("Ошибка с комментарием");
+        }
+        CommentDto commentDto = itemService.postComment(requestBody.get("text"), itemId, authorId);
+        log.info("Пользователь {} для Вещи {} добавил комментарий", authorId, itemId);
+        return commentDto;
+
+    }
+
 }

@@ -1,30 +1,47 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.stereotype.Component;
+import ru.practicum.shareit.booking.dto.ShortBookingDto;
+import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
-@Component
+import java.util.List;
+import java.util.Optional;
+
 public class ItemMapper {
-
-    public ItemDto toItemDto(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getRequestId() != null ? item.getRequestId() : null
-        );
+    public static ItemDto toItemDto(Item item) {
+        return ItemDto.builder()
+                .id(item.getId())
+                .available(item.isAvailable())
+                .name(item.getName())
+                .description(item.getDescription())
+                .build();
     }
 
-    public Item toItem(ItemDto itemDto, Long ownerId) {
-        return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                ownerId,
-                itemDto.getRequestId() != null ? itemDto.getRequestId() : null
-        );
+    public static Item fromItemDto(ItemDto itemDto, User owner) {
+        return Item.builder()
+                .id(Optional.ofNullable(itemDto.getId()).orElse(0L))
+                .available(itemDto.getAvailable())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .owner(owner)
+                .build();
+    }
+
+    public static ItemBookingsDto toItemBookingsDto(Item item,
+                                                    ShortBookingDto lastBooking,
+                                                    ShortBookingDto nextBooking) {
+        return new ItemBookingsDto(toItemDto(item), lastBooking, nextBooking);
+    }
+
+    public static ItemCommentsDto toItemCommentDto(Item item,
+                                                   ShortBookingDto lastBooking,
+                                                   ShortBookingDto nextBooking,
+                                                   List<CommentDto> comments) {
+        return new ItemCommentsDto(toItemBookingsDto(item, lastBooking, nextBooking), comments);
     }
 }
+
