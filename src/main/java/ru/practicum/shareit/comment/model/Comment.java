@@ -10,9 +10,9 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "comments",
-        uniqueConstraints = {@UniqueConstraint(name = "ONE_USER_ONE_COMMENT", columnNames = {"item_id", "author_id"})})
+@Table(name = "comments", uniqueConstraints = {@UniqueConstraint(name = "ONE_USER_ONE_COMMENT", columnNames = {"item_id", "author_id"})})
 @Getter
 @Setter
 @ToString
