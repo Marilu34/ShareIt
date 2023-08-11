@@ -20,7 +20,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findBookingByOwnerOrBooker(long bookingId, long userId);
     //ищет Booking, используя идентификатор (bookingId) и идентификатор владельца (userId) или бронирующего (userId).
 
-    Stream<Booking> findAllByBookerId(long bookerId,  Pageable sort);
+    Stream<Booking> findAllByBookerId(long bookerId, Pageable sort);
     //находит все Bookings, связанные с определенным booker'ом по его идентификатору (bookerId).
 
     Stream<Booking> findAllByBookerIdAndStatusIs(long bookerId, Status status, Pageable page);

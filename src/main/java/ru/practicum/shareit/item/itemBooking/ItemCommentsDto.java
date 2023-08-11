@@ -16,4 +16,4 @@ import java.util.List;
 public class ItemCommentsDto extends ItemBookingsDto {
     List<CommentDto> comments;
 
-  }
+}

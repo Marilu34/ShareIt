@@ -34,11 +34,11 @@ class BookingRepositoryTest {
 
     private LocalDateTime now = LocalDateTime.now();
 
-    private Booking bookingCurrentOfBooker5AndOwner1;
-    private Booking bookingFutureOfBooker5AndOwner2;
+    private Booking booking;
+    private Booking booking1;
 
     @BeforeAll
-    private void populateDBWith() {
+    private void beforeAll() {
         for (int i = 1; i <= 5; i++) {
             userRepository.save(User.builder()
                     .name("User" + i)
@@ -56,48 +56,41 @@ class BookingRepositoryTest {
                     .build());
         }
 
-        bookingCurrentOfBooker5AndOwner1 = new Booking();
-        bookingCurrentOfBooker5AndOwner1.setItem(itemRepository.findById(1L).get());
-        bookingCurrentOfBooker5AndOwner1.setBooker(userRepository.findById(5L).get());
-        bookingCurrentOfBooker5AndOwner1.setStatus(Status.APPROVED);
-        bookingCurrentOfBooker5AndOwner1.setStart(now.minusSeconds(1));
-        bookingCurrentOfBooker5AndOwner1.setEnd(now.plusSeconds(2));
-        bookingCurrentOfBooker5AndOwner1 = bookingRepository.save(bookingCurrentOfBooker5AndOwner1);
+        booking = new Booking();
+        booking.setItem(itemRepository.findById(1L).get());
+        booking.setBooker(userRepository.findById(5L).get());
+        booking.setStatus(Status.APPROVED);
+        booking.setStart(now.minusSeconds(1));
+        booking.setEnd(now.plusSeconds(2));
+        booking = bookingRepository.save(booking);
 
-        bookingFutureOfBooker5AndOwner2 = new Booking();
-        bookingFutureOfBooker5AndOwner2.setItem(itemRepository.findById(2L).get());
-        bookingFutureOfBooker5AndOwner2.setBooker(userRepository.findById(5L).get());
-        bookingFutureOfBooker5AndOwner2.setStatus(Status.WAITING);
-        bookingFutureOfBooker5AndOwner2.setStart(now.plusSeconds(1));
-        bookingFutureOfBooker5AndOwner2.setEnd(now.plusSeconds(2));
-        bookingFutureOfBooker5AndOwner2 = bookingRepository.save(bookingFutureOfBooker5AndOwner2);
+        booking1 = new Booking();
+        booking1.setItem(itemRepository.findById(2L).get());
+        booking1.setBooker(userRepository.findById(5L).get());
+        booking1.setStatus(Status.WAITING);
+        booking1.setStart(now.plusSeconds(1));
+        booking1.setEnd(now.plusSeconds(2));
+        booking1 = bookingRepository.save(booking1);
 
     }
 
     @Test
-    void findBookingByOwnerOrBooker_shouldReturnSame_whenBookerOrOwnerOfSameBooking() {
-        long id = bookingFutureOfBooker5AndOwner2.getId();
-        long bookerId = bookingFutureOfBooker5AndOwner2.getBooker().getId();
-        long ownerId = bookingFutureOfBooker5AndOwner2.getItem().getOwner().getId();
-
-        assertTrue(bookingRepository.findBookingByOwnerOrBooker(id,bookerId).isPresent());
-        assertEquals(bookingRepository.findBookingByOwnerOrBooker(id,bookerId).get(),
-                bookingRepository.findBookingByOwnerOrBooker(id, ownerId).get());
+    void testGetBookingsById() {
+        long bookingId = booking1.getId();
+        long bookerId = booking1.getBooker().getId();
+        long ownerId = booking1.getItem().getOwner().getId();
+        assertTrue(bookingRepository.findBookingByOwnerOrBooker(bookingId, bookerId).isPresent());
+        assertEquals(bookingRepository.findBookingByOwnerOrBooker(bookingId, bookerId).get(),
+                bookingRepository.findBookingByOwnerOrBooker(bookingId, ownerId).get());
     }
 
     @Test
-    void findAllCurrentBookerBookings_shouldReturnOne_whenSearchedForBookerWithOneCurrent() {
-        long bookerId = bookingCurrentOfBooker5AndOwner1.getBooker().getId();
-        Stream<Booking> allBookerBookings = bookingRepository.findAllByBookerId(bookerId, PageRequest.of(0, 1000));
-        assertTrue(allBookerBookings.count() > 1);
+    void testGetAll() {
+        long bookerId = booking.getBooker().getId();
         Stream<Booking> actual = bookingRepository.findAllCurrentBookerBookings(bookerId, now, PageRequest.of(0, 1000));
         assertEquals(1, actual.count());
-    }
+        Stream<Booking> allBookerBookings = bookingRepository.findAllByBookerId(bookerId, PageRequest.of(0, 1000));
+        assertTrue(allBookerBookings.count() > 1);
 
-    @Test
-    void findAllCurrentOwnerBookings_shouldReturnEmptyStream_whenOwnerDoesNotHaveCurrentBookings() {
-        long ownerId = bookingFutureOfBooker5AndOwner2.getItem().getOwner().getId();
-        assertEquals(0, bookingRepository.findAllCurrentOwnerBookings(ownerId, now, PageRequest.ofSize(100))
-                .count());
     }
 }

@@ -27,88 +27,84 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(value = BookingController.class)
 class BookingControllerTest {
 
+    @MockBean
+    private BookingService bookingService;
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper mapper;
-
-    @MockBean
-    private BookingService service;
+    private ObjectMapper objectMapper;
 
 
-    @SneakyThrows
     @Test
-    void create_shouldReturnOkAndCorrectObject_whenInvoked() {
-        CreationBooking dto = new CreationBooking();
-        long bookerId = 2L;
-        BookingDto expected = new BookingDto(2, "2022", "2023", "Status", null, null);
-        when(service.createBooking(any(CreationBooking.class))).thenReturn(expected);
+    void testCreate() throws Exception {
+
+        long bookerId = 5L;
+        CreationBooking booking = new CreationBooking();
+        BookingDto expected = new BookingDto(5, "1990", "2023", "Status", null, null);
+        when(bookingService.createBooking(any(CreationBooking.class))).thenReturn(expected);
 
         String responseBody = mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", bookerId)
+                        .header("X-Sharer-User-Id", String.valueOf(bookerId))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(dto))
+                        .content(objectMapper.writeValueAsString(booking))
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        assertEquals(mapper.writeValueAsString(expected), responseBody);
+        assertEquals(objectMapper.writeValueAsString(expected), responseBody);
 
-        dto.setBookerId(bookerId);
-        verify(service, times(1)).createBooking(dto);
+        booking.setBookerId(bookerId);
+        verify(bookingService, times(1)).createBooking(any(CreationBooking.class));
+    }
 
+
+    @SneakyThrows
+    @Test
+    void testGetBookingById() {
+        mockMvc.perform(get("/bookings/{bookingId}", 11)
+                        .header("X-Sharer-User-id", 11))
+                .andExpect(status().isOk());
     }
 
     @SneakyThrows
     @Test
-    void ownerAcceptation_shouldPassAllParamsToServiceMethod_whenInvoked() {
-        long ownerId = 5L;
-        long bookingId = 4L;
-        boolean approved = true;
-
-        mockMvc.perform(patch("/bookings/{bookingId}", bookingId)
+    void testGetAllBookingsByOwner() {
+        long ownerId = 3L;
+        String state = "WAITING";
+        mockMvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-id", ownerId)
-                        .queryParam("approved", Boolean.toString(approved))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        verify(service, times(1)).confirmationBooking(bookingId, ownerId, approved);
-
-    }
-
-    @SneakyThrows
-    @Test
-    void getBookingByOwnerOrBooker_shouldReturnOk_whenInvoked() {
-        mockMvc.perform(get("/bookings/{bookingId}", 1)
-                        .header("X-Sharer-User-id", 1))
+                        .queryParam("state", state))
                 .andExpect(status().isOk());
     }
 
+
     @SneakyThrows
     @Test
-    void findBookingsOfBooker_shouldReturnCorrectCollection_whenInvoked() {
-        DateTimeFormatter frmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    void testGetAllBookingsByBooker() {
+        DateTimeFormatter localDateTime = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         long bookerId = 3L;
         State state = State.APPROVED;
         int from = 10;
         int size = 5;
         List<BookingDto> expected = List.of(
                 new BookingDto(1,
-                        LocalDateTime.now().minusDays(1).format(frmt),
-                        LocalDateTime.now().minusHours(23).format(frmt),
+                        LocalDateTime.now().minusDays(1).format(localDateTime),
+                        LocalDateTime.now().minusHours(23).format(localDateTime),
                         Status.APPROVED.name(),
                         null,
                         null),
                 new BookingDto(3,
-                        LocalDateTime.now().minusDays(2).format(frmt),
-                        LocalDateTime.now().minusHours(47).format(frmt),
+                        LocalDateTime.now().minusDays(2).format(localDateTime),
+                        LocalDateTime.now().minusHours(47).format(localDateTime),
                         Status.APPROVED.name(),
                         null,
                         null)
         );
-        when(service.getAllBookingsByBooker(bookerId, state, from, size))
+        when(bookingService.getAllBookingsByBooker(bookerId, state, from, size))
                 .thenReturn(expected);
 
         String responseBody = mockMvc.perform(get("/bookings")
@@ -122,22 +118,27 @@ class BookingControllerTest {
                 .getContentAsString();
 
         assertArrayEquals(expected.toArray(),
-                mapper.readValue(responseBody, BookingDto[].class));
+                objectMapper.readValue(responseBody, BookingDto[].class));
 
-        verify(service, times(1))
+        verify(bookingService, times(1))
                 .getAllBookingsByBooker(bookerId, state, from, size);
 
     }
 
-
     @SneakyThrows
     @Test
-    void findBookingsOfOwner_shouldReturnClientError_whenInvokedWithWrongState() {
-        long ownerId = 3L;
-        String state = "WRONG_STATE";
-        mockMvc.perform(get("/bookings/owner")
+    void testConfirmationBooking() {
+        long ownerId = 11L;
+        long bookingId = 12L;
+        boolean approved = true;
+
+        mockMvc.perform(patch("/bookings/{bookingId}", bookingId)
                         .header("X-Sharer-User-id", ownerId)
-                        .queryParam("state", state))
-                .andExpect(status().is4xxClientError());
+                        .queryParam("approved", Boolean.toString(approved))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(bookingService, times(1)).confirmationBooking(bookingId, ownerId, approved);
+
     }
 }

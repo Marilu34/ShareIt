@@ -12,7 +12,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.ALWAYS)
+@JsonInclude
 public class ItemBookingsDto extends ItemDto {
     ShortBookingDto lastBooking;
     ShortBookingDto nextBooking;

@@ -173,5 +173,4 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(approved ? APPROVED : REJECTED);
         return BookingMapper.toBookingDto(booking);
     }
-
 }

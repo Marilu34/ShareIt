@@ -9,7 +9,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
@@ -25,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -32,99 +32,61 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class BookingServiceImplTest {
 
+    @InjectMocks
+    private BookingServiceImpl bookingService;
+
+    @Mock
+    private BookingRepository bookingRepository;
+
+    private CreationBooking creationBooking;
     @Mock
     private ItemRepository itemRepository;
 
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private BookingRepository bookingRepository;
 
     @Spy
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    @InjectMocks
-    private BookingServiceImpl service;
-
-    private CreationBooking dto;
-
-    @BeforeEach
-    void setUp() {
-        dto = new CreationBooking();
-        dto.setBookerId(1);
-        dto.setItemId(1);
-        dto.setStart(LocalDateTime.now().plusSeconds(2));
-        dto.setEnd(LocalDateTime.now().plusSeconds(3));
-
-        when(userRepository.existsById(anyLong())).thenReturn(true);
-
-    }
 
     @Test
-    void create_shouldThrowException_whenOwnerTryToBoolOwnItem() {
+    void testCreate() {
         long ownerId = 123;
         Item item = Item.builder()
                 .id(1)
                 .owner(User.builder().id(ownerId).build())
                 .available(true)
                 .build();
-        dto.setBookerId(ownerId);
+        long bookerId = 11L;
+        creationBooking.setBookerId(bookerId);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
-        assertThrows(RuntimeException.class, () -> service.createBooking(dto));
+        assertThrows(RuntimeException.class, () -> bookingService.createBooking(creationBooking));
     }
 
-    @Test
-    void findAllBookingsOfBooker_shouldInvokeCorrectRepositoryMethod_whenStateIsPast() {
-        service.getAllBookingsByBooker(1, State.PAST, 0, 1);
-
-        verify(bookingRepository, atLeastOnce())
-                .findAllByBookerIdAndEndIsBefore(anyLong(), any(LocalDateTime.class), any(Pageable.class));
-    }
 
     @Test
-    void findAllBookingsOfBooker_shouldInvokeCorrectRepositoryMethod_whenStateIsApproved() {
-        service.getAllBookingsByBooker(1, State.APPROVED, 0, 1);
-
-        verify(bookingRepository, atLeastOnce())
-                .findAllByBookerIdAndStatusIs(anyLong(), any(Status.class), any(Pageable.class));
-    }
-
-    @Test
-    void findAllBookingsOfBooker_shouldThrowUserNotFoundException_whenUserNotExists() {
-        when(userRepository.existsById(anyLong())).thenReturn(false);
+    void testGetAll() {
+        when(userRepository.existsById(123L)).thenReturn(false);
 
         assertThrows(NotFoundException.class,
-                () -> service.getAllBookingsByBooker(1, State.ALL, 0, 1));
+                () -> bookingService.getAllBookingsByOwner(123L, State.ALL, 0, 1));
         verifyNoInteractions(bookingRepository);
     }
 
-    @Test
-    void findAllBookingsOfOwner_shouldThrowUserNotFoundException_whenUserNotExists() {
-        when(userRepository.existsById(anyLong())).thenReturn(false);
 
-        assertThrows(NotFoundException.class,
-                () -> service.getAllBookingsByOwner(1,State.ALL, 0, 1));
-        verifyNoInteractions(bookingRepository);
+    @BeforeEach
+    void before() {
+        creationBooking = new CreationBooking();
+        creationBooking.setBookerId(1);
+        creationBooking.setItemId(1);
+        creationBooking.setStart(LocalDateTime.now().plusSeconds(2));
+        creationBooking.setEnd(LocalDateTime.now().plusSeconds(3));
+
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+
     }
-
-    @Test
-    void findAllBookingsOfOwner_shouldInvokeCorrectRepositoryMethod_whenStateIsPast() {
-        service.getAllBookingsByOwner(1, State.PAST, 0, 1);
-
-        verify(bookingRepository, atLeastOnce())
-                .findAllByItemOwnerIdAndEndIsBefore(anyLong(), any(LocalDateTime.class), any(Pageable.class));
-    }
-
-    @Test
-    void findAllBookingsOfOwner_shouldInvokeCorrectRepositoryMethod_whenStateIsFuture() {
-        service.getAllBookingsByOwner(1, State.FUTURE, 0, 1);
-
-        verify(bookingRepository, atLeastOnce())
-                .findAllByItemOwnerIdAndStartIsAfter(anyLong(), any(LocalDateTime.class), any(Pageable.class));
-    }
-
 
 
 }

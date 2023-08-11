@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 public class ShortRequestDto {
     long requesterId;
 
-    @NotBlank @Length(max = 2024)
+    @NotBlank
+    @Length(max = 2024)
     private String description;
 }

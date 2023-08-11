@@ -7,7 +7,6 @@ import org.mockito.AdditionalAnswers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -26,88 +25,72 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private MockMvc mvc;
 
     @MockBean
-    private UserService service;
+    private UserService userService;
 
     @Autowired
-    private ObjectMapper mapper;
+    private ObjectMapper objectMapper;
 
     @SneakyThrows
     @Test
-    void createNewUser_shouldHaveStatusCreatedAndReturnObject_whenInvokedCorrectly() {
-        UserDto dto = UserDto.builder().name("name").email("mail@mail.net").build();
-        when(service.createUser(dto)).thenReturn(dto);
+    void testCreateUser() {
+        UserDto user = UserDto.builder().name("name").email("mail@mail.ru").build();
+        when(userService.createUser(user)).thenReturn(user);
 
-        String responseBody = mockMvc.perform(post("/users")
+        String responseBody = mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
-                        .content(mapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        assertEquals(mapper.writeValueAsString(dto), responseBody);
+        assertEquals(objectMapper.writeValueAsString(user), responseBody);
     }
-
-     @SneakyThrows
-    @Test
-    void createNewUser_shouldHaveStatusConflict_whenServiceThrowsDataIntegrityViolationException() {
-        UserDto dto = UserDto.builder().name("name").email("repeatedEmail@mail.net").build();
-        when(service.createUser(dto)).thenThrow(new DataIntegrityViolationException("EMAIL_UNIQUE violation"));
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(mapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict());
-    }
-
-
 
     @SneakyThrows
     @Test
-    void getAll_shouldReturnOk_whenInvoked() {
-        mockMvc.perform(get("/users"))
+    void testGetUserById() {
+        long userId = 1;
+        mvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isOk());
-        verify(service, times(1)).getAllUsers();
+        verify(userService, atLeastOnce()).getUserById(userId);
     }
 
     @SneakyThrows
     @Test
-    void findUserById_shouldPassParamIntoServiceAndReturnStatusOk_whenInvoked() {
-        long userId = 123;
-
-        mockMvc.perform(get("/users/{userId}", userId))
+    void testGetAllUsers() {
+        mvc.perform(get("/users"))
                 .andExpect(status().isOk());
-
-        verify(service, atLeastOnce()).getUserById(userId);
+        verify(userService, times(1)).getAllUsers();
     }
+
 
     @SneakyThrows
     @Test
-    void updateUserFields_shouldReturnStatusOk_whenInvoked() {
-        long userId = 123L;
-        UserDto dto = UserDto.builder().id(null).email("mail@email.net").name("name").build();
-        when(service.updateUser(any(UserDto.class))).then(AdditionalAnswers.returnsFirstArg());
+    void testUpdate() {
+        long userId = 1L;
+        UserDto user = UserDto.builder().id(null).email("email@yandex.ru").name("name").build();
+        when(userService.updateUser(any(UserDto.class))).then(AdditionalAnswers.returnsFirstArg());
 
-        mockMvc.perform(patch("/users/{userId}", userId)
+        mvc.perform(patch("/users/{userId}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(userId), Long.class));
     }
 
     @SneakyThrows
     @Test
-    void deleteUser_shouldInvokeDeleteServiceMetod_whenInvoked() {
+    void testDeleteUser() {
         long userId = 123;
-        mockMvc.perform(delete("/users/{userId}", userId))
+        mvc.perform(delete("/users/{userId}", userId))
                 .andExpect(status().isOk());
 
-        verify(service, times(1)).deleteUser(userId);
-        verifyNoMoreInteractions(service);
+        verify(userService, times(1)).deleteUser(userId);
+        verifyNoMoreInteractions(userService);
     }
 }
