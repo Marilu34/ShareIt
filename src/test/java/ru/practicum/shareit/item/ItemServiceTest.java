@@ -47,7 +47,7 @@ class ItemServiceTest {
         assertEquals(item, item1);
         assertThrows(NotFoundException.class, () -> itemService.createItem(1234L, list.get(2)));
         assertThrows(ValidationException.class,
-                () -> itemService.createItem(2L, list.get(3).toBuilder().name(null).build()));
+                () -> itemService.createItem(1L, list.get(3).toBuilder().name(null).build()));
     }
 
     @Test
