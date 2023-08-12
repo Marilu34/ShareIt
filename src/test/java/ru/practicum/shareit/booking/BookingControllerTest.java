@@ -139,8 +139,10 @@ class BookingControllerTest {
                 .andExpect(status().isOk());
 
         verify(bookingService, times(1)).confirmationBooking(bookingId, ownerId, approved);
-
     }
+
+
+
     @Test
     void testBadCreate() throws Exception {
         CreationBooking dto = new CreationBooking();

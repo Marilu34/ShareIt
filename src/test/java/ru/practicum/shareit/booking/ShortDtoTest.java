@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 public class ShortDtoTest {
     @Autowired
     private JacksonTester<ShortRequestDto> json;
@@ -37,7 +38,7 @@ public class ShortDtoTest {
     void testGetId() {
         // Arrange
         long expectedId = 10;
-        ShortBookingDto shortBooking = new ShortBookingDto(1L,expectedId);
+        ShortBookingDto shortBooking = new ShortBookingDto(1L, expectedId);
 
         // Act
         shortBooking.setId(expectedId);
@@ -51,7 +52,7 @@ public class ShortDtoTest {
     void testGetBookerId() {
         // Arrange
         long expectedBookerId = 5;
-        ShortBookingDto shortBooking = new ShortBookingDto(1L,expectedBookerId);
+        ShortBookingDto shortBooking = new ShortBookingDto(1L, expectedBookerId);
 
         // Act
         shortBooking.setBookerId(expectedBookerId);
@@ -65,7 +66,7 @@ public class ShortDtoTest {
     void testRiqghEquals() {
 
         // Arrange
-        ShortBookingDto shortBooking = new ShortBookingDto(11L,12L);
+        ShortBookingDto shortBooking = new ShortBookingDto(11L, 12L);
 
         // Act & Assert
         assertTrue(shortBooking.equals(shortBooking));
@@ -74,7 +75,7 @@ public class ShortDtoTest {
     @Test
     void testBadEquals() {
         // Arrange
-        ShortBookingDto shortBooking = new ShortBookingDto(11L,12L);
+        ShortBookingDto shortBooking = new ShortBookingDto(11L, 12L);
         String otherObject = "some string";
 
         // Act & Assert
@@ -86,11 +87,11 @@ public class ShortDtoTest {
         // Arrange
         Long id = 10L;
         Long bookerId = 5L;
-        ShortBookingDto shortBooking1 = new ShortBookingDto(11L,12L);
+        ShortBookingDto shortBooking1 = new ShortBookingDto(11L, 12L);
         shortBooking1.setId(id);
         shortBooking1.setBookerId(bookerId);
 
-        ShortBookingDto shortBooking2 = new ShortBookingDto(13L,14L);
+        ShortBookingDto shortBooking2 = new ShortBookingDto(13L, 14L);
         shortBooking2.setId(id);
         shortBooking2.setBookerId(bookerId);
 
@@ -104,7 +105,7 @@ public class ShortDtoTest {
         Long id1 = 10L;
         Long id2 = 20L;
         Long bookerId = 5L;
-        ShortBookingDto shortBooking1 = new ShortBookingDto(id1,bookerId);
+        ShortBookingDto shortBooking1 = new ShortBookingDto(id1, bookerId);
         shortBooking1.setId(id1);
         shortBooking1.setBookerId(bookerId);
 
@@ -116,23 +117,27 @@ public class ShortDtoTest {
         assertFalse(shortBooking1.equals(shortBooking2));
     }
 
+
     @Test
     void testWrongBookerId() {
         // Arrange
         Long id = 10L;
         Long bookerId1 = 5L;
         Long bookerId2 = 8L;
-        ShortBookingDto shortBooking1 = new ShortBookingDto(id,bookerId1);
+        ShortBookingDto shortBooking1 = new ShortBookingDto(id, bookerId1);
         shortBooking1.setId(id);
         shortBooking1.setBookerId(bookerId1);
 
-        ShortBookingDto shortBooking2 = new ShortBookingDto(id,bookerId2);
+        ShortBookingDto shortBooking2 = new ShortBookingDto(id, bookerId2);
         shortBooking2.setId(id);
         shortBooking2.setBookerId(bookerId2);
 
         // Act & Assert
         assertFalse(shortBooking1.equals(shortBooking2));
+
     }
+
+
     @Test
     void testEmptyDescription() {
         ShortRequestDto dto = new ShortRequestDto();
@@ -149,6 +154,7 @@ public class ShortDtoTest {
         assertDoesNotThrow(() -> validate(dto));
     }
 
+
     @Test
     void testWrongDescription() {
         ShortRequestDto dto = new ShortRequestDto();
@@ -158,6 +164,4 @@ public class ShortDtoTest {
         dto.setDescription("b".repeat(2048) + " ");
         assertThrows(ValidationException.class, () -> validate(dto));
     }
-
-
 }

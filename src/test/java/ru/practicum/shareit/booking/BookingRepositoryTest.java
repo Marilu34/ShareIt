@@ -91,17 +91,17 @@ class BookingRepositoryTest {
         assertEquals(1, actual.count());
         Stream<Booking> allBookerBookings = bookingRepository.findAllByBookerId(bookerId, PageRequest.of(0, 1000));
         assertTrue(allBookerBookings.count() > 1);
-
     }
+
+
     @Test
     void testShouldReturnBookingByOwnerOrBooker() {
         long id = booking1.getId();
         long bookerId = booking1.getBooker().getId();
         long ownerId = booking1.getItem().getOwner().getId();
 
-        assertTrue(bookingRepository.findBookingByOwnerOrBooker(id,bookerId).isPresent());
-        assertEquals(bookingRepository.findBookingByOwnerOrBooker(id,bookerId).get(),
+        assertTrue(bookingRepository.findBookingByOwnerOrBooker(id, bookerId).isPresent());
+        assertEquals(bookingRepository.findBookingByOwnerOrBooker(id, bookerId).get(),
                 bookingRepository.findBookingByOwnerOrBooker(id, ownerId).get());
     }
-    
 }

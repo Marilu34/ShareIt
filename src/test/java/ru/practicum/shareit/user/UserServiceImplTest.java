@@ -10,7 +10,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
-import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.*;
@@ -51,6 +50,7 @@ class UserServiceImplTest {
         assertEquals(user.getEmail(), user1.getEmail());
         assertEquals(user.getId(), user1.getId());
     }
+
     @Test
     void testWrongUpdate() {
         long userId = 2;
@@ -69,13 +69,12 @@ class UserServiceImplTest {
         userService.deleteUser(1L);
         verify(userRepository, atLeastOnce()).deleteById(1L);
     }
+
+
     @Test
     void testShouldReturnMistakeIfUserIsNotExist() {
         when(userRepository.existsById(anyLong())).thenReturn(false);
-
         assertThrows(NotFoundException.class, () -> userService.deleteUser(anyLong()));
-
         verify(userRepository, Mockito.never()).deleteById(anyLong());
     }
-
 }

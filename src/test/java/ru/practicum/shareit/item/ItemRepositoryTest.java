@@ -34,7 +34,6 @@ public class ItemRepositoryTest {
     private ItemService itemService = mock(ItemService.class);
 
 
-
     private TestEntityManager em = mock(TestEntityManager.class);
 
 
@@ -45,7 +44,6 @@ public class ItemRepositoryTest {
         int from = 0;
         int size = 10;
         Pageable page = any();
-
 
 
         List<Item> itemList = Arrays.asList(
@@ -75,6 +73,8 @@ public class ItemRepositoryTest {
         // проверки других полей возвращаемого объекта
 
     }
+
+
     @Test
     void testGetAll() {
         for (int i = 1; i <= 5; i++) {
@@ -129,7 +129,6 @@ public class ItemRepositoryTest {
                 "namE",
                 Pageable.ofSize(100)
         );
-
         assertEquals(0, actual3.count());
     }
 }

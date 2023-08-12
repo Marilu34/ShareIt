@@ -79,7 +79,7 @@ public class ItemMapperTest {
         item.setName("Test Item");
         item.setDescription("Item description");
 
-        ShortBookingDto lastBooking = new ShortBookingDto(1L,123L);
+        ShortBookingDto lastBooking = new ShortBookingDto(1L, 123L);
         lastBooking.setId(100L);
 
         ShortBookingDto nextBooking = new ShortBookingDto(1L, 123L);
@@ -107,7 +107,7 @@ public class ItemMapperTest {
         item.setName("Test Item");
         item.setDescription("Item description");
 
-        ShortBookingDto lastBooking = new ShortBookingDto(1L,123L);
+        ShortBookingDto lastBooking = new ShortBookingDto(1L, 123L);
         lastBooking.setId(100L);
 
         ShortBookingDto nextBooking = new ShortBookingDto(1L, 123L);

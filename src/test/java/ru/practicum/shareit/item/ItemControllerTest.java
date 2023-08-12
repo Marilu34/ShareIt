@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
@@ -160,6 +159,7 @@ class ItemControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason("Текст не может отсутствовать"));
     }
+
     @Test
     void testBadCreate() throws Exception {
         ItemDto dto = ItemDto.builder().name("name").available(true).build();

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,6 @@ class UserControllerTest {
     void testCreateUser() {
         UserDto user = UserDto.builder().name("name").email("mail@mail.ru").build();
         when(userService.createUser(user)).thenReturn(user);
-
         String responseBody = mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -49,20 +47,20 @@ class UserControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
         assertEquals(objectMapper.writeValueAsString(user), responseBody);
     }
+
     @Test
     void testWrongCreate() throws Exception {
         UserDto user = UserDto.builder().name("name").email("email@mail.ru").build();
         when(userService.createUser(user)).thenThrow(new DataIntegrityViolationException("Эл почта содержит ошибку"));
-
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isConflict());
     }
+
     @SneakyThrows
     @Test
     void testGetUserById() {
@@ -87,7 +85,6 @@ class UserControllerTest {
         long userId = 1L;
         UserDto user = UserDto.builder().id(null).email("email@yandex.ru").name("name").build();
         when(userService.updateUser(any(UserDto.class))).then(AdditionalAnswers.returnsFirstArg());
-
         mvc.perform(patch("/users/{userId}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
@@ -101,7 +98,6 @@ class UserControllerTest {
         long userId = 123;
         mvc.perform(delete("/users/{userId}", userId))
                 .andExpect(status().isOk());
-
         verify(userService, times(1)).deleteUser(userId);
         verifyNoMoreInteractions(userService);
     }

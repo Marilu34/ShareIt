@@ -55,6 +55,7 @@ class ItemRequestControllerTest {
         assertEquals("some description", actual.getDescription());
     }
 
+
     @SneakyThrows
     @Test
     void testGetAllRequesterRequests() {
@@ -69,6 +70,7 @@ class ItemRequestControllerTest {
 
 
     }
+
 
     @SneakyThrows
     @Test
@@ -109,6 +111,7 @@ class ItemRequestControllerTest {
         assertEquals(mapper.writeValueAsString(expectedList), responseBody);
     }
 
+
     @SneakyThrows
     @Test
     void testGetRequestById() {
@@ -122,5 +125,4 @@ class ItemRequestControllerTest {
         verify(itemRequestService).getRequestById(userId, requestId);
         verifyNoMoreInteractions(itemRequestService);
     }
-
 }
