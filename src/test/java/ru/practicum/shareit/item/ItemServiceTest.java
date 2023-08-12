@@ -13,8 +13,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.comment.dto.CommentDto;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -45,7 +43,7 @@ class ItemServiceTest {
         ItemDto item = itemService.createItem(1L, list.get(1));
         ItemDto item1 = list.get(1).toBuilder().id(item.getId()).build();
         assertNotNull(itemService.createItem(1L, item));
-        assertNotNull( itemService.createItem(1L, item1));
+        assertNotNull(itemService.createItem(1L, item1));
     }
 
     @Test
