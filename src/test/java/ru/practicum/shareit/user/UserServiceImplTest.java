@@ -4,17 +4,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -40,6 +40,7 @@ class UserServiceImplTest {
         assertEquals(UserMapper.toUserDto(user), actual.iterator().next());
     }
 
+
     @Test
     void testUpdate() {
         User user = User.builder().id(1L).email("email@yandex.ru").name("name").build();
@@ -49,7 +50,17 @@ class UserServiceImplTest {
         assertEquals(user.getEmail(), user1.getEmail());
         assertEquals(user.getId(), user1.getId());
     }
+    @Test
+    void testWrongUpdate() {
+        long userId = 2;
+        String wrongEmail = "wrongEmail";
+        User user = User.builder().id(userId).email("email@yandex.ru").name("name").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
+        assertThrows(ConstraintViolationException.class,
+                () -> userService.updateUser(UserDto.builder().id(userId).email(wrongEmail).build()));
+        verifyNoMoreInteractions(userRepository);
+    }
 
     @Test
     void testDelete() {
@@ -57,4 +68,13 @@ class UserServiceImplTest {
         userService.deleteUser(1L);
         verify(userRepository, atLeastOnce()).deleteById(1L);
     }
+    @Test
+    void testShouldReturnMistakeIfUserIsNotExist() {
+        when(userRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> userService.deleteUser(anyLong()));
+
+        verify(userRepository, Mockito.never()).deleteById(anyLong());
+    }
+
 }

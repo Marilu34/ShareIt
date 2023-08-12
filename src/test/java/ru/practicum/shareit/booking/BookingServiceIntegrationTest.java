@@ -120,7 +120,7 @@ class BookingServiceIntegrationTest {
 
 
     @Test
-    void findAllBookingsByBooker() throws InterruptedException {
+    void testGetAllBookingsByBooker() throws InterruptedException {
         int from = 0;
         int size = 10;
 
@@ -157,7 +157,7 @@ class BookingServiceIntegrationTest {
     }
 
     @Test
-    void findAllBookingsOfOwner() throws InterruptedException {
+    void testGetAllBookingsByOwner() throws InterruptedException {
         int from = 0;
         int size = 10;
 

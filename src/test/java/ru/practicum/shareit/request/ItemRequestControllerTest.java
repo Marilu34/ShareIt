@@ -39,7 +39,7 @@ class ItemRequestControllerTest {
 
     @SneakyThrows
     @Test
-    void createShouldPassCorrectDescriptionAndRequesterIdAndStatusIsOk() {
+    void testCreate() {
         ShortRequestDto itemRequestDtoToCreate = new ShortRequestDto();
         itemRequestDtoToCreate.setDescription("some description");
         long requesterId = 1L;
@@ -57,7 +57,7 @@ class ItemRequestControllerTest {
 
     @SneakyThrows
     @Test
-    void findAllRequesterRequestsShouldInvokeServiceMethodWIthCorrectId() {
+    void testGetAllRequesterRequests() {
         long requesterId = 1L;
 
         mockMvc.perform(get("/requests")
@@ -122,4 +122,5 @@ class ItemRequestControllerTest {
         verify(itemRequestService).getRequestById(userId, requestId);
         verifyNoMoreInteractions(itemRequestService);
     }
+
 }
