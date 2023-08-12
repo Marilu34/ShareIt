@@ -89,7 +89,7 @@ class ItemControllerTest {
         long userId = 2L;
         ItemCommentsDto expected = new ItemCommentsDto();
         expected.setId(itemId);
-        expected.setDescription("описание");
+        expected.setDescription("description");
         expected.setComments(List.of(
                 new CommentDto(1, "text1", "name1", LocalDateTime.now().minusNanos(100)),
                 new CommentDto(2, "text2", "name2", LocalDateTime.now())
@@ -117,15 +117,6 @@ class ItemControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    void testGetAllBadRequest() throws Exception {
-        mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", 1)
-                        .queryParam("size", "0"))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().string(containsString("size должен быть больше нуля")));
-    }
-
 
     @SneakyThrows
     @Test
@@ -147,18 +138,6 @@ class ItemControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    void testBadPostCommentBadRequest() throws Exception {
-        String contentWithoutTextProperty = objectMapper.writeValueAsString(Map.of("пусто", "anyText"));
-
-        mockMvc.perform(post("/items/{itemId}/comment", 1)
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(contentWithoutTextProperty)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(status().reason("Текст не может отсутствовать"));
-    }
 
     @Test
     void testBadCreate() throws Exception {

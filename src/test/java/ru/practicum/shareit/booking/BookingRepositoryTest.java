@@ -37,6 +37,38 @@ class BookingRepositoryTest {
     private Booking booking;
     private Booking booking1;
 
+
+    @Test
+    void testGetBookingsById() {
+        long bookingId = booking1.getId();
+        long bookerId = booking1.getBooker().getId();
+        long ownerId = booking1.getItem().getOwner().getId();
+        assertTrue(bookingRepository.findBookingByOwnerOrBooker(bookingId, bookerId).isPresent());
+        assertEquals(bookingRepository.findBookingByOwnerOrBooker(bookingId, bookerId).get(),
+                bookingRepository.findBookingByOwnerOrBooker(bookingId, ownerId).get());
+    }
+
+    @Test
+    void testGetAll() {
+        long bookerId = booking.getBooker().getId();
+        Stream<Booking> actual = bookingRepository.findAllCurrentBookerBookings(bookerId, now, PageRequest.of(0, 1000));
+        assertEquals(1, actual.count());
+        Stream<Booking> allBookerBookings = bookingRepository.findAllByBookerId(bookerId, PageRequest.of(0, 1000));
+        assertTrue(allBookerBookings.count() > 1);
+    }
+
+
+    @Test
+    void testShouldReturnBookingByOwnerOrBooker() {
+        long id = booking1.getId();
+        long bookerId = booking1.getBooker().getId();
+        long ownerId = booking1.getItem().getOwner().getId();
+
+        assertTrue(bookingRepository.findBookingByOwnerOrBooker(id, bookerId).isPresent());
+        assertEquals(bookingRepository.findBookingByOwnerOrBooker(id, bookerId).get(),
+                bookingRepository.findBookingByOwnerOrBooker(id, ownerId).get());
+    }
+
     @BeforeAll
     private void beforeAll() {
         for (int i = 1; i <= 5; i++) {
@@ -74,34 +106,4 @@ class BookingRepositoryTest {
 
     }
 
-    @Test
-    void testGetBookingsById() {
-        long bookingId = booking1.getId();
-        long bookerId = booking1.getBooker().getId();
-        long ownerId = booking1.getItem().getOwner().getId();
-        assertTrue(bookingRepository.findBookingByOwnerOrBooker(bookingId, bookerId).isPresent());
-        assertEquals(bookingRepository.findBookingByOwnerOrBooker(bookingId, bookerId).get(),
-                bookingRepository.findBookingByOwnerOrBooker(bookingId, ownerId).get());
-    }
-
-    @Test
-    void testGetAll() {
-        long bookerId = booking.getBooker().getId();
-        Stream<Booking> actual = bookingRepository.findAllCurrentBookerBookings(bookerId, now, PageRequest.of(0, 1000));
-        assertEquals(1, actual.count());
-        Stream<Booking> allBookerBookings = bookingRepository.findAllByBookerId(bookerId, PageRequest.of(0, 1000));
-        assertTrue(allBookerBookings.count() > 1);
-    }
-
-
-    @Test
-    void testShouldReturnBookingByOwnerOrBooker() {
-        long id = booking1.getId();
-        long bookerId = booking1.getBooker().getId();
-        long ownerId = booking1.getItem().getOwner().getId();
-
-        assertTrue(bookingRepository.findBookingByOwnerOrBooker(id, bookerId).isPresent());
-        assertEquals(bookingRepository.findBookingByOwnerOrBooker(id, bookerId).get(),
-                bookingRepository.findBookingByOwnerOrBooker(id, ownerId).get());
-    }
 }

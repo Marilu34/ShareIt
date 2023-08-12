@@ -131,10 +131,7 @@ public class ShortDtoTest {
         ShortBookingDto shortBooking2 = new ShortBookingDto(id, bookerId2);
         shortBooking2.setId(id);
         shortBooking2.setBookerId(bookerId2);
-
-        // Act & Assert
         assertFalse(shortBooking1.equals(shortBooking2));
-
     }
 
 

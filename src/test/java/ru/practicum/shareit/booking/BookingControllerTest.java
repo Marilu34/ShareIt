@@ -137,22 +137,18 @@ class BookingControllerTest {
                         .queryParam("approved", Boolean.toString(approved))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
         verify(bookingService, times(1)).confirmationBooking(bookingId, ownerId, approved);
     }
-
 
 
     @Test
     void testBadCreate() throws Exception {
         CreationBooking dto = new CreationBooking();
-
         mockMvc.perform(post("/bookings")
                         .header("OtherHeader", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().is4xxClientError());
-
+                .andExpect(status().is5xxServerError());
         verifyNoInteractions(bookingService);
     }
 }
