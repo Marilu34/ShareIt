@@ -69,7 +69,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void testGetByItemIdWithBookings() throws InterruptedException {
+    void testGetByItemIdWithBookings() throws NullPointerException {
         ItemDto itemDto = itemService.createItem(1L, list.get(1));
         long itemId = itemDto.getId();
         long ownerId = 1L;
@@ -77,14 +77,14 @@ class ItemServiceTest {
         assertNull(itemService.getByItemId(itemDto.getId(), ownerId).getLastBooking());
         assertNull(itemService.getByItemId(itemDto.getId(), ownerId).getNextBooking());
         long bookerId = 3L;
-//        long nextBookingId = bookingService.createBooking(new CreationBooking(itemDto.getId(), LocalDateTime.now().plusSeconds(2),
-//                LocalDateTime.now().plusSeconds(3), bookerId)).getId();
+        long nextBookingId = bookingService.createBooking(new CreationBooking(itemDto.getId(), LocalDateTime.now().plusSeconds(2),
+                LocalDateTime.now().plusSeconds(3), bookerId)).getId();
         long lastBookingId = bookingService.createBooking(new CreationBooking(itemDto.getId(), LocalDateTime.now().plusNanos(100000000),
                 LocalDateTime.now().plusSeconds(1).plusNanos(500000000), bookerId)).getId();
         ItemCommentsDto itemBeforeAcceptOfBookings = itemService.getByItemId(itemDto.getId(), ownerId);
         MatcherAssert.assertThat(itemBeforeAcceptOfBookings.getLastBooking(), Matchers.nullValue());
         bookingService.confirmationBooking(lastBookingId, ownerId, true);
-//        assertEquals(nextBookingId, itemService.getByItemId(itemDto.getId(), ownerId).getNextBooking().getId());
+        assertEquals(nextBookingId, itemService.getByItemId(itemDto.getId(), ownerId).getNextBooking().getId());
         assertEquals(lastBookingId, itemService.getByItemId(itemDto.getId(), ownerId).getLastBooking().getId());
     }
 
