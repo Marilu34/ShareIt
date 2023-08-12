@@ -125,4 +125,18 @@ class ItemRequestControllerTest {
         verify(itemRequestService).getRequestById(userId, requestId);
         verifyNoMoreInteractions(itemRequestService);
     }
+
+    @SneakyThrows
+    @Test
+    void testGetBadRequestById() {
+        long requestId = -5;
+        long userId = 1;
+
+        mockMvc.perform(get("/requests/{requestId}", requestId)
+                        .header("X-Sharer-User-id", userId))
+                .andExpect(status().isOk());
+
+        verify(itemRequestService).getRequestById(userId, requestId);
+        verifyNoMoreInteractions(itemRequestService);
+    }
 }
