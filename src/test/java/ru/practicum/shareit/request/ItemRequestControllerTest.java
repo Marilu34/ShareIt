@@ -72,7 +72,7 @@ class ItemRequestControllerTest {
 
     @SneakyThrows
     @Test
-    void getAllPageableShouldThrowExceptionWhenSizeParamIsNotPositive() {
+    void testShouldSendAMistakeifSizeParamIsNotPositive() {
         String responseBody = mockMvc.perform(get("/requests/all")
                         .header("X-Sharer-User-id", 1)
                         .param("size", "0"))
@@ -88,7 +88,7 @@ class ItemRequestControllerTest {
 
     @SneakyThrows
     @Test
-    void getAllPageableShouldReturnCorrectList() {
+    void testGetAllItemRequests() {
         long requesterId = 1L;
         Integer from = 0;
         Integer size = 3;
@@ -111,7 +111,7 @@ class ItemRequestControllerTest {
 
     @SneakyThrows
     @Test
-    void getRequestByIdShouldInvokeServiceMethodWithCorrectParams() {
+    void testGetRequestById() {
         long requestId = 5;
         long userId = 1;
 
