@@ -43,7 +43,7 @@ class ItemServiceTest {
     @Test
     void testCreateItem() {
         ItemDto item = itemService.createItem(1L, list.get(1));
-        ItemDto item1 = list.get(1).toBuilder().id(1L).build();
+        ItemDto item1 = list.get(1).toBuilder().id(item.getId()).build();
         assertThrows(NotFoundException.class, () -> itemService.createItem(1234L, list.get(1)));
         assertThrows(ValidationException.class,
                 () -> itemService.createItem(1L, list.get(3).toBuilder().name(null).build()));
