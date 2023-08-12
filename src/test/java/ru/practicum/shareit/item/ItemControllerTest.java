@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -17,10 +19,14 @@ import ru.practicum.shareit.item.service.ItemService;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsSecondArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -56,6 +62,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.available", Matchers.is(true)));
     }
 
+
     @SneakyThrows
     @Test
     void testUpdate() {
@@ -83,7 +90,7 @@ class ItemControllerTest {
         long userId = 2L;
         ItemCommentsDto expected = new ItemCommentsDto();
         expected.setId(itemId);
-        expected.setDescription("description");
+        expected.setDescription("описание");
         expected.setComments(List.of(
                 new CommentDto(1, "text1", "name1", LocalDateTime.now().minusNanos(100)),
                 new CommentDto(2, "text2", "name2", LocalDateTime.now())
@@ -111,6 +118,15 @@ class ItemControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void testGetAllBadRequest() throws Exception {
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .queryParam("size", "0"))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().string(containsString("size должен быть больше нуля")));
+    }
+
 
     @SneakyThrows
     @Test
@@ -130,5 +146,29 @@ class ItemControllerTest {
                         .content("{\"text\":\"anyText\"}")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void testBadPostCommentBadRequest() throws Exception {
+        String contentWithoutTextProperty = objectMapper.writeValueAsString(Map.of("пусто", "anyText"));
+
+        mockMvc.perform(post("/items/{itemId}/comment", 1)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(contentWithoutTextProperty)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason("Текст не может отсутствовать"));
+    }
+    @Test
+    void testBadCreate() throws Exception {
+        ItemDto dto = ItemDto.builder().name("name").available(true).build();
+        when(itemService.createItem(anyLong(), any(ItemDto.class))).thenThrow(NotFoundException.class);
+
+        mockMvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ItemDto())))
+                .andExpect(status().isNotFound());
     }
 }
