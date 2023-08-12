@@ -13,6 +13,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
@@ -163,7 +164,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void getByUserId() {
+    void testGetByUserId() {
         int from = 0;
         int size = 10;
 
@@ -184,6 +185,17 @@ class ItemServiceTest {
         Item item2 = ItemMapper.fromItemDto(itemDto2, null, itemRequest); // Используем null вместо user
         expected.add(ItemMapper.toItemBookingsDto(item2, null, null));
         assertIterableEquals(expected, itemService.getItemsByUserId(4L, from, size));
+    }
+
+    @Test
+    void testGetByUserId_InvalidUser() {
+        int from = 0;
+        int size = 10;
+
+        // Нет такого пользователя
+        assertThrows(NotFoundException.class, () -> {
+            itemService.getItemsByUserId(999L, from, size);
+        });
     }
 }
 
