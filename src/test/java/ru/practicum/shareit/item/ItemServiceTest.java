@@ -75,7 +75,6 @@ class ItemServiceTest {
         assertEquals(itemId, itemService.getByItemId(itemDto.getId(), ownerId).getId());
         assertNull(itemService.getByItemId(itemDto.getId(), ownerId).getLastBooking());
         assertNull(itemService.getByItemId(itemDto.getId(), ownerId).getNextBooking());
-
         long bookerId = 3L;
         long nextBookingId = bookingService.createBooking(
                 new CreationBooking(itemDto.getId(),
