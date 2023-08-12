@@ -98,6 +98,17 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
+    void testBadCreateIfUserNotExist() {
+        long requesterId = shortDto.getRequesterId();
+        when(userRepository.findById(requesterId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> service.createRequests(shortDto));
+
+        verifyNoInteractions(itemRepository, itemRepository);
+    }
+
+
+    @Test
     void testGetAllWrong() {
         when(userRepository.existsById(1L)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> service.getAllRequestsBySearcher(1L));
