@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemRequestMapper;
 import ru.practicum.shareit.item.ItemRequestRepository;
@@ -17,11 +18,9 @@ import ru.practicum.shareit.item.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,56 +32,64 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final Validator validator;
     private final Sort sort = Sort.by("created");
 
+    private void validate(ShortRequestDto itemRequestDto) {
+        List<String> mistakes = new ArrayList<>();
+
+        validator.validate(itemRequestDto).forEach(mistake -> {
+            String message = mistake.getPropertyPath() + ": " + mistake.getMessage();
+            mistakes.add(message);
+        });
+
+        if (!mistakes.isEmpty()) {
+            throw new ValidationException("Ошибки: " + mistakes);
+        }
+    }
+
     @Transactional
     @Override
     public RequestDto createRequests(ShortRequestDto itemRequestDto) {
         validate(itemRequestDto);
         User requester = userRepository.findById(itemRequestDto.getRequesterId())
                 .orElseThrow(() -> new NotFoundException("Объект Пользователь не найден в репозитории"));
-        ItemRequest itemRequest = ItemRequestMapper.mapToItemRequest(itemRequestDto, requester);
+        ItemRequest itemRequest = ItemRequestMapper.toShortRequestDto(itemRequestDto, requester);
         itemRequest = itemRequestRepository.save(itemRequest);
-        return ItemRequestMapper.mapToItemRequestDto(itemRequest);
+        return ItemRequestMapper.toRequestDto(itemRequest);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<RequestList> getAllRequestsBySearcher(long requesterId) {
-        ifUserNotExistsThenThrowUserNotFoundException(requesterId);
-        List<ItemRequest> dtoList = itemRequestRepository.findAllByRequesterId(requesterId, sort);
-        return dtoList.stream()
-                .map(o -> ItemRequestMapper.mapToItemRequestWithItemsDto(o, itemRepository.findAllByRequestId(o.getId())))
+    public List<RequestList> getAllRequestsBySearcher(long userId) {
+        checkUser(userId);
+        List<ItemRequest> itemsList = itemRequestRepository.findAllByRequesterId(userId, sort);
+        return itemsList.stream()
+                .map(itemRequest -> ItemRequestMapper.toRequestList(itemRequest, itemRepository.findAllByRequestId(itemRequest.getId())))
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<RequestList> getAllRequests(long userId, int from, int size) {
-        ifUserNotExistsThenThrowUserNotFoundException(userId);
+        checkUser(userId);
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.Direction.DESC, "created");
         Page<ItemRequest> page = itemRequestRepository.findAllByRequesterIdNot(userId, pageRequest);
         return page.get()
-                .map(ir -> ItemRequestMapper.mapToItemRequestWithItemsDto(ir,
+                .map(ir -> ItemRequestMapper.toRequestList(ir,
                         itemRepository.findAllByRequestId(ir.getId()))).collect(Collectors.toUnmodifiableList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public RequestList getRequestById(long userId, long requestId) {
-        ifUserNotExistsThenThrowUserNotFoundException(userId);
+        checkUser(userId);
         ItemRequest request = itemRequestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос на поиск Item не найден"));
 
-        return ItemRequestMapper.mapToItemRequestWithItemsDto(request, itemRepository.findAllByRequestId(requestId));
+        return ItemRequestMapper.toRequestList(request, itemRepository.findAllByRequestId(requestId));
     }
 
-    private void ifUserNotExistsThenThrowUserNotFoundException(long userId) {
-        if (!userRepository.existsById(userId)) throw new NotFoundException("Объект Пользователь не найден");
+    private void checkUser(long userId) {
+        if (!userRepository.existsById(userId))
+            throw new NotFoundException("Объект Пользователь не найден");
     }
 
-    private void validate(ShortRequestDto itemRequestDto) {
-        Set<ConstraintViolation<ShortRequestDto>> violations = validator.validate(itemRequestDto);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-    }
 }

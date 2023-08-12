@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ItemRequestMapper {
-    public static ItemRequest mapToItemRequest(ShortRequestDto itemRequestDto, User requester) {
+    public static ItemRequest toShortRequestDto(ShortRequestDto itemRequestDto, User requester) {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setRequester(requester);
         itemRequest.setDescription(itemRequestDto.getDescription());
@@ -21,16 +21,16 @@ public class ItemRequestMapper {
         return itemRequest;
     }
 
-    public static RequestDto mapToItemRequestDto(ItemRequest itemRequest) {
+    public static RequestDto toRequestDto(ItemRequest itemRequest) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         return RequestDto.of(itemRequest.getId(),
                 itemRequest.getDescription(),
                 formatter.format(itemRequest.getCreated()));
     }
 
-    public static RequestList mapToItemRequestWithItemsDto(ItemRequest itemRequest,
-                                                           List<Item> items) {
-        return new RequestList(ItemRequestMapper.mapToItemRequestDto(itemRequest),
+    public static RequestList toRequestList(ItemRequest itemRequest,
+                                            List<Item> items) {
+        return new RequestList(ItemRequestMapper.toRequestDto(itemRequest),
                 items.stream().map(ItemMapper::toItemDto).collect(Collectors.toUnmodifiableList()));
     }
 }

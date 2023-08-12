@@ -1,10 +1,14 @@
 package ru.practicum.shareit.request;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -22,6 +26,7 @@ import ru.practicum.shareit.user.model.User;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,19 +49,19 @@ class ItemRequestServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    private ShortRequestDto goodDto;
+    private ShortRequestDto shortDto;
 
     @BeforeEach
     public void before() {
-        goodDto = new ShortRequestDto();
-        goodDto.setRequesterId(1);
-        goodDto.setDescription("Description");
+        shortDto = new ShortRequestDto();
+        shortDto.setRequesterId(1);
+        shortDto.setDescription("Text");
     }
 
     @Test
     void testCreate() {
         long requestId = 4;
-        long requesterId = goodDto.getRequesterId();
+        long requesterId = shortDto.getRequesterId();
         User requester = new User(requesterId, "mail@mail.ru", "userName");
         LocalDateTime pointBefore = LocalDateTime.now();
 
@@ -67,12 +72,12 @@ class ItemRequestServiceImplTest {
                     ir.setId(requestId);
                     return ir;
                 });
-        RequestDto actual = service.createRequests(goodDto);
+        RequestDto actual = service.createRequests(shortDto);
 
         LocalDateTime pointAfter = LocalDateTime.now();
 
         assertEquals(requestId, actual.getId());
-        assertEquals(goodDto.getDescription(), actual.getDescription());
+        assertEquals(shortDto.getDescription(), actual.getDescription());
         LocalDateTime actualTime = LocalDateTime.parse(actual.getCreated(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         assertTrue(actualTime.isAfter(pointBefore));
         assertTrue(actualTime.isBefore(pointAfter));
@@ -88,10 +93,25 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
+    public void getAllRequestsBySearcher_ReturnsListOfRequestListsWithItems() {
+        // Arrange
+
+        long requesterId = 1L;
+        Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
+
+        // When
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(requesterId, sortByCreated);
+
+
+        assertEquals(0, itemRequests.size());
+    }
+
+
+    @Test
     void testGetById() {
         ItemRequest expectedRequest = new ItemRequest();
         expectedRequest.setId(3L);
-        expectedRequest.setDescription("Description");
+        expectedRequest.setDescription("Text");
         expectedRequest.setCreated(LocalDateTime.now());
         List<Item> expectedItems = List.of(
                 Item.builder().id(2).available(true).name("item1").build(),
