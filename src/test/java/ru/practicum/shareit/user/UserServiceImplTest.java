@@ -50,6 +50,7 @@ class UserServiceImplTest {
         assertEquals(user.getId(), user1.getId());
     }
 
+
     @Test
     void testDelete() {
         when(userRepository.existsById(1L)).thenReturn(true);

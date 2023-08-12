@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 class BookingMapperTest {
 
     @Test
-    public void fromBookingDto_ReturnsCorrectBooking() {
+    public void fromBookingDto_ReturnsCorrectBooking() throws NullPointerException {
         // Arrange
         CreationBooking creationBooking = new CreationBooking();
         creationBooking.setStart(LocalDateTime.of(2022, 1, 1, 8, 0));
@@ -39,17 +39,20 @@ class BookingMapperTest {
     @Test
     public void toBookingDto_ReturnsCorrectBookingDto() {
         // Arrange
+        User booker = new User();
+        booker.setName("John");
+        booker.setId(2L);
+
         Booking booking = new Booking();
         booking.setId(1L);
+        booking.setBooker(booker);
         booking.setStart(LocalDateTime.of(2022, 1, 1, 8, 0));
         booking.setEnd(LocalDateTime.of(2022, 1, 1, 10, 0));
         booking.setStatus(Status.WAITING);
 
-        User booker = new User();
-        booker.setId(2L);
-
         Item item = new Item();
-        item.setId(3L);
+        item.setId(31L);
+        booking.setItem(item);
 
         // Act
         BookingDto bookingDto = BookingMapper.toBookingDto(booking);
@@ -62,4 +65,5 @@ class BookingMapperTest {
         Assertions.assertEquals(booker.getId(), bookingDto.getBooker().getId());
         Assertions.assertEquals(item.getId(), bookingDto.getItem().getId());
     }
+
 }
