@@ -20,6 +20,7 @@ import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +44,10 @@ class ItemServiceTest {
     void testCreateItem() {
         ItemDto item = itemService.createItem(1L, list.get(1));
         ItemDto item1 = list.get(1).toBuilder().id(1L).build();
-        assertEquals(item1, item);
-
         assertThrows(NotFoundException.class, () -> itemService.createItem(1234L, list.get(1)));
         assertThrows(ValidationException.class,
                 () -> itemService.createItem(1L, list.get(3).toBuilder().name(null).build()));
+        assertEquals(item1, item);
     }
 
     @Test
