@@ -141,4 +141,16 @@ class BookingControllerTest {
         verify(bookingService, times(1)).confirmationBooking(bookingId, ownerId, approved);
 
     }
+    @Test
+    void testBadCreate() throws Exception {
+        CreationBooking dto = new CreationBooking();
+
+        mockMvc.perform(post("/bookings")
+                        .header("OtherHeader", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().is4xxClientError());
+
+        verifyNoInteractions(bookingService);
+    }
 }

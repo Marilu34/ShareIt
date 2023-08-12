@@ -9,6 +9,8 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class CommentMapperTest {
 
     @Test
@@ -52,5 +54,21 @@ class CommentMapperTest {
         Assertions.assertEquals(author, comment.getAuthor());
         Assertions.assertEquals(item, comment.getItem());
         Assertions.assertNotNull(comment.getCreated());
+    }
+
+    @Test
+    void testEquals_shouldNotBeEqual_whenNew() {
+        assertNotEquals(new Comment(), new Comment());
+    }
+
+    @Test
+    void testHashCode_shouldHaveSameHash_whenObjectsAreEqual() {
+        Comment comment1 = new Comment();
+        comment1.setId(5);
+        Comment comment2 = new Comment();
+        comment2.setId(5);
+
+        assertFalse(comment1.equals(comment2));
+
     }
 }

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.exceptions;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

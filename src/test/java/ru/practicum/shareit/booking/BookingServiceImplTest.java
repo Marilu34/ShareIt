@@ -9,6 +9,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
@@ -87,5 +88,47 @@ class BookingServiceImplTest {
 
     }
 
+
+    @Test
+    void testGetAllBookingsIfUserNotExists() {
+        when(userRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(NotFoundException.class,
+                () -> bookingService.getAllBookingsByOwner(1, State.ALL, 0, 1));
+        verifyNoInteractions(bookingRepository);
+    }
+
+    @Test
+    void testGetAllBookings() {
+        when(userRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(NotFoundException.class,
+                () -> bookingService.getAllBookingsByOwner(1, State.ALL, 0, 1));
+        verifyNoInteractions(bookingRepository);
+    }
+
+    @Test
+    void testGetAllPastBookings() {
+        bookingService.getAllBookingsByOwner(1, State.PAST, 0, 1);
+
+        verify(bookingRepository, atLeastOnce())
+                .findAllByItemOwnerIdAndEndIsBefore(anyLong(), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void testGetAllAFutureBookings() {
+        bookingService.getAllBookingsByOwner(1, State.FUTURE, 0, 1);
+
+        verify(bookingRepository, atLeastOnce())
+                .findAllByItemOwnerIdAndStartIsAfter(anyLong(), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void testGetAllApprovedBookings() {
+        bookingService.getAllBookingsByOwner(1, State.APPROVED, 0, 1);
+
+        verify(bookingRepository, atLeastOnce())
+                .findAllByItemOwnerIdAndStatusIs(anyLong(), any(Status.class), any(Pageable.class));
+    }
 
 }
