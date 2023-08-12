@@ -67,8 +67,6 @@ class ItemRequestControllerTest {
 
         verify(itemRequestService).getAllRequestsBySearcher(requesterId);
         verifyNoMoreInteractions(itemRequestService);
-
-
     }
 
 
