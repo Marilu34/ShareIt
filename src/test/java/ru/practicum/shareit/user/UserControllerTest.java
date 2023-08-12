@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.mockito.AdditionalAnswers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -50,7 +52,17 @@ class UserControllerTest {
 
         assertEquals(objectMapper.writeValueAsString(user), responseBody);
     }
+    @Test
+    void testWrongCreate() throws Exception {
+        UserDto user = UserDto.builder().name("name").email("email@mail.ru").build();
+        when(userService.createUser(user)).thenThrow(new DataIntegrityViolationException("Эл почта содержит ошибку"));
 
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isConflict());
+    }
     @SneakyThrows
     @Test
     void testGetUserById() {

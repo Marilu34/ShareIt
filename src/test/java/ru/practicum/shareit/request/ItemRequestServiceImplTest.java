@@ -7,6 +7,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemRequestRepository;
@@ -20,6 +21,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -82,23 +85,30 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void testGetAll() {
+    void testWrongCreate() {
+        ShortRequestDto badRequest = new ShortRequestDto();
+        badRequest.setDescription("  ");
+        Validator validator1 = Validation.buildDefaultValidatorFactory().getValidator();
+        ReflectionTestUtils.setField(service, "validator", validator1);
+        assertThrows(ConstraintViolationException.class, () -> service.createRequests(badRequest));
+        badRequest.setDescription(null);
+        assertThrows(ConstraintViolationException.class, () -> service.createRequests(badRequest));
+        verifyNoInteractions(itemRepository, userRepository, itemRepository);
+        ReflectionTestUtils.setField(service, "validator", validator);
+    }
+
+    @Test
+    void testGetAllWrong() {
         when(userRepository.existsById(1L)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> service.getAllRequestsBySearcher(1L));
         verifyNoInteractions(itemRequestRepository, itemRepository);
     }
 
     @Test
-    public void getAllRequestsBySearcher_ReturnsListOfRequestListsWithItems() {
-        // Arrange
-
+    public void testGetAllRequestsBySearcher() {
         long requesterId = 1L;
-        Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
-
-        // When
+        Sort sortByCreated = Sort.by(Sort.Direction.DESC, "done");
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(requesterId, sortByCreated);
-
-
         assertEquals(0, itemRequests.size());
     }
 
