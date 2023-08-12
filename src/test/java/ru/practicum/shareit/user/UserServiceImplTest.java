@@ -77,4 +77,62 @@ class UserServiceImplTest {
         assertThrows(NotFoundException.class, () -> userService.deleteUser(anyLong()));
         verify(userRepository, Mockito.never()).deleteById(anyLong());
     }
+
+    @Test
+    void testGetUserById() {
+        long userId = 4L; // Замените на существующий идентификатор пользователя
+
+        // Создаем тестового пользователя
+        User user = new User();
+        user.setId(userId);
+        user.setName("John");
+
+        // Настраиваем поведение мока
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // Получаем результат вызова метода getUserById
+        UserDto result = userService.getUserById(userId);
+
+        // Проверяем, что метод findById был вызван с правильным аргументом
+        Mockito.verify(userRepository).findById(userId);
+
+        // Проверяем, что результат не равен null
+        assertNotNull(result);
+
+        // Проверяем правильность преобразования из User в UserDto
+        assertEquals(userId, result.getId());
+        assertEquals("John", result.getName());
+    }
+
+    @Test
+    void testCreateUser() {
+        // Создаем тестовый UserDto
+        User user1 = new User();
+        user1.setId(1L);
+        user1.setEmail("john1@mail.ru");
+        user1.setName("John1");
+
+        // Создаем тестового пользователя
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("john@mail.ru");
+        user.setName("John");
+
+        // Настраиваем поведение мока
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
+
+        // Вызываем метод createUser
+        UserDto result = userService.createUser(UserMapper.toUserDto(user1));
+
+        // Проверяем, что метод save был вызван с правильным аргументом
+        Mockito.verify(userRepository).save(Mockito.any(User.class));
+
+        // Проверяем, что результат не равен null
+        assertNotNull(result);
+
+        // Проверяем правильность преобразования из User в UserDto
+        assertEquals(result.getId(), 1L);
+        assertEquals(result.getName(), "John");
+    }
 }
+
