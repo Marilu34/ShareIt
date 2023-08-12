@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
@@ -57,7 +58,7 @@ class UserServiceImplTest {
         User user = User.builder().id(userId).email("email@yandex.ru").name("name").build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        assertThrows(ConstraintViolationException.class,
+        assertThrows(ValidationException.class,
                 () -> userService.updateUser(UserDto.builder().id(userId).email(wrongEmail).build()));
         verifyNoMoreInteractions(userRepository);
     }

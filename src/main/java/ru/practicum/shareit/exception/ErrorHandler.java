@@ -20,7 +20,7 @@ public class ErrorHandler {
 
     @ExceptionHandler({ConstraintViolationException.class, ValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected String handleConstraintViolationException(final RuntimeException e) {
+    public String handleConstraintViolationException(final RuntimeException e) {
         log.warn(e.toString());
         return e.getMessage();
     }
@@ -50,7 +50,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected Map<String, String> handleUnknownStateException(final UnknownStateException e) {
+    public Map<String, String> handleUnknownStateException(final UnknownStateException e) {
         log.warn(e.toString());
         return Map.of("error", "Unknown state: " + e.getMessage());
     }

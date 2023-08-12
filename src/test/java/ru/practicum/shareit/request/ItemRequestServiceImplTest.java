@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemRequestRepository;
 import ru.practicum.shareit.item.dto.RequestDto;
@@ -90,9 +91,9 @@ class ItemRequestServiceImplTest {
         badRequest.setDescription("  ");
         Validator validator1 = Validation.buildDefaultValidatorFactory().getValidator();
         ReflectionTestUtils.setField(service, "validator", validator1);
-        assertThrows(ConstraintViolationException.class, () -> service.createRequests(badRequest));
+        assertThrows(ValidationException.class, () -> service.createRequests(badRequest));
         badRequest.setDescription(null);
-        assertThrows(ConstraintViolationException.class, () -> service.createRequests(badRequest));
+        assertThrows(ValidationException.class, () -> service.createRequests(badRequest));
         verifyNoInteractions(itemRepository, userRepository, itemRepository);
         ReflectionTestUtils.setField(service, "validator", validator);
     }
