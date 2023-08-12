@@ -57,6 +57,12 @@ class BookingRepositoryTest {
         assertTrue(allBookerBookings.count() > 1);
     }
 
+    @Test
+    void testGetEmptyList() {
+        long ownerId = booking1.getItem().getOwner().getId();
+        assertEquals(0, bookingRepository.findAllCurrentOwnerBookings(ownerId, now, PageRequest.ofSize(100))
+                .count());
+    }
 
     @Test
     void testShouldReturnBookingByOwnerOrBooker() {

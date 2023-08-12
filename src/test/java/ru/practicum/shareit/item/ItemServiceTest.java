@@ -15,12 +15,17 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
+import ru.practicum.shareit.item.itemBooking.dto.ItemBookingsDto;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemRequest;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -157,4 +162,28 @@ class ItemServiceTest {
         }
     }
 
+    @Test
+    void getByUserId() {
+        int from = 0;
+        int size = 10;
+
+        // Нет товаров
+        assertIterableEquals(Collections.emptyList(), itemService.getItemsByUserId(4L, from, size));
+
+        // Один товар
+        UserDto user = userService.getUserById(4L);
+        ItemDto itemDto = itemService.createItem(4L, list.get(4));
+        ItemRequest itemRequest = new ItemRequest();
+        Item item = ItemMapper.fromItemDto(itemDto, null, itemRequest); // Используем null вместо user
+        List<ItemBookingsDto> expected = new ArrayList<>(List.of(ItemMapper.toItemBookingsDto(item, null, null)));
+        Collection<ItemBookingsDto> byUserId = itemService.getItemsByUserId(4L, from, size);
+        assertIterableEquals(expected, byUserId);
+
+        // Два товара
+        ItemDto itemDto2 = itemService.createItem(4L, list.get(5));
+        Item item2 = ItemMapper.fromItemDto(itemDto2, null, itemRequest); // Используем null вместо user
+        expected.add(ItemMapper.toItemBookingsDto(item2, null, null));
+        assertIterableEquals(expected, itemService.getItemsByUserId(4L, from, size));
+    }
 }
+
