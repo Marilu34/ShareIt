@@ -124,9 +124,9 @@ class ItemRequestControllerTest {
         verifyNoMoreInteractions(itemRequestService);
     }
 
-    @SneakyThrows
+
     @Test
-    void testGetBadRequestById() {
+    void testGetBadRequestById() throws Exception {
         long requestId = -5;
         long userId = 1;
 

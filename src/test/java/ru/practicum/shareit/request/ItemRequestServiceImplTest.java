@@ -51,6 +51,9 @@ class ItemRequestServiceImplTest {
     private UserRepository userRepository;
 
     private ShortRequestDto shortDto;
+    @Captor
+    private ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
+
 
     @BeforeEach
     public void before() {
@@ -117,6 +120,17 @@ class ItemRequestServiceImplTest {
         verifyNoInteractions(itemRequestRepository, itemRepository);
     }
 
+    @Test
+    void testGetAllPageable() {
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRequestRepository.findAllByRequesterIdNot(anyLong(), pageRequestArgumentCaptor.capture()))
+                .thenReturn(Page.empty());
+
+        service.getAllRequests(1, 0, 1);
+
+        PageRequest actualRequest = pageRequestArgumentCaptor.getValue();
+        assertEquals(Sort.sort(ItemRequest.class).by(ItemRequest::getCreated).descending(), actualRequest.getSort());
+    }
     @Test
     public void testGetAllRequestsBySearcher() {
         long requesterId = 1L;
