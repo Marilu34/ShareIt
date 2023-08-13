@@ -131,6 +131,13 @@ class ItemRequestServiceImplTest {
         PageRequest actualRequest = pageRequestArgumentCaptor.getValue();
         assertEquals(Sort.sort(ItemRequest.class).by(ItemRequest::getCreated).descending(), actualRequest.getSort());
     }
+    @Test
+    void getRequestById_shouldThrowRequestNotFoundException_whenItemRequestNotFound() {
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> service.getRequestById(1, 1));
+    }
 
 
     @Test
