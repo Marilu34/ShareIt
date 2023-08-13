@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -9,15 +10,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.itemBooking.ItemCommentsDto;
 import ru.practicum.shareit.item.service.ItemService;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -138,15 +146,16 @@ class ItemControllerTest {
 
     @SneakyThrows
     @Test
-    void testBadPostComment() {
-        mockMvc.perform(post("/items/{itemId}/comment", 1)
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(" ")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is5xxServerError());
-    }
+    void testBadPostComment() throws Exception{
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/items/{itemId}/comment", 1)
+                .header("X-Sharer-User-Id", String.valueOf(1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(" ")
+                .accept(MediaType.APPLICATION_JSON);
 
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+    }
 
     @Test
     void testBadCreate() throws Exception {
@@ -158,5 +167,20 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ItemDto())))
                 .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    void tesPostCommentWhenNoTextPropertyInBody() throws Exception {
+        Map<String, String> requestBody = Collections.singletonMap("noTextProperty", "anyText");
+
+        mockMvc.perform(post("/items/{itemId}/comment", 1)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
     }
 }

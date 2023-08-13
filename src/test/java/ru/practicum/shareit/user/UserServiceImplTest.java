@@ -58,8 +58,13 @@ class UserServiceImplTest {
         User user = User.builder().id(userId).email("email@yandex.ru").name("name").build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        assertThrows(ValidationException.class,
-                () -> userService.updateUser(UserDto.builder().id(userId).email(wrongEmail).build()));
+        try {
+            userService.updateUser(UserDto.builder().id(userId).email(wrongEmail).build());
+            fail("Expected ValidationException");
+        } catch (ValidationException e) {
+            // Success
+        }
+
         verifyNoMoreInteractions(userRepository);
     }
 
@@ -134,7 +139,5 @@ class UserServiceImplTest {
         assertEquals(result.getId(), 1L);
         assertEquals(result.getName(), "John");
     }
-
-
 }
 

@@ -8,6 +8,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -154,20 +157,23 @@ class BookingControllerTest {
 
     @Test
     void testGetBookingsWithoutParms() throws Exception {
-        long ownerId = 3L;
-        State defaultState = State.ALL;
-        int defaultFrom = 0;
-        int defaultSize = 10;
-        mockMvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-id", ownerId))
-                .andExpect(status().isOk());
+            long ownerId = 3L;
+            State defaultState = State.ALL;
+            int defaultFrom = 0;
+            int defaultSize = 10;
 
-        verify(bookingService, times(1))
-                .getAllBookingsByOwner(ownerId, defaultState, defaultFrom, defaultSize);
-    }
+            MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/bookings/owner")
+                    .header("X-Sharer-User-id", String.valueOf(ownerId));
+
+            mockMvc.perform(requestBuilder)
+                    .andExpect(MockMvcResultMatchers.status().isOk());
+
+            verify(bookingService, times(1)).getAllBookingsByOwner(ownerId, defaultState, defaultFrom, defaultSize);
+        }
 
 
-    @Test
+
+        @Test
     void testBadGetAllBookings() throws Exception {
         long ownerId = 3L;
         String state = "WRONG_STATE";
