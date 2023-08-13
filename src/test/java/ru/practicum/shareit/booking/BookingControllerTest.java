@@ -165,6 +165,8 @@ class BookingControllerTest {
         verify(bookingService, times(1))
                 .getAllBookingsByOwner(ownerId, defaultState, defaultFrom, defaultSize);
     }
+
+
     @Test
     void testBadGetAllBookings() throws Exception {
         long ownerId = 3L;
