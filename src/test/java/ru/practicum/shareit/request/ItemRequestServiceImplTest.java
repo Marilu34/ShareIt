@@ -111,6 +111,8 @@ class ItemRequestServiceImplTest {
 
         verifyNoInteractions(itemRepository, itemRepository);
     }
+
+
     @Test
     void findAllRequesterRequests_shouldThrowUserNotFoundException_whenUserNotExists() {
         when(userRepository.existsById(anyLong())).thenReturn(false);
@@ -118,6 +120,7 @@ class ItemRequestServiceImplTest {
         assertThrows(NotFoundException.class, () -> service.getAllRequestsBySearcher(anyLong()));
         verifyNoInteractions(itemRequestRepository, itemRepository);
     }
+
     @Test
     void getRequestById_shouldThrowRequestNotFoundException_whenItemRequestNotFound() {
         when(userRepository.existsById(anyLong())).thenReturn(true);
@@ -125,12 +128,15 @@ class ItemRequestServiceImplTest {
 
         assertThrows(NotFoundException.class, () -> service.getRequestById(1, 1));
     }
+
+
     @Test
     void testGetAllWrong() {
         when(userRepository.existsById(1L)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> service.getAllRequestsBySearcher(1L));
         verifyNoInteractions(itemRequestRepository, itemRepository);
     }
+
 
     @Test
     void testGetAllPageable() {
@@ -143,6 +149,8 @@ class ItemRequestServiceImplTest {
         PageRequest actualRequest = pageRequestArgumentCaptor.getValue();
         assertEquals(Sort.sort(ItemRequest.class).by(ItemRequest::getCreated).descending(), actualRequest.getSort());
     }
+
+
     @Test
     void testGetRequestById_shouldThrowRequestNotFoundException_whenItemRequestNotFound() {
         when(userRepository.existsById(anyLong())).thenReturn(true);
