@@ -9,11 +9,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
@@ -56,13 +59,14 @@ class BookingServiceImplTest {
         Item item = Item.builder()
                 .id(1)
                 .owner(User.builder().id(ownerId).build())
-                .available(true)
+                .available(false) // Set item availability to false
                 .build();
-        long bookerId = 11L;
+        long bookerId = ownerId; // Set bookerId same as ownerId
         creationBooking.setBookerId(bookerId);
+
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
-        assertThrows(RuntimeException.class, () -> bookingService.createBooking(creationBooking));
+        assertThrows(ValidationException.class, () -> bookingService.createBooking(creationBooking));
     }
 
 
@@ -130,5 +134,31 @@ class BookingServiceImplTest {
         verify(bookingRepository, atLeastOnce())
                 .findAllByItemOwnerIdAndStatusIs(anyLong(), any(Status.class), any(Pageable.class));
     }
+
+    @Test
+    void testGetAllBookingsByBooker_PastState() {
+        long bookerId = 123;
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        Pageable page = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "start"));
+
+        when(userRepository.existsById(bookerId)).thenReturn(true);
+
+        bookingService.getAllBookingsByBooker(bookerId, State.PAST, 0, 10);
+
+        verify(bookingRepository).findAllByBookerIdAndEndIsBefore(bookerId, currentDateTime, page);
+    }
+
+    @Test
+    void testGetAllBookingsByBooker_ApprovedState() {
+        long bookerId = 123;
+        Pageable page = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "start"));
+
+        when(userRepository.existsById(bookerId)).thenReturn(true);
+
+        bookingService.getAllBookingsByBooker(bookerId, State.APPROVED, 0, 10);
+
+        verify(bookingRepository).findAllByBookerIdAndStatusIs(bookerId, Status.APPROVED, page);
+    }
+
 
 }
