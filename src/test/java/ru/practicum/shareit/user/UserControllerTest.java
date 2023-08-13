@@ -38,7 +38,9 @@ class UserControllerTest {
     @Test
     void testCreateUser() {
         UserDto user = UserDto.builder().name("name").email("mail@mail.ru").build();
+
         when(userService.createUser(user)).thenReturn(user);
+
         String responseBody = mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -47,13 +49,16 @@ class UserControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
+
         assertEquals(objectMapper.writeValueAsString(user), responseBody);
     }
 
     @Test
     void testWrongCreate() throws Exception {
         UserDto user = UserDto.builder().name("name").email("email@mail.ru").build();
+
         when(userService.createUser(user)).thenThrow(new DataIntegrityViolationException("Эл почта содержит ошибку"));
+
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -65,16 +70,20 @@ class UserControllerTest {
     @Test
     void testGetUserById() {
         long userId = 1;
+
         mvc.perform(get("/users/{userId}", userId))
                 .andExpect(status().isOk());
+
         verify(userService, atLeastOnce()).getUserById(userId);
     }
 
     @SneakyThrows
     @Test
     void testGetAllUsers() {
+
         mvc.perform(get("/users"))
                 .andExpect(status().isOk());
+
         verify(userService, times(1)).getAllUsers();
     }
 
@@ -84,7 +93,9 @@ class UserControllerTest {
     void testUpdate() {
         long userId = 1L;
         UserDto user = UserDto.builder().id(null).email("email@yandex.ru").name("name").build();
+
         when(userService.updateUser(any(UserDto.class))).then(AdditionalAnswers.returnsFirstArg());
+
         mvc.perform(patch("/users/{userId}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
@@ -96,8 +107,10 @@ class UserControllerTest {
     @Test
     void testDeleteUser() {
         long userId = 123;
+
         mvc.perform(delete("/users/{userId}", userId))
                 .andExpect(status().isOk());
+
         verify(userService, times(1)).deleteUser(userId);
         verifyNoMoreInteractions(userService);
     }

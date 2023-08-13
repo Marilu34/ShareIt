@@ -51,7 +51,9 @@ class ItemControllerTest {
         long id = 1L;
         ItemDto item = ItemDto.builder().name("name").available(true).build();
         long userId = 999L;
+
         when(itemService.createItem(userId, item)).thenReturn(item.toBuilder().id(id).build());
+
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -72,8 +74,10 @@ class ItemControllerTest {
         ItemDto item = ItemDto.builder().requestId(requestId).build();
         long itemId = 2L;
         long userId = 3L;
+
         when(itemService.updateItem(userId, item.toBuilder().id(itemId).build()))
                 .then(returnsSecondArg());
+
         mockMvc.perform(patch("/items/{itemId}", itemId)
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -91,6 +95,7 @@ class ItemControllerTest {
     void testGetById() {
         long itemId = 1L;
         long userId = 2L;
+
         ItemCommentsDto expected = new ItemCommentsDto();
         expected.setId(itemId);
         expected.setDescription("description");
@@ -98,7 +103,9 @@ class ItemControllerTest {
                 new CommentDto(1, "text1", "name1", LocalDateTime.now().minusNanos(100)),
                 new CommentDto(2, "text2", "name2", LocalDateTime.now())
         ));
+
         when(itemService.getByItemId(itemId, userId)).thenReturn(expected);
+
         String responseBody = mockMvc.perform(get("/items/{itemId}", itemId)
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,27 +115,33 @@ class ItemControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
+
         assertEquals(objectMapper.writeValueAsString(expected), responseBody);
     }
 
 
     @Test
     void testGetAll() throws Exception {
-        mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", 1)
-                        .queryParam("size", "30")
-                        .queryParam("from", "60"))
-                .andExpect(status().isOk());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/items")
+                .header("X-Sharer-User-Id", String.valueOf(1))
+                .param("size", "30")
+                .param("from", "60");
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
-    @SneakyThrows
+
     @Test
-    void testGetByText() {
-        mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", 1)
-                        .queryParam("text", "anyText"))
-                .andExpect(status().isOk());
+    void testGetByText() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/items/search")
+                .header("X-Sharer-User-Id", String.valueOf(1))
+                .param("text", "anyText");
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
+
 
     @SneakyThrows
     @Test

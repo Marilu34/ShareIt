@@ -94,6 +94,7 @@ class BookingServiceIntegrationTest {
         assertThrows(Exception.class, () -> bookingService.confirmationBooking(bookingId, ownerId + 1, true));
 
         BookingDto actualAccepted = bookingService.confirmationBooking(bookingId, ownerId, true);
+
         assertEquals(Status.APPROVED.name(), actualAccepted.getStatus());
 
         assertThrows(Exception.class, () -> bookingService.confirmationBooking(bookingId, ownerId, false));
@@ -108,9 +109,11 @@ class BookingServiceIntegrationTest {
         long bookerId = actual.getBooker().getId();
 
         BookingDto byOwner = bookingService.getBookingById(bookingId, ownerId);
+
         assertBookingEquals(actual, byOwner);
 
         BookingDto byBooker = bookingService.getBookingById(bookingId, bookerId);
+
         assertBookingEquals(actual, byBooker);
 
         assertThrows(NotFoundException.class, () -> bookingService.getBookingById(bookingId + 10, ownerId));
@@ -148,11 +151,15 @@ class BookingServiceIntegrationTest {
         assertEquals(0, bookingService.getAllBookingsByBooker(bookerId, State.REJECTED, from, size).size());
 
         List<BookingDto> allBookingsOfBooker = bookingService.getAllBookingsByBooker(bookerId, State.FUTURE, from, size);
+
         assertEquals(2, allBookingsOfBooker.size());
         assertEquals(actual2.getId(), allBookingsOfBooker.get(0).getId()); //check sorting
 
+
         assertTrue(bookingService.getAllBookingsByBooker(bookerId, State.CURRENT, from, size).isEmpty());
+
         Thread.sleep(2000);
+
         assertFalse(bookingService.getAllBookingsByBooker(bookerId, State.CURRENT, from, size).isEmpty());
     }
 
@@ -173,12 +180,16 @@ class BookingServiceIntegrationTest {
         assertEquals(1, bookingService.getAllBookingsByOwner(ownerId, State.ALL, from, size).size());
 
         assertEquals(1, bookingService.getAllBookingsByOwner(ownerId, State.WAITING, from, size).size());
+
         bookingService.confirmationBooking(actual.getId(), ownerId, false);
+
         assertTrue(bookingService.getAllBookingsByOwner(ownerId, State.WAITING, from, size).isEmpty());
         assertEquals(1, bookingService.getAllBookingsByOwner(ownerId, State.ALL, from, size).size());
         assertEquals(1, bookingService.getAllBookingsByOwner(ownerId, State.REJECTED, from, size).size());
         assertTrue(bookingService.getAllBookingsByOwner(ownerId, State.CURRENT, from, size).isEmpty());
+
         Thread.sleep(2000);
+
         assertFalse(bookingService.getAllBookingsByOwner(ownerId, State.CURRENT, from, size).isEmpty());
     }
 

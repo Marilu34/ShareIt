@@ -50,7 +50,9 @@ class ItemRequestControllerTest {
                         .content(mapper.writeValueAsString(itemRequestDtoToCreate)))
                 .andExpect(status().isOk());
         verify(itemRequestService, times(1)).createRequests(addItemRequestDtoArgumentCaptor.capture());
+
         ShortRequestDto actual = addItemRequestDtoArgumentCaptor.getValue();
+
         assertEquals(requesterId, actual.getRequesterId());
         assertEquals("some description", actual.getDescription());
     }

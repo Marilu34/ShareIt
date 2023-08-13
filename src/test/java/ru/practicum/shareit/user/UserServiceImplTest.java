@@ -34,8 +34,10 @@ class UserServiceImplTest {
     @Test
     void testGetAll() {
         User user = User.builder().id(1).email("email@yandex.ru").name("name").build();
+
         when(userRepository.findAll()).thenReturn(List.of(user));
         Collection<UserDto> actual = userService.getAllUsers();
+
         assertEquals(1, actual.size());
         assertEquals(UserMapper.toUserDto(user), actual.iterator().next());
     }
@@ -44,9 +46,12 @@ class UserServiceImplTest {
     @Test
     void testUpdate() {
         User user = User.builder().id(1L).email("email@yandex.ru").name("name").build();
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).then(AdditionalAnswers.returnsFirstArg());
+
         UserDto user1 = userService.updateUser(UserDto.builder().id(1L).email("email@yandex.ru").build());
+
         assertEquals(user.getEmail(), user1.getEmail());
         assertEquals(user.getId(), user1.getId());
     }
@@ -56,6 +61,7 @@ class UserServiceImplTest {
         long userId = 2;
         String wrongEmail = "wrongEmail";
         User user = User.builder().id(userId).email("email@yandex.ru").name("name").build();
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         try {
@@ -69,9 +75,11 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testDelete() {
+    public void testDelete() {
         when(userRepository.existsById(1L)).thenReturn(true);
+
         userService.deleteUser(1L);
+
         verify(userRepository, atLeastOnce()).deleteById(1L);
     }
 
@@ -79,7 +87,9 @@ class UserServiceImplTest {
     @Test
     void testShouldReturnMistakeIfUserIsNotExist() {
         when(userRepository.existsById(anyLong())).thenReturn(false);
+
         assertThrows(NotFoundException.class, () -> userService.deleteUser(anyLong()));
+
         verify(userRepository, Mockito.never()).deleteById(anyLong());
     }
 

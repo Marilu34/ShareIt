@@ -131,6 +131,7 @@ public class ShortDtoTest {
         ShortBookingDto shortBooking2 = new ShortBookingDto(id, bookerId2);
         shortBooking2.setId(id);
         shortBooking2.setBookerId(bookerId2);
+
         assertFalse(shortBooking1.equals(shortBooking2));
     }
 
@@ -143,6 +144,7 @@ public class ShortDtoTest {
 
         //blank case
         dto.setDescription("  ");
+
         assertThrows(ValidationException.class, () -> validate(dto));
 
         // correct case
@@ -156,9 +158,11 @@ public class ShortDtoTest {
     void testWrongDescription() {
         ShortRequestDto dto = new ShortRequestDto();
         dto.setDescription("a".repeat(2024));
+
         assertDoesNotThrow(() -> validate(dto));
 
         dto.setDescription("b".repeat(2048) + " ");
+
         assertThrows(ValidationException.class, () -> validate(dto));
     }
 }

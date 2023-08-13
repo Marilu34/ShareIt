@@ -93,12 +93,17 @@ class ItemRequestServiceImplTest {
     void testWrongCreate() {
         ShortRequestDto badRequest = new ShortRequestDto();
         badRequest.setDescription("  ");
+
         Validator validator1 = Validation.buildDefaultValidatorFactory().getValidator();
         ReflectionTestUtils.setField(service, "validator", validator1);
+
         assertThrows(ValidationException.class, () -> service.createRequests(badRequest));
         badRequest.setDescription(null);
+
         assertThrows(ValidationException.class, () -> service.createRequests(badRequest));
+
         verifyNoInteractions(itemRepository, userRepository, itemRepository);
+
         ReflectionTestUtils.setField(service, "validator", validator);
     }
 
@@ -122,18 +127,30 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void testBadGetRequestByIdWhenItemRequestNotFound() {
+    public void testBadGetRequestByIdWhenItemRequestNotFound() {
         when(userRepository.existsById(anyLong())).thenReturn(true);
         when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> service.getRequestById(1, 1));
+        try {
+            service.getRequestById(1, 1);
+            fail("Expected NotFoundException was not thrown");
+        } catch (NotFoundException e) {
+            // Expected exception was thrown, test passed
+        }
     }
 
 
     @Test
-    void testGetAllWrong() {
+    public void testGetAllWrong() {
         when(userRepository.existsById(1L)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> service.getAllRequestsBySearcher(1L));
+
+        try {
+            service.getAllRequestsBySearcher(1L);
+            fail("Expected NotFoundException was not thrown");
+        } catch (NotFoundException e) {
+            // Expected exception was thrown, test passed
+        }
+
         verifyNoInteractions(itemRequestRepository, itemRepository);
     }
 
@@ -155,7 +172,9 @@ class ItemRequestServiceImplTest {
     public void testGetAllRequestsBySearcher() {
         long requesterId = 1L;
         Sort sortByCreated = Sort.by(Sort.Direction.DESC, "done");
+
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(requesterId, sortByCreated);
+
         assertEquals(0, itemRequests.size());
     }
 
@@ -163,9 +182,11 @@ class ItemRequestServiceImplTest {
     @Test
     void testGetRequestById() {
         ItemRequest expectedRequest = new ItemRequest();
+
         expectedRequest.setId(3L);
         expectedRequest.setDescription("Text");
         expectedRequest.setCreated(LocalDateTime.now());
+
         List<Item> expectedItems = List.of(
                 Item.builder().id(2).available(true).name("item1").build(),
                 Item.builder().id(5).available(false).name("item2").build()
@@ -176,6 +197,7 @@ class ItemRequestServiceImplTest {
         when(itemRepository.findAllByRequestId(anyLong())).thenReturn(expectedItems);
 
         RequestList actual = service.getRequestById(1, 1);
+
         assertEquals(expectedRequest.getId(), actual.getId());
         assertEquals(expectedRequest.getCreated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), actual.getCreated());
         assertEquals(expectedItems.size(), actual.getItems().size());

@@ -48,6 +48,7 @@ class ItemServiceTest {
     void testCreateItem() {
         ItemDto item = itemService.createItem(1L, list.get(1));
         ItemDto item1 = list.get(1).toBuilder().id(item.getId()).build();
+
         assertNotNull(itemService.createItem(1L, item));
         assertNotNull(itemService.createItem(1L, item1));
     }
@@ -56,8 +57,11 @@ class ItemServiceTest {
     void testUpdate() {
         ItemDto item = itemService.createItem(2L, list.get(2));
         ItemDto item1 = item.toBuilder().name("NewName").build();
+
         assertEquals(item1, itemService.updateItem(2L, item1));
+
         ItemDto item2 = ItemDto.builder().id(item.getId()).available(false).build();
+
         assertEquals(item1.toBuilder().available(false).build(), itemService.updateItem(2L, item2));
         assertThrows(RuntimeException.class, () -> itemService.updateItem(123L, item));
     }
@@ -66,6 +70,7 @@ class ItemServiceTest {
     @Test
     void testGetByItemId() {
         ItemDto expected = itemService.createItem(3L, list.get(3));
+
         assertEquals(expected, itemService.getByItemId(expected.getId()));
     }
 
@@ -74,9 +79,11 @@ class ItemServiceTest {
         ItemDto itemDto = itemService.createItem(1L, list.get(1));
         long itemId = itemDto.getId();
         long ownerId = 1L;
+
         assertEquals(itemId, itemService.getByItemId(itemDto.getId(), ownerId).getId());
         assertNull(itemService.getByItemId(itemDto.getId(), ownerId).getLastBooking());
         assertNull(itemService.getByItemId(itemDto.getId(), ownerId).getNextBooking());
+
         long bookerId = 3L;
         long nextBookingId = bookingService.createBooking(
                 new CreationBooking(itemDto.getId(),
@@ -91,10 +98,12 @@ class ItemServiceTest {
                         bookerId)
         ).getId();
         Thread.sleep(1000);
+
         ItemCommentsDto itemBeforeAcceptOfBookings = itemService.getByItemId(itemDto.getId(), ownerId);
         MatcherAssert.assertThat(itemBeforeAcceptOfBookings.getLastBooking(), Matchers.nullValue());
 
         bookingService.confirmationBooking(lastBookingId, ownerId, true);
+
         assertEquals(nextBookingId, itemService.getByItemId(itemDto.getId(), ownerId).getNextBooking().getId());
         assertEquals(lastBookingId, itemService.getByItemId(itemDto.getId(), ownerId).getLastBooking().getId());
 
@@ -108,15 +117,18 @@ class ItemServiceTest {
     @Test
     void testGetByText() {
         ItemDto item = itemService.createItem(6L, list.get(6));
+
         assertTrue(itemService.getItemByComment("6 deSc").contains(item)
                 && itemService.getItemByComment("6 dEsc").size() == 1);
         item.setDescription("updated");
         itemService.updateItem(6L, item);
+
         assertTrue(itemService.getItemByComment("item6").contains(item)
                 && itemService.getItemByComment("item6").size() == 1);
         assertTrue(itemService.getItemByComment("").isEmpty());
         item.setAvailable(false);
         itemService.updateItem(6L, item);
+
         assertTrue(itemService.getItemByComment("Item6").isEmpty());
     }
 
@@ -136,6 +148,7 @@ class ItemServiceTest {
         bookingService.confirmationBooking(booking.getId(), authorId - 1, true);
         Thread.sleep(1000);
         CommentDto actual = itemService.postComment(text, itemId, authorId);
+
         assertEquals(text, actual.getText());
         assertEquals(userService.getUserById(authorId).getName(), actual.getAuthorName());
         assertNotNull(actual.getCreated());
@@ -178,12 +191,14 @@ class ItemServiceTest {
         Item item = ItemMapper.fromItemDto(itemDto, null, itemRequest); // Используем null вместо user
         List<ItemBookingsDto> expected = new ArrayList<>(List.of(ItemMapper.toItemBookingsDto(item, null, null)));
         Collection<ItemBookingsDto> byUserId = itemService.getItemsByUserId(4L, from, size);
+
         assertIterableEquals(expected, byUserId);
 
         // Два товара
         ItemDto itemDto2 = itemService.createItem(4L, list.get(5));
         Item item2 = ItemMapper.fromItemDto(itemDto2, null, itemRequest); // Используем null вместо user
         expected.add(ItemMapper.toItemBookingsDto(item2, null, null));
+
         assertIterableEquals(expected, itemService.getItemsByUserId(4L, from, size));
     }
 
