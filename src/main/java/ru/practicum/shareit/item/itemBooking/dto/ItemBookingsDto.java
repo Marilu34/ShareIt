@@ -14,7 +14,10 @@ import ru.practicum.shareit.item.dto.ItemDto;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude
 public class ItemBookingsDto extends ItemDto {
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     ShortBookingDto lastBooking;
+
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     ShortBookingDto nextBooking;
 
 }

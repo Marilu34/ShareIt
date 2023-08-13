@@ -116,7 +116,6 @@ class ItemControllerTest {
                 .andExpect(status().isOk());
     }
 
-
     @SneakyThrows
     @Test
     void testGetByText() {
