@@ -134,5 +134,7 @@ class UserServiceImplTest {
         assertEquals(result.getId(), 1L);
         assertEquals(result.getName(), "John");
     }
+
+
 }
 
