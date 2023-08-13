@@ -151,4 +151,27 @@ class BookingControllerTest {
                 .andExpect(status().is5xxServerError());
         verifyNoInteractions(bookingService);
     }
+
+    @Test
+    void testGetBookingsWithoutParms() throws Exception {
+        long ownerId = 3L;
+        State defaultState = State.ALL;
+        int defaultFrom = 0;
+        int defaultSize = 10;
+        mockMvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-id", ownerId))
+                .andExpect(status().isOk());
+
+        verify(bookingService, times(1))
+                .getAllBookingsByOwner(ownerId, defaultState, defaultFrom, defaultSize);
+    }
+    @Test
+    void testBadGetAllBookings() throws Exception {
+        long ownerId = 3L;
+        String state = "WRONG_STATE";
+        mockMvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-id", ownerId)
+                        .queryParam("state", state))
+                .andExpect(status().is4xxClientError());
+    }
 }
