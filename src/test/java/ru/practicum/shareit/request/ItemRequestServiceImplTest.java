@@ -131,6 +131,8 @@ class ItemRequestServiceImplTest {
         PageRequest actualRequest = pageRequestArgumentCaptor.getValue();
         assertEquals(Sort.sort(ItemRequest.class).by(ItemRequest::getCreated).descending(), actualRequest.getSort());
     }
+
+
     @Test
     public void testGetAllRequestsBySearcher() {
         long requesterId = 1L;
