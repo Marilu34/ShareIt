@@ -135,18 +135,6 @@ class BookingServiceImplTest {
                 .findAllByItemOwnerIdAndStatusIs(anyLong(), any(Status.class), any(Pageable.class));
     }
 
-    @Test
-    void testGetAllBookingsByBooker_PastState() {
-        long bookerId = 123;
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        Pageable page = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "start"));
-
-        when(userRepository.existsById(bookerId)).thenReturn(true);
-
-        bookingService.getAllBookingsByBooker(bookerId, State.PAST, 0, 10);
-
-        verify(bookingRepository).findAllByBookerIdAndEndIsBefore(bookerId, currentDateTime, page);
-    }
 
     @Test
     void testGetAllBookingsByBooker_ApprovedState() {

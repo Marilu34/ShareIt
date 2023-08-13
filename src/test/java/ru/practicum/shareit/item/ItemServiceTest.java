@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @Transactional
 @SpringBootTest
@@ -226,7 +227,7 @@ class ItemServiceTest {
         Long requestFromUserId = 2L;
 
         // Mocking repository methods
-        Mockito.when(itemRepository.findById(itemId)).thenReturn(Optional.empty()); // Возвращаем Optional.empty()
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty()); // Возвращаем Optional.empty()
 
         // Running the method under test
         assertThrows(NotFoundException.class, () -> {
@@ -234,10 +235,23 @@ class ItemServiceTest {
         });
 
         // Verify method calls
-        Mockito.when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
         Mockito.verifyNoInteractions(bookingRepository);
         Mockito.verifyNoInteractions(commentRepository);
         Mockito.verifyNoInteractions(itemMapper);
     }
+
+    @Test
+    void getItemByText_WhenTextIsBlank_ShouldReturnEmptyList() {
+        // Arrange
+        String blankText = "";
+
+        // Act
+        Collection<ItemDto> result = itemService.getItemByText(blankText, 0, 0);
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
 }
+

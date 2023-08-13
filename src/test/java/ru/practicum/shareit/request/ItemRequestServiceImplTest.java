@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import org.apache.catalina.connector.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -224,6 +222,5 @@ class ItemRequestServiceImplTest {
 
         assertEquals(Sort.by(Sort.Direction.DESC, "created"), actualRequest.getSort());
     }
-
-
 }
+

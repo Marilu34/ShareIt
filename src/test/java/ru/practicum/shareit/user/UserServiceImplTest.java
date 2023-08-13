@@ -57,6 +57,38 @@ class UserServiceImplTest {
     }
 
     @Test
+    void testUpdateUser_UpdateName() {
+        // Создание тестовых данных
+        long userId = 1;
+        String newName = "John Doe";
+        UserDto userDto = UserDto.builder().id(1L).email("email@yandex.ru").build();
+
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setName("Old Name");
+
+        User updatedUser = new User();
+        updatedUser.setId(userId);
+        updatedUser.setName(newName);
+
+        // Мокирование зависимостей
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+
+        // Выполнение метода и проверка результата
+        UserDto result = userService.updateUser(userDto);
+
+        // Проверка, что нужный метод репозитория был вызван с правильными параметрами
+        verify(userRepository).findById(userId);
+        verify(userRepository).save(updatedUser);
+
+        // Проверка результата
+        assertEquals(newName, result.getName());
+        assertEquals(userId, result.getId());
+    }
+
+
+    @Test
     void testWrongUpdate() {
         long userId = 2;
         String wrongEmail = "wrongEmail";
@@ -149,5 +181,6 @@ class UserServiceImplTest {
         assertEquals(result.getId(), 1L);
         assertEquals(result.getName(), "John");
     }
+
 }
 
