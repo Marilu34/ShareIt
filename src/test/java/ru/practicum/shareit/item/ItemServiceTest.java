@@ -5,13 +5,16 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreationBooking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.comment.CommentRepository;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -24,10 +27,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -197,5 +197,32 @@ class ItemServiceTest {
             itemService.getItemsByUserId(999L, from, size);
         });
     }
-}
 
+    @Test
+    void testGetItemCommentDto() {
+        // Mocking repositories and dependencies
+        ItemRepository itemRepository = Mockito.mock(ItemRepository.class);
+        BookingRepository bookingRepository = Mockito.mock(BookingRepository.class);
+        CommentRepository commentRepository = Mockito.mock(CommentRepository.class);
+        ItemMapper itemMapper = Mockito.mock(ItemMapper.class);
+
+        // Creating test data
+        Long itemId = 1L;
+        Long requestFromUserId = 2L;
+
+        // Mocking repository methods
+        Mockito.when(itemRepository.findById(itemId)).thenReturn(Optional.empty()); // Возвращаем Optional.empty()
+
+        // Running the method under test
+        assertThrows(NotFoundException.class, () -> {
+            itemService.getByItemId(itemId, requestFromUserId);
+        });
+
+        // Verify method calls
+        Mockito.when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        Mockito.verifyNoInteractions(bookingRepository);
+        Mockito.verifyNoInteractions(commentRepository);
+        Mockito.verifyNoInteractions(itemMapper);
+    }
+}
