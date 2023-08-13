@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -125,7 +127,7 @@ class ItemRequestServiceImplTest {
 
 
     @Test
-    void testGetById() {
+    void testGetRequestById() {
         ItemRequest expectedRequest = new ItemRequest();
         expectedRequest.setId(3L);
         expectedRequest.setDescription("Text");
@@ -147,4 +149,22 @@ class ItemRequestServiceImplTest {
                 expectedItems.stream().mapToLong(Item::getId).sum());
         verifyNoMoreInteractions(userRepository, itemRequestRepository, itemRepository);
     }
+
+
+    @Test
+    void testGetAll() {
+
+        ArgumentCaptor<PageRequest> pageRequestArgumentCaptor = ArgumentCaptor.forClass(PageRequest.class);
+
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(itemRequestRepository.findAllByRequesterIdNot(anyLong(), pageRequestArgumentCaptor.capture()))
+                .thenReturn(Page.empty());
+
+        service.getAllRequests(1, 0, 1);
+
+        PageRequest actualRequest = pageRequestArgumentCaptor.getValue();
+
+        assertEquals(Sort.by(Sort.Direction.DESC, "created"), actualRequest.getSort());
+    }
+
 }
