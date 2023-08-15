@@ -75,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    @Transactional(readOnly = true)
+
     @Override
     public BookingDto getBookingById(long bookingId, long userId) {
         Booking booking = bookingRepository.findBookingByOwnerOrBooker(bookingId, userId)

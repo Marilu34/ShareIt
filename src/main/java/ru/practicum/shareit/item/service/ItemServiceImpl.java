@@ -164,6 +164,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CommentDto postComment(String text, Long itemId, Long authorId) {
         LocalDateTime now = LocalDateTime.now();
