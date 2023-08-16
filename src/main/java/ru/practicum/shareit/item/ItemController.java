@@ -78,7 +78,5 @@ public class ItemController {
         CommentDto commentDto = itemService.postComment(requestBody.get("text"), itemId, authorId);
         log.info("Пользователь {} для Вещи {} добавил комментарий", authorId, itemId);
         return commentDto;
-
     }
-
 }
