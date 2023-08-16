@@ -16,8 +16,4 @@ import java.util.List;
 public class ItemCommentsDto extends ItemBookingsDto {
     List<CommentDto> comments;
 
-    public ItemCommentsDto(ItemBookingsDto itemBookingsDto, List<CommentDto> comments) {
-        super(itemBookingsDto, itemBookingsDto.getLastBooking(), itemBookingsDto.getNextBooking());
-        this.comments = comments;
-    }
 }

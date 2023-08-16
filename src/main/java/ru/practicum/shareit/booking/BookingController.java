@@ -3,18 +3,22 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.CreationBooking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.UnknownStateException;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
     private final BookingService bookingService;
 
@@ -37,17 +41,27 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> getAllBookingsByBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                                   @RequestParam(defaultValue = "ALL") String state) {
-        List<BookingDto> bookings = bookingService.getAllBookingsByBooker(bookerId, checkState(state));
+    public List<BookingDto> getAllBookingsByBooker(
+            @RequestHeader("X-Sharer-User-Id") long bookerId,
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from должен быть больше нуля") int from,
+            @RequestParam(defaultValue = "10") @Positive(message = "size должен быть больше нуля") int size
+    ) {
+        List<BookingDto> bookings = bookingService
+                .getAllBookingsByBooker(bookerId, checkState(state), from, size);
         log.info("Для букера {} было найдено {} бронирование с состоянием {}", bookerId, bookings.size(), state);
         return bookings;
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getAllBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                                  @RequestParam(defaultValue = "ALL") String state) {
-        List<BookingDto> bookings = bookingService.getAllBookingsByOwner(ownerId, checkState(state));
+    public List<BookingDto> getAllBookingsByOwner(
+            @RequestHeader("X-Sharer-User-Id") long ownerId,
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from должен быть больше нуля") int from,
+            @RequestParam(defaultValue = "10") @Positive(message = "size должен быть больше нуля") int size
+    ) {
+        List<BookingDto> bookings = bookingService
+                .getAllBookingsByOwner(ownerId, checkState(state), from, size);
         log.info("Для Владельца {} было найдено {} бронирование с состоянием {}", ownerId, bookings.size(), state);
         return bookings;
     }

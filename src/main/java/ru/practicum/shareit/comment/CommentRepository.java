@@ -12,6 +12,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query(value = "SELECT new ru.practicum.shareit.comment.dto.CommentDto(c.id, c.text, c.author.name, c.created) " +
             "FROM Comment AS c " +
             "WHERE c.item.id = :itemId")
-    List<CommentDto> findAllByItemId(long itemId);
+    List<CommentDto> getAllCommentsByItems(long itemId);
 }
 
