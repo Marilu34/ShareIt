@@ -4,9 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestList;
-import ru.practicum.shareit.request.dto.ShortRequestDto;
+import ru.practicum.shareit.request.repository.ShortRequestDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;

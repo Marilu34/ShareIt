@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,13 +11,15 @@ import java.util.stream.Stream;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    Page<Item> findAllByOwnerId(Long ownerId, PageRequest page);
+    Page<Item> findAllByOwnerId(Long ownerId, Pageable page);
 
     @Query(value = "SELECT i FROM Item AS i " +
             "WHERE i.available = true AND " +
             "(LOWER(i.name) like(concat('%', LOWER(:text), '%')) " +
             "OR (LOWER(i.description) like(concat('%', LOWER(:text), '%'))))")
-    Stream<Item> findAllByAvailableTrueAndNameContainsOrDescriptionContainsAllIgnoreCase(String text, Pageable page);
+    Stream<Item> findAllByAvailableTrueAndNameContainsOrDescriptionContainsAllIgnoreCase(String text, Pageable pageable);
 
     List<Item> findAllByRequestId(long requestId);
+
+
 }

@@ -1,8 +1,5 @@
 package ru.practicum.shareit.request;
-
-import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestList;
-import ru.practicum.shareit.request.dto.ShortRequestDto;
+import ru.practicum.shareit.request.repository.ShortRequestDto;
 
 import java.util.List;
 

@@ -15,20 +15,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    protected String handleThrowable(final Throwable e) {
-        return "Unexpected error, please check your request and then try again";
-    }
-
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected String handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
-        log.warn(e.toString());
-        return e.getLocalizedMessage();
-    }
-
     @ExceptionHandler({ConstraintViolationException.class, IllegalArgumentException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected Map<String, String> handleConstraintViolationException(final RuntimeException e) {
@@ -41,9 +27,22 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected String handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
+        log.warn(e.toString());
+        return e.getLocalizedMessage();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected Map<String, String> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.warn(e.toString());
         String message = e.getFieldError().getField() + " " + e.getFieldError().getDefaultMessage();
         return Map.of("error", message);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected String handleThrowable(final Throwable e) {
+        return "Unexpected error, please check your request and then try again";
     }
 }

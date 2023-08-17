@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.constrains.NullOrNotBlank;
+import ru.practicum.shareit.containts.NullOrNotBlank;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;

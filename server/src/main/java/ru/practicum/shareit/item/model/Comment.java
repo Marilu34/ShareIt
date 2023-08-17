@@ -9,16 +9,19 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
+
 
 @Entity
 @Table(name = "comments",
-        uniqueConstraints = {@UniqueConstraint(name = "ONE_USER_ONE_COMMENT", columnNames = {"item_id", "author_id"})})
+        uniqueConstraints = {
+                @UniqueConstraint(name = "ONE_USER_ONE_COMMENT",
+                        columnNames = {"item_id", "author_id"})})
 @Getter
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
@@ -28,7 +31,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
-    ru.practicum.shareit.item.model.Item item;
+    Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -36,17 +39,4 @@ public class Comment {
 
     @Column(nullable = false)
     LocalDateTime created = LocalDateTime.now();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Comment comment = (Comment) o;
-        return id != 0 && id == comment.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

@@ -41,9 +41,10 @@ public class BookingClient extends BaseClient {
         return post("", userId, requestDto);
     }
 
-    public ResponseEntity<Object> getBooking(long userId, Long bookingId) {
+    public ResponseEntity<Object> getBooking(long userId, long bookingId) {
         return get("/" + bookingId, userId);
     }
+
     public ResponseEntity<Object> patchOwnerAcceptation(long userId, long bookingId, Boolean approved) {
         String uri = String.format("/%d?approved=%b", bookingId, approved);
         return patch(uri, userId);
