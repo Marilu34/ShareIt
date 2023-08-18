@@ -2,10 +2,8 @@ package ru.practicum.shareit.user.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import java.util.Objects;
 
 @Entity
@@ -22,17 +20,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    @Column(nullable = false)
-    @Email(message = "Электронная почта не может быть пустой и должна содержать символ @!")
+    @Column(nullable = false, length = 256)
     String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 128)
     String name;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return id != 0 && id == user.id;
     }

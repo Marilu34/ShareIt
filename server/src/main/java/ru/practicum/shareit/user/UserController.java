@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
 
@@ -13,7 +14,7 @@ import java.util.Collection;
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

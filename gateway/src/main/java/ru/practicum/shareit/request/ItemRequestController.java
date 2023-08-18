@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.ShortRequestDto;
+import ru.practicum.shareit.request.dto.ShortRequestsDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -22,7 +22,7 @@ public class ItemRequestController {
 
     @PostMapping
     public ResponseEntity<Object> createRequest(@RequestHeader("X-Sharer-User-id") @Positive long requesterId,
-                                                @RequestBody @Valid ShortRequestDto itemRequestDto) {
+                                                @RequestBody @Valid ShortRequestsDto itemRequestDto) {
 
         log.info("Creating request {}, userId={}", itemRequestDto, requesterId);
         return requestClient.postNewRequest(requesterId, itemRequestDto);

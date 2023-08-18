@@ -72,6 +72,7 @@ public class ItemServiceImpl implements ItemService {
         });
 
         if (!mistakes.isEmpty()) {
+
             throw new ValidationException("Ошибки: " + mistakes);
         }
     }
@@ -135,7 +136,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         PageRequest page = PageRequest.of(from / size, size);
-        Page<Item> itemPage = itemRepository.findAllByOwnerId(userId, page);
+        Page<Item> itemPage = (Page<Item>) itemRepository.findAllByOwnerId(userId, page);
         LocalDateTime now = LocalDateTime.now();
 
         return itemPage.stream()

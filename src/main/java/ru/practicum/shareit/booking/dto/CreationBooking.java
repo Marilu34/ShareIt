@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.jetbrains.annotations.NotNull;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
 

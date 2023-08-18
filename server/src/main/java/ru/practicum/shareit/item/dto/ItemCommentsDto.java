@@ -13,5 +13,4 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemCommentsDto extends ItemBookingsDto {
     List<CommentDto> comments;
-
 }

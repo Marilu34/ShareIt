@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.dto;
 
-import com.sun.istack.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -28,8 +28,8 @@ public class CreationBooking {
 
     long bookerId;
 
-    @AssertTrue(message = "Начало должно быть раньше окончания")
-    private boolean isStartBeforeEnd() {  //Без этого метода валятся тесты
+    @AssertTrue(message = "Start must be before end")
+    private boolean isStartBeforeEnd() {  //Any method name is ok as long as it begins with `is`
         return Objects.nonNull(start) && Objects.nonNull(end) && start.isBefore(end);
     }
 }
