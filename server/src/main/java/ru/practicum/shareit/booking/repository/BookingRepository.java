@@ -4,63 +4,38 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+    List<Booking> findByBooker_idOrderByRentStartDateDesc(long bookerId, Pageable page);
 
-    @Query(value = "SELECT b FROM Booking AS b " +
-            "WHERE b.id = :bookingId " +
-            "AND (b.item.owner.id = :userId OR b.booker.id = :userId)")
-    Optional<Booking> findBookingByOwnerOrBooker(long bookingId, long userId);
+    List<Booking> findByBooker_idAndStatusOrderByRentStartDateDesc(long bookerId, BookingStatus rejected, Pageable page);
 
-    Stream<Booking> findAllByBookerId(long bookerId, Pageable page);
+    @Query("SELECT b FROM Booking b JOIN Item i ON b.item.id = i.id WHERE i.ownerId = ?1 ORDER BY b.rentStartDate DESC")
+    List<Booking> findBookingsOfItemsByOwnerId(long ownerId, Pageable page);
 
-    Stream<Booking> findAllByBookerIdAndStatusIs(long bookerId, Status status, Pageable page);
+    @Query("SELECT b FROM Booking b JOIN Item i ON b.item.id = i.id WHERE i.ownerId = ?1 AND b.status = ?2 ORDER BY b.rentStartDate DESC")
+    List<Booking> findBookingsOfItemsByOwnerIdAndStatus(long ownerId, BookingStatus status, Pageable page);
 
-    Stream<Booking> findAllByBookerIdAndEndIsBefore(long bookerId, LocalDateTime now, Pageable page);
+    @Query("SELECT b FROM Booking b JOIN Item i ON b.item.id = i.id WHERE i.ownerId = ?1 AND b.rentStartDate > ?2 ORDER BY b.rentStartDate DESC")
+    List<Booking> findBookingsOfItemsByOwnerIdInFuture(long ownerId, LocalDateTime now, Pageable page);
 
-    Stream<Booking> findAllByBookerIdAndStartIsAfter(long bookerId, LocalDateTime now, Pageable page);
+    @Query("SELECT b FROM Booking b JOIN Item i ON b.item.id = i.id WHERE i.ownerId = ?1 AND b.rentEndDate < ?2 ORDER BY b.rentStartDate DESC")
+    List<Booking> findBookingsOfItemsByOwnerIdInPast(long ownerId, LocalDateTime now, Pageable page);
 
-    @Query(value = "SELECT b FROM Booking AS b " +
-            "JOIN FETCH b.item AS i " +
-            "JOIN FETCH i.owner " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.booker.id = :bookerId " +
-            "AND :now BETWEEN b.start AND b.end")
-    Stream<Booking> findAllCurrentBookerBookings(long bookerId, LocalDateTime now, Pageable page);
+    @Query("SELECT b FROM Booking b JOIN Item i ON b.item.id = i.id WHERE i.ownerId = ?1 AND b.rentStartDate < ?2 AND b.rentEndDate > ?2 ORDER BY b.rentStartDate DESC")
+    List<Booking> findBookingsOfItemsByOwnerIdInCurrent(long ownerId, LocalDateTime now, Pageable page);
 
-    Stream<Booking> findAllByItemOwnerIdAndStatusIs(long ownerId, Status status, Pageable page);
+    List<Booking> findByBooker_idAndRentStartDateAfterOrderByRentStartDateDesc(long bookerId, LocalDateTime now, Pageable page);
 
-    Stream<Booking> findAllByItemOwnerIdAndStartIsAfter(long ownerId, LocalDateTime now, Pageable page);
+    List<Booking> findByBooker_idAndRentStartDateBeforeAndRentEndDateAfterOrderByRentStartDateDesc(long bookerId, LocalDateTime now, LocalDateTime now1, Pageable page);
 
-    Stream<Booking> findAllByItemOwnerId(long ownerId, Pageable page);
+    List<Booking> findByBooker_idAndRentEndDateBeforeOrderByRentStartDateDesc(long bookerId, LocalDateTime now, Pageable page);
 
-    Stream<Booking> findAllByItemOwnerIdAndEndIsBefore(long ownerId, LocalDateTime now, Pageable page);
+    List<Booking> findByItem_idAndBooker_idAndStatusAndRentEndDateIsBefore(long itemId, long authorId, BookingStatus approved, LocalDateTime now);
 
-    @Query(value = "SELECT b FROM Booking AS b " +
-            "JOIN FETCH b.item AS i " +
-            "JOIN FETCH i.owner " +
-            "JOIN FETCH b.booker " +
-            "WHERE b.item.owner.id = :ownerId " +
-            "AND :now BETWEEN b.start AND b.end")
-    Stream<Booking> findAllCurrentOwnerBookings(long ownerId, LocalDateTime now, Pageable page);
-
-    // find next booking
-    ShortBookingDto findFirstByItemIdAndStartAfterAndStatusNotOrderByStartAsc(long itemId,
-                                                                              LocalDateTime now,
-                                                                              Status status);
-
-    // find last booking
-    ShortBookingDto findFirstByItemIdAndStartBeforeAndStatusOrderByStartDesc(long itemId,
-                                                                             LocalDateTime now,
-                                                                             Status status);
-
-    List<Booking> findAllByItemIdAndBookerIdAndStatusIsAndEndBefore(long itemId, long bookerId,
-                                                                    Status status, LocalDateTime now);
-
+    List<Booking> findByItem_idInAndStatus(List<Long> itemIdList, BookingStatus approved);
 }

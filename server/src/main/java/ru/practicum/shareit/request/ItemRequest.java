@@ -1,34 +1,39 @@
 package ru.practicum.shareit.request;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.user.model.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "requests")
-@Getter
-@Setter
-@ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class ItemRequest {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "request_id")
+    private long requestId;
 
-    @Column(length = 2024, nullable = false)
-    String description;
+    @JoinColumn(name = "request_author_id", referencedColumnName = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User requestAuthor;
+
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(nullable = false)
-    LocalDateTime created;
+    private LocalDateTime created;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    @ToString.Exclude
-    User requester;
+    @OneToMany(mappedBy = "itemRequest")
+    private List<Item> items;
 }

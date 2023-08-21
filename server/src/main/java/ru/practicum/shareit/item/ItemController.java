@@ -4,79 +4,92 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exceptions.ValidationException;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemBookingsDto;
-import ru.practicum.shareit.item.dto.ItemCommentsDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.common.Constants;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Item;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import java.util.Collection;
-import java.util.Map;
+import javax.validation.ValidationException;
+import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Slf4j
 public class ItemController {
     private final ItemService itemService;
 
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto createItem(@RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        itemDto = itemService.createItem(userId, itemDto);
-        log.info("Пользователь {} создал Вещь {}", userId, itemDto);
-        return itemDto;
+    public ItemDto create(@RequestBody ItemCreateRequest itemCreateRequest,
+                          @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Create item, owner {}: " + itemCreateRequest.toString(), ownerId);
+        return ItemDtoMapper.toItemDto(itemService.create(itemCreateRequest, ownerId));
     }
+
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto itemDto,
-                              @PathVariable Long itemId,
-                              @RequestHeader("X-Sharer-User-Id") Long userId) {
-        itemDto.setId(itemId);
-        itemDto = itemService.updateItem(userId, itemDto);
-        log.info("Пользователь {} обновил Вещь {}", userId, itemDto);
-        return itemDto;
-    }
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDto update(@PathVariable int itemId,
+                          @RequestBody ItemDto itemDto,
+                          @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Update item {}, ownerId {}: " + itemDto, itemId, ownerId);
 
-    @GetMapping("/{itemId}")
-    public ItemCommentsDto getByItemId(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        ItemCommentsDto itemDto = itemService.getByItemId(itemId, userId);
-        log.info("Получен Item по ID {}", itemDto);
-        return itemDto;
+        itemDto.setId(itemId);
+        Item item = ItemDtoMapper.toItem(itemDto);
+
+        return ItemDtoMapper.toItemDto(itemService.update(item, ownerId));
     }
 
     @GetMapping
-    public Collection<ItemBookingsDto> getItemsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                        @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from cannot be negative") int from,
-                                                        @RequestParam(defaultValue = "10") @Positive(message = "size must be positive") int size
-    ) {
-        Collection<ItemBookingsDto> collection = itemService.getItemsByUserId(userId, from, size);
-        log.info("Данные {} Вещи принадлежат пользователю {}", collection.size(), userId);
-        return collection;
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemDto> getOwnedItemsList(@RequestParam(defaultValue = "0") int from,
+                                           @RequestParam(defaultValue = "20") int size,
+                                           @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Get owned items list, ownerId {}", ownerId);
+        return ItemDtoMapper.toItemDtoList(itemService.getOwnedItemsList(ownerId, from, size));
+    }
+
+
+    @GetMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ItemDto get(@PathVariable int itemId,
+                       @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Get itemId {}", itemId);
+        return ItemDtoMapper.toItemDto(itemService.getById(itemId, ownerId));
     }
 
 
     @GetMapping("/search")
-    public Collection<ItemDto> getItemByComment(@RequestParam() String text) {
-        Collection<ItemDto> collection = itemService.getItemByComment(text);
-        log.info("Вещи {} по описанию {}", collection.size(), text);
-        return collection;
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemDto> search(@RequestParam(defaultValue = "0") int from,
+                                @RequestParam(defaultValue = "20") int size,
+                                @RequestParam(defaultValue = "") String text) {
+        log.info("Search text '{}'", text);
+        if (!text.isBlank()) {
+            return ItemDtoMapper.toItemDtoList(itemService.search(text, from, size));
+        } else {
+            return List.of();
+        }
     }
 
+
+    @DeleteMapping("/{itemId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable int itemId,
+                       @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Delete itemId {}, ownerId {}", itemId, ownerId);
+        itemService.delete(itemId, ownerId);
+    }
+
+
     @PostMapping("/{itemId}/comment")
-    public CommentDto postComment(@RequestHeader("X-Sharer-User-id") Long authorId,
-                                  @PathVariable Long itemId,
-                                  @RequestBody @Valid @NotBlank Map<String, String> requestBody) {
-        if (!requestBody.containsKey("text") || requestBody.get("text").isBlank()) {
-            throw new ValidationException("Ошибка с комментарием");
-        }
-        CommentDto commentDto = itemService.postComment(requestBody.get("text"), itemId, authorId);
-        log.info("Пользователь {} для Вещи {} добавил комментарий", authorId, itemId);
-        return commentDto;
+    @ResponseStatus(HttpStatus.OK)
+    public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable int itemId,
+                                    @RequestHeader(value = Constants.X_HEADER_NAME) int authorId) {
+        log.info("Create comment for item {}, author {}: " + commentDto.toString(), itemId, authorId);
+        return CommentDtoMapper.toCommentDto(itemService.createComment(commentDto.getText(), itemId, authorId));
     }
 }

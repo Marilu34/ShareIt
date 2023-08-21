@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -11,19 +10,26 @@ import ru.practicum.shareit.user.dto.UserDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
-@Slf4j
-@Controller
+@RestController
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
+@Slf4j
 @Validated
 public class UserController {
+
     private final UserClient userClient;
 
     @PostMapping
-    @Validated({UserDto.Creation.class})
-    public ResponseEntity<Object> createNewUser(@RequestBody @Valid UserDto userDto) {
-        log.info("Creating user with name={} and email={}", userDto.getName(), userDto.getEmail());
-        return userClient.createUser(userDto);
+    public ResponseEntity<Object> createUser(@Valid @RequestBody User user) {
+        log.info("Create user {}", user);
+        return userClient.createUser(user);
+    }
+
+
+    @PatchMapping("/{userId}")
+    public ResponseEntity<Object> updateUser(@Positive @PathVariable long userId, @Valid @RequestBody UserDto userDto) {
+        log.info("Update userId {}, userDto {}", userId, userDto);
+        return userClient.updateUser(userId, userDto);
     }
 
     @GetMapping
@@ -32,22 +38,16 @@ public class UserController {
         return userClient.getAllUsers();
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<Object> findUserById(@PathVariable @Positive long userId) {
-        log.info("Get user id={}", userId);
-        return userClient.getUserById(userId);
-    }
 
-    @PatchMapping("/{userId}")
-    public ResponseEntity<Object> updateUserFields(@PathVariable @Positive long userId,
-                                                   @RequestBody @Valid UserDto userDto) {
-        log.info("Update user id={}", userId);
-        return userClient.updateUserFields(userId, userDto);
+    @GetMapping("/{userId}")
+    public ResponseEntity<Object> getUser(@Positive @PathVariable Long userId) {
+        log.info("Get userId {}", userId);
+        return userClient.getUser(userId);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> deleteUser(@PathVariable @Positive long userId) {
-        log.info("Delete user id={}", userId);
-        return userClient.deleteUserById(userId);
+    public ResponseEntity<Object> deleteUser(@Positive @PathVariable int userId) {
+        log.info("Delete userId {}", userId);
+        return userClient.deleteUser(userId);
     }
 }

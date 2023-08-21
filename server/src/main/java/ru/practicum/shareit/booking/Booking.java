@@ -1,58 +1,60 @@
 package ru.practicum.shareit.booking;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "bookings")
-@Getter
-@Setter
-@ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class Booking {
+    /**
+     * id бронирования в системе, уникальное
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    @Column(name = "booking_id", nullable = false)
+    private long id;
 
-    @Column(name = "stat_date", nullable = false)
-    LocalDateTime start;
+    /**
+     * вещь, которую бронируют
+     */
+    @JoinColumn(name = "item_id", referencedColumnName = "item_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Item item;
 
+    /**
+     * пользователь, который бронирует
+     */
+    @JoinColumn(name = "booker_id", referencedColumnName = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User booker;
+
+    /**
+     * начало периода аренды, с даты
+     */
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime rentStartDate;
+
+    /**
+     * окончание периода аренды, по дату (включительно)
+     */
     @Column(name = "end_date", nullable = false)
-    LocalDateTime end;
+    private LocalDateTime rentEndDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", nullable = false)
-    @ToString.Exclude
-    Item item;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booker_id", nullable = false)
-    @ToString.Exclude
-    User booker;
-
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(10) default 'WAITING'")
-    Status status;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Booking booking = (Booking) o;
-        return id != 0 && id == booking.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    /**
+     * подтверждение бронирования хозяином вещи
+     */
+    @Enumerated
+    @Column(nullable = false)
+    private BookingStatus status;
 }

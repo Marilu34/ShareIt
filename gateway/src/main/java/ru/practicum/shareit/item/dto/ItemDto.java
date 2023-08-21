@@ -1,34 +1,32 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.constrains.NullOrNotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import ru.practicum.shareit.booking.ShortBookingDto;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.List;
 
 @Data
-@Builder(toBuilder = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ItemDto {
-    Long id;
 
-    @NotNull(groups = OnCreate.class)
-    Boolean available;
+    @PositiveOrZero
+    private long id;
 
-    @NotNull(groups = OnCreate.class)
-    @NullOrNotBlank
-    @Size(max = 64) String name;
+    private String name;
 
-    @NotNull(groups = OnCreate.class)
-    @NullOrNotBlank
-    @Size(max = 256) String description;
+    private String description;
 
-    Long requestId;
+    private Boolean available;
 
-    public interface OnCreate {
-    }
+    private ShortBookingDto lastBooking;
 
+    private ShortBookingDto nextBooking;
+
+    private List<CommentDto> comments;
+
+    private long requestId;
 }

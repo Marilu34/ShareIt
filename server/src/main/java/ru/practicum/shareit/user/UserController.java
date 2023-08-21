@@ -5,52 +5,60 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.dto.UserDtoMapper;
 
-import java.util.Collection;
+import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
+
     private final UserService userService;
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody UserDto userDto) {
-        UserDto dto = userService.createUser(userDto);
-        log.info("Пользователь создан {}", dto);
-        return dto;
+    public UserDto create(@RequestBody User user) {
+        log.info("Create user: " + user.toString());
+
+        return UserDtoMapper.toUserDto(userService.create(user));
     }
 
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
+    @ResponseStatus(HttpStatus.OK)
+    public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
         userDto.setId(userId);
-        UserDto dto = userService.updateUser(userDto);
-        log.info("Пользователь обновлен {}", dto);
-        return dto;
+        log.info("Update user {}: " + userDto, userId);
+
+        User user = UserDtoMapper.toUser(userDto);
+
+        return UserDtoMapper.toUserDto(userService.update(user));
     }
 
 
     @GetMapping
-    public Collection<UserDto> getAllUsers() {
-        Collection<UserDto> all = userService.getAllUsers();
-        log.info("Получены все Пользователи {}", all.size());
-        return all;
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserDto> getAll() {
+        log.info("Get all users");
+        return UserDtoMapper.toUserDtoList(userService.getAll());
     }
+
 
     @GetMapping("/{userId}")
-    public UserDto getUserById(@PathVariable Long userId) {
-        UserDto dto = userService.getUserById(userId);
-        log.info("Получен Пользователь {}", dto);
-        return dto;
+    @ResponseStatus(HttpStatus.OK)
+    public UserDto get(@PathVariable Long userId) {
+        log.info("Get userId {}", userId);
+        return UserDtoMapper.toUserDto(userService.getById(userId));
     }
 
+
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable Long userId) {
-        userService.deleteUser(userId);
-        log.info("Пользователь удален {}", userId);
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable int userId) {
+        log.info("Delete userId {}", userId);
+        userService.delete(userId);
     }
 }

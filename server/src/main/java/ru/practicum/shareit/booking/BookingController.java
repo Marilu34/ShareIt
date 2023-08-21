@@ -3,85 +3,101 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.CreationBooking;
+import ru.practicum.shareit.booking.dto.BookingCreateRequest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exceptions.UnknownStateException;
+import ru.practicum.shareit.common.Constants;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
+import javax.validation.ValidationException;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
-@Validated
+@Slf4j
 public class BookingController {
     private final BookingService bookingService;
 
+    /**
+     * Запрос создания нового бронирования
+     *
+     * @param bookingCreateRequest данные для создания бронирования
+     * @param bookerId             id пользователя, который делает запрос
+     * @return заполненный объект типа BookingDto
+     * @throws ValidationException если данные не прошли валидацию
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto createBooking(@RequestBody CreationBooking creationBooking,
-                                    @RequestHeader("X-Sharer-User-Id") long bookerId) {
-        creationBooking.setBookerId(bookerId);
-        BookingDto bookingDto = bookingService.createBooking(creationBooking);
-        log.info("Создано новое бронирование {}", bookingDto);
-        return bookingDto;
+    public BookingDto create(@RequestBody BookingCreateRequest bookingCreateRequest,
+                             @RequestHeader(value = Constants.X_HEADER_NAME) long bookerId) {
+        log.info("Create booking, booker {}: " + bookingCreateRequest.toString(), bookerId);
+        return BookingDtoMapper.toBookingDto(bookingService.create(bookingCreateRequest, bookerId));
     }
 
-    @GetMapping("/{bookingId}")
-    public BookingDto getBookingById(@RequestHeader("X-Sharer-User-Id") long userId,
-                                     @PathVariable long bookingId) {
-        BookingDto bookingDto = bookingService.getBookingById(bookingId, userId);
-        log.info("Было предоставлено бронирование {} для пользователя {}", bookingId, userId);
-        return bookingDto;
-    }
-
-    @GetMapping
-    public List<BookingDto> getAllBookingsByBooker(
-            @RequestHeader("X-Sharer-User-Id") long bookerId,
-            @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from должен быть больше нуля") int from,
-            @RequestParam(defaultValue = "10") @Positive(message = "size должен быть больше нуля") int size
-    ) {
-        List<BookingDto> bookings = bookingService
-                .getAllBookingsByBooker(bookerId, checkState(state), from, size);
-        log.info("Для букера {} было найдено {} бронирование с состоянием {}", bookerId, bookings.size(), state);
-        return bookings;
-    }
-
-    @GetMapping("/owner")
-    public List<BookingDto> getAllBookingsByOwner(
-            @RequestHeader("X-Sharer-User-Id") long ownerId,
-            @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from должен быть больше нуля") int from,
-            @RequestParam(defaultValue = "10") @Positive(message = "size должен быть больше нуля") int size
-    ) {
-        List<BookingDto> bookings = bookingService
-                .getAllBookingsByOwner(ownerId, checkState(state), from, size);
-        log.info("Для Владельца {} было найдено {} бронирование с состоянием {}", ownerId, bookings.size(), state);
-        return bookings;
-    }
-
-
+    /**
+     * Запрос подтверждения бронирования владельцем вещи
+     *
+     * @param bookingId id бронирования
+     * @param approved  вид действия: true - подтвердить, false - отклонить
+     * @param ownerId   id пользователя, который делает запрос
+     * @return заполненный объект типа BookingDto
+     */
     @PatchMapping("/{bookingId}")
-    public BookingDto confirmationBooking(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                          @PathVariable long bookingId,
-                                          @RequestParam boolean approved) {
-        BookingDto bookingDto = bookingService.confirmationBooking(bookingId, ownerId, approved);
-        String action = approved ? "подтвердил" : "отменил";
-        log.info("Пользователь {} {} бронирование {}", ownerId, action, bookingId);
-        return bookingDto;
+    @ResponseStatus(HttpStatus.OK)
+    public BookingDto approve(@PathVariable long bookingId,
+                              @RequestParam Boolean approved,
+                              @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Approve booking {}, ownerId {}, approved {}", bookingId, ownerId, approved);
+        return BookingDtoMapper.toBookingDto(bookingService.approve(bookingId, approved, ownerId));
     }
 
-    private State checkState(String state) {
-        try {
-            return State.valueOf(state);
-        } catch (IllegalArgumentException e) {
-            throw new UnknownStateException(state);
-        }
+    /**
+     * Запросить бронирование с указанным id
+     *
+     * @param bookingId id бронирования
+     * @param userId    id пользователя, который делает запрос
+     * @return если запрос делает автор бронирования или владелец вещи - вернётся заполненный объект типа BookingDto, иначе - возникнет исключение
+     */
+    @GetMapping("/{bookingId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BookingDto get(@PathVariable long bookingId,
+                          @RequestHeader(value = Constants.X_HEADER_NAME) int userId) {
+        log.info("Get booking {}, userId {}", bookingId, userId);
+        return BookingDtoMapper.toBookingDto(bookingService.getById(bookingId, userId));
+    }
+
+    /**
+     * Запросить бронирования созданные определенным пользователем, с фильтрацией или без
+     *
+     * @param state    вид фильтрации данных: по умолчанию равен ALL, может принимать значения CURRENT, PAST, FUTURE, WAITING, REJECTED
+     * @param bookerId id пользователя, который делает запрос
+     * @return список бронирований в виде списка объектов BookingDto
+     */
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<BookingDto> getBookingsByBookerId(@RequestParam(defaultValue = "0") int from,
+                                                  @RequestParam(defaultValue = "20") int size,
+                                                  @RequestParam(defaultValue = "ALL") String state,
+                                                  @RequestHeader(value = Constants.X_HEADER_NAME) int bookerId) {
+        log.info("Get bookings of booker id {}", bookerId);
+        return BookingDtoMapper.toBookingDtoList(bookingService.getBookingsByBookerId(bookerId, state, from, size));
+    }
+
+    /**
+     * Запросить бронирования вещей определенного пользователя, с фильтрацией или без
+     *
+     * @param state   вид фильтрации данных: по умолчанию равен ALL, может принимать значения CURRENT, PAST, FUTURE, WAITING, REJECTED
+     * @param ownerId id пользователя, который делает запрос
+     * @return список бронирований в виде списка объектов BookingDto
+     */
+    @GetMapping("/owner")
+    @ResponseStatus(HttpStatus.OK)
+    public List<BookingDto> getBookingsByOwnerId(@RequestParam(defaultValue = "0") int from,
+                                                 @RequestParam(defaultValue = "20") int size,
+                                                 @RequestParam(defaultValue = "ALL") String state,
+                                                 @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Get bookings of item of owner id {}", ownerId);
+        return BookingDtoMapper.toBookingDtoList(bookingService.getBookingsByOwnerId(ownerId, state, from, size));
     }
 }

@@ -2,83 +2,79 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.shareit.booking.Constants;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemRequest;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.Map;
 
-@Slf4j
-@Controller
+@RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Slf4j
 @Validated
 public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
-    @Validated(ItemDto.OnCreate.class)
-    public ResponseEntity<Object> postNewItem(@RequestBody @Valid ItemDto itemDto,
-                                              @RequestHeader("X-Sharer-User-Id") @Positive long userId) {
-        log.info("Creating item {}, userId={}", itemDto, userId);
-        return itemClient.postItem(userId, itemDto);
+    public ResponseEntity<Object> createItem(@Valid @RequestBody ItemRequest itemRequest,
+                                             @Positive @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Create item {}, owner {}", ownerId, itemRequest.toString());
+        return itemClient.createItem(ownerId, itemRequest);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> patchItem(@RequestBody @Valid ItemDto itemDto,
-                                            @PathVariable @Positive Long itemId,
-                                            @RequestHeader("X-Sharer-User-Id") @Positive long userId) {
-        log.info("Update itemId={} by userId={}", itemId, userId);
-        return itemClient.patchItem(userId, itemId, itemDto);
-    }
-
-    @GetMapping("/{itemId}")
-    public ResponseEntity<Object> getByItemId(@PathVariable @Positive Long itemId,
-                                              @RequestHeader("X-Sharer-User-Id") @Positive long userId) {
-        log.info("Get itemId={} by userId={}", itemId, userId);
-        return itemClient.getByItemId(userId, itemId);
+    public ResponseEntity<Object> updateItem(@Positive @PathVariable int itemId,
+                                             @Valid @RequestBody ItemDto itemDto,
+                                             @Positive @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Update item {}, ownerId {}: ", itemDto, ownerId);
+        return itemClient.updateItem(ownerId, itemId, itemDto);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllUserItems(
-            @RequestHeader("X-Sharer-User-Id") @Positive long userId,
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from cannot be negative") int from,
-            @RequestParam(defaultValue = "10") @Positive(message = "size must be positive") int size
-    ) {
-        log.info("Get items of userId={}, from={}, size={}", userId, from, size);
-        return itemClient.getAllUserItems(userId, from, size);
+    public ResponseEntity<Object> getOwnedItemsList(@PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                    @Positive @RequestParam(defaultValue = "20") int size,
+                                                    @Positive @RequestHeader(value = Constants.X_HEADER_NAME) long ownerId) {
+        log.info("Get owned items list, ownerId {}, from {}, size {}", ownerId, from, size);
+        return itemClient.getItems(ownerId, from, size);
     }
+
+    @GetMapping("/{itemId}")
+    public ResponseEntity<Object> getSingleItem(@Positive @PathVariable int itemId,
+                                                @Positive @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Get itemId {} by userId {}", itemId, ownerId);
+        return itemClient.getSingleItem(ownerId, itemId);
+    }
+
 
     @GetMapping("/search")
-    public ResponseEntity<Object> findByText(
-            @RequestHeader("X-Sharer-User-Id") @Positive long userId,
-            @RequestParam() String text,
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "from cannot be negative") int from,
-            @RequestParam(defaultValue = "10") @Positive(message = "size must be positive") int size
-    ) {
-        log.info("Get items with text \"{}\", userId={}, from={}, size={}", text, userId, from, size);
-        return itemClient.getByText(userId, text, from, size);
+    public ResponseEntity<Object> search(@PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                         @Positive @RequestParam(defaultValue = "20") int size,
+                                         @RequestParam(defaultValue = "") String text) {
+        log.info("Search text '{}', from {}, size {}", text, from, size);
+        return itemClient.search(text, from, size);
     }
+
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<Object> deleteItem(@Positive @PathVariable int itemId,
+                                             @Positive @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
+        log.info("Delete itemId {}, ownerId {}", itemId, ownerId);
+        return itemClient.deleteItem(itemId, ownerId);
+    }
+
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> postCommentForItem(@RequestHeader("X-Sharer-User-id") @Positive Long authorId,
-                                                     @PathVariable @Positive long itemId,
-                                                     @RequestBody Map<String, String> requestBody) {
-        if (!requestBody.containsKey("text") || requestBody.get("text").isBlank()) {
-            ResponseStatusException e = new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Body must have not empty text property");
-            log.warn(e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        log.info("Creating comment {} for itemId={} by userId={}", requestBody.get("text"), itemId, authorId);
-        return itemClient.postCommentForItemFromAuthor(authorId, itemId, requestBody);
+    public ResponseEntity<Object> createComment(@Valid @RequestBody CommentDto commentDto,
+                                                @Positive @PathVariable int itemId,
+                                                @Positive @RequestHeader(value = Constants.X_HEADER_NAME) int authorId) {
+        log.info("Create comment {}, itemId {}, authorId {}: ", commentDto, itemId, authorId);
+        return itemClient.postComment(authorId, itemId, commentDto);
     }
-
 }

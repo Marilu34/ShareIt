@@ -1,42 +1,54 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.List;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "items")
-@Getter
-@Setter
-@ToString
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Item {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    @Column(name = "item_id", nullable = false)
+    private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id") // такое бы и создалось наименование, написал для уч целей
-    @ToString.Exclude // чтобы не было случайных обращений к базе например при выводе в лог
-    User owner;
+    @Column(name = "owner_id", nullable = false)
+    private long ownerId;
 
 
-    boolean available; // user intention to share the item
+    @Column(nullable = false)
+    private String name;
 
-    @Column(nullable = false, length = 64)
-    String name;
+    @Column(nullable = false)
+    private String description;
 
-    @Column(nullable = false, length = 256)
-    String description;
+    @Column(nullable = false)
+    private Boolean available;
+
+    @Transient
+    private Booking lastBooking;
+
+    @Transient
+    private Booking nextBooking;
+
+
+    @Transient
+    private List<Comment> comments;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
-    @ToString.Exclude
-    ItemRequest request;
+    private ItemRequest itemRequest;
 }

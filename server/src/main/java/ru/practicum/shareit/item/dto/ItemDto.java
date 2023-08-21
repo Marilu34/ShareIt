@@ -1,23 +1,32 @@
 package ru.practicum.shareit.item.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import ru.practicum.shareit.booking.repository.BookingShortDto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
-@Builder(toBuilder = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class ItemDto {
-    Long id;
-    @NotNull Boolean available;
-    @NotBlank @Size(max = 64) String name;
-    @NotBlank @Size(max = 256) String description;
-    Long requestId;
+
+    private long id;
+
+
+    private String name;
+
+    private String description;
+
+
+    private Boolean available;
+
+    private BookingShortDto lastBooking;
+
+    private BookingShortDto nextBooking;
+
+    private List<CommentDto> comments;
+
+    private long requestId;
 }

@@ -2,59 +2,53 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestList;
-import ru.practicum.shareit.request.dto.ShortRequestDto;
+import ru.practicum.shareit.common.Constants;
+import ru.practicum.shareit.request.dto.ItemRequestCreateRequest;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDtoMapper;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
-@Validated
 public class ItemRequestController {
+
     private final ItemRequestService itemRequestService;
 
     @PostMapping
-    public RequestDto createRequests(@RequestHeader("X-Sharer-User-id") long requesterId,
-                                     @RequestBody ShortRequestDto itemRequestDto) {
+    @ResponseStatus(HttpStatus.OK)
+    public ItemRequestDto create(@RequestBody ItemRequestCreateRequest itemRequestCreateRequest,
+                                 @RequestHeader(value = Constants.X_HEADER_NAME) long requestAuthorId) {
+        log.info("Create item request, owner {}: " + itemRequestCreateRequest.toString(), requestAuthorId);
 
-        itemRequestDto.setRequesterId(requesterId);
-        RequestDto created = itemRequestService.createRequests(itemRequestDto);
-        log.info("Создан новый запрос {}", created);
-        return created;
+        return ItemRequestDtoMapper.toItemRequestDto(itemRequestService.create(ItemRequestDtoMapper.toItemRequest(itemRequestCreateRequest), requestAuthorId));
     }
 
-    @GetMapping("/{requestId}")
-    public RequestList getRequestById(@RequestHeader("X-Sharer-User-id") long userId,
-                                      @PathVariable long requestId) {
-        RequestList result = itemRequestService.getRequestById(userId, requestId);
-        log.info("Получен для Пользователя {} слеуюдщие запросы {}", userId, requestId);
-        return result;
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemRequestDto> getOwn(@RequestHeader(value = Constants.X_HEADER_NAME) long requestAuthorId) {
+        log.info("Get own item requests authorId {}", requestAuthorId);
+        return ItemRequestDtoMapper.toItemRequestDtoList(itemRequestService.getOwnItemRequests(requestAuthorId));
     }
 
     @GetMapping("/all")
-    public List<RequestList> getAllRequests(@RequestHeader("X-Sharer-User-id") long userId,
-                                            @RequestParam(defaultValue = "0")
-                                            @PositiveOrZero(message = "from должен быть больше нуля") int from,
-                                            @RequestParam(defaultValue = "10")
-                                            @Positive(message = "size должен быть больше нуля") int size) {
-        List<RequestList> result = itemRequestService.getAllRequests(userId, from, size);
-        log.info("Получены для Пользователя {} следующие запросы {} от других Пользователей. Запросы от {}, размер {} ",
-                userId, result.size(), from, size);
-        return result;
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemRequestDto> getAll(@RequestParam(defaultValue = "0") int from,
+                                       @RequestParam(defaultValue = "20") int size,
+                                       @RequestHeader(value = Constants.X_HEADER_NAME) long requestAuthorId) {
+        log.info("Get all item requests from {} size {} requestAuthorId {}", from, size, requestAuthorId);
+        return ItemRequestDtoMapper.toItemRequestDtoList(itemRequestService.getAll(from, size, requestAuthorId));
     }
 
-
-    @GetMapping
-    public List<RequestList> getAllRequestsBySearcher(@RequestHeader("X-Sharer-User-id") long requesterId) {
-        List<RequestList> result = itemRequestService.getAllRequestsBySearcher(requesterId);
-        log.info("Получены {} запросы от Пользователя {}", result.size(), requesterId);
-        return result;
+    @GetMapping("/{requestId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ItemRequestDto getById(@PathVariable int requestId,
+                                  @RequestHeader(value = Constants.X_HEADER_NAME) long userId) {
+        log.info("Get requestId {} for userId {}", requestId, userId);
+        return ItemRequestDtoMapper.toItemRequestDto(itemRequestService.getById(requestId, userId));
     }
 }
