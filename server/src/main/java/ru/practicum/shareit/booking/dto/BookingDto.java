@@ -13,33 +13,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class BookingDto {
-    /**
-     * id бронирования в системе, уникальное
-     */
+
     private long id;
 
-    /**
-     * вещь, которую бронируют
-     */
     private ItemDto item;
 
-    /**
-     * пользователь, который бронирует
-     */
+
     private UserDto booker;
 
-    /**
-     * начало периода аренды, с даты
-     */
+
     private LocalDateTime start;
 
-    /**
-     * окончание периода аренды, по дату (включительно)
-     */
     private LocalDateTime end;
 
-    /**
-     * подтверждение бронирования хозяином вещи
-     */
     private BookingStatus status;
 }

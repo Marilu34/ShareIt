@@ -5,9 +5,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-/**
- * Класс для данных для создания бронирования
- */
+
 @Getter
 @Builder
 public class BookingCreateRequest {

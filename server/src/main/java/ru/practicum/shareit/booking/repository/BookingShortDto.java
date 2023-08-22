@@ -5,9 +5,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-/**
- * Класс для отправки данных о предыдущем и следующем бронированиях вещи
- */
+
 @Getter
 @AllArgsConstructor
 public class BookingShortDto {

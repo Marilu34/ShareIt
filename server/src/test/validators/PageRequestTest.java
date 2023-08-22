@@ -3,11 +3,10 @@ package validators;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import ru.practicum.shareit.validators.PaginationValidator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PaginationValidatorTest {
+class PageRequestTest {
     @Test
     void validatePaginationNormalWay() {
         Pageable page =  PageRequest.of(20, 20);

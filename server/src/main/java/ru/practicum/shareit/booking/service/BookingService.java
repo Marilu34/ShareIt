@@ -73,17 +73,10 @@ public class BookingService {
         }
     }
 
-    /**
-     * Вернуть список бронирований, созданных пользователем
-     *
-     * @param bookerId id пользователя
-     * @param state    вид фильтрации данных: по умолчанию равен ALL, может принимать значения CURRENT, PAST, FUTURE, WAITING, REJECTED
-     * @return список объектов Booking
-     * @throws BookingUnsupportedStatusException если указан неверный вид фильтрации
-     */
+
     public List<Booking> getBookingsByBookerId(long bookerId, String state, int from, int size) throws BookingUnsupportedStatusException {
         userService.getById(bookerId);
-        Pageable page =  PageRequest.of(from / size, size);
+        Pageable page = PageRequest.of(from / size, size);
 
         switch (state) {
             case "CURRENT":
@@ -109,17 +102,10 @@ public class BookingService {
         }
     }
 
-    /**
-     * Вернуть список бронирований вещей пользователя
-     *
-     * @param ownerId id пользователя
-     * @param state   вид фильтрации данных: по умолчанию равен ALL, может принимать значения CURRENT, PAST, FUTURE, WAITING, REJECTED
-     * @return список объектов Booking
-     * @throws BookingUnsupportedStatusException если указан неверный вид фильтрации
-     */
+
     public List<Booking> getBookingsByOwnerId(long ownerId, String state, int from, int size) {
         userService.getById(ownerId);
-        Pageable page =  PageRequest.of(from / size, size);
+        Pageable page = PageRequest.of(from / size, size);
 
         switch (state) {
             case "CURRENT":

@@ -38,7 +38,6 @@ public final class BookingDtoMapper {
                 bookingDtoList.add(toBookingDto(booking));
             }
         }
-
         return bookingDtoList;
     }
 }

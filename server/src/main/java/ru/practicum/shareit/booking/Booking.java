@@ -17,43 +17,29 @@ import java.time.LocalDateTime;
 @Table(name = "bookings")
 @Builder
 public class Booking {
-    /**
-     * id бронирования в системе, уникальное
-     */
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id", nullable = false)
     private long id;
 
-    /**
-     * вещь, которую бронируют
-     */
+
     @JoinColumn(name = "item_id", referencedColumnName = "item_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Item item;
 
-    /**
-     * пользователь, который бронирует
-     */
     @JoinColumn(name = "booker_id", referencedColumnName = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User booker;
 
-    /**
-     * начало периода аренды, с даты
-     */
+
     @Column(name = "start_date", nullable = false)
     private LocalDateTime rentStartDate;
 
-    /**
-     * окончание периода аренды, по дату (включительно)
-     */
     @Column(name = "end_date", nullable = false)
     private LocalDateTime rentEndDate;
 
-    /**
-     * подтверждение бронирования хозяином вещи
-     */
+
     @Enumerated
     @Column(nullable = false)
     private BookingStatus status;
