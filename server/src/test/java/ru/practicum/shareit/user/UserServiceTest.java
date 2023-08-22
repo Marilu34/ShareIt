@@ -6,9 +6,9 @@ import org.mockito.Mockito;
 import org.springframework.dao.DataIntegrityViolationException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UserEmailNotUniqueException;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;

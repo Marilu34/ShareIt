@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ItemCreateRequest {
+public class CreationItemRequest {
     private String name;
 
     private String description;

@@ -2,7 +2,8 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.booking.BookingDtoMapper;
+import ru.practicum.shareit.booking.dto.BookingDtoMapper;
+import ru.practicum.shareit.item.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
@@ -58,12 +59,12 @@ public final class ItemDtoMapper {
         return itemDtoList;
     }
 
-    public static Item toItem(ItemCreateRequest itemCreateRequest) {
-        if (itemCreateRequest != null) {
+    public static Item toItem(CreationItemRequest creationItemRequest) {
+        if (creationItemRequest != null) {
             return Item.builder()
-                    .name(itemCreateRequest.getName())
-                    .description(itemCreateRequest.getDescription())
-                    .available(itemCreateRequest.getAvailable()).build();
+                    .name(creationItemRequest.getName())
+                    .description(creationItemRequest.getDescription())
+                    .available(creationItemRequest.getAvailable()).build();
         } else {
             return null;
         }

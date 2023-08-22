@@ -5,24 +5,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Pageable;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.comment.Comment;
-import ru.practicum.shareit.item.comment.CommentRepository;
-import ru.practicum.shareit.item.dto.ItemCreateRequest;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.dto.CreationItemRequest;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.request.ItemRequestRepository;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.practicum.shareit.booking.Status.APPROVED;
+import static ru.practicum.shareit.booking.model.Status.APPROVED;
 
 class ItemServiceTest {
 
@@ -133,8 +133,8 @@ class ItemServiceTest {
 
     @Test
     void createItemNormalWayWithoutRequest() {
-        ItemCreateRequest itemCreateRequest = new ItemCreateRequest("name", "description", true, 0);
-        Item testItem = ItemDtoMapper.toItem(itemCreateRequest);
+        CreationItemRequest creationItemRequest = new CreationItemRequest("name", "description", true, 0);
+        Item testItem = ItemDtoMapper.toItem(creationItemRequest);
         testItem.setOwnerId(1);
 
         Mockito
@@ -145,14 +145,14 @@ class ItemServiceTest {
                 .when(mockUserRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(new User(1, "name", "e@mail.ru")));
 
-        Item item = itemService.create(itemCreateRequest, 1);
+        Item item = itemService.create(creationItemRequest, 1);
 
         assertEquals(testItem, item);
     }
 
     @Test
     void createItemNormalWayWithRequest() {
-        ItemCreateRequest itemCreateRequest = new ItemCreateRequest("name", "description", true, 1);
+        CreationItemRequest creationItemRequest = new CreationItemRequest("name", "description", true, 1);
         User testOwnerUser = new User(1, "name", "e@mail.ru");
         User testRequestUser = new User(2, "name2", "e@mail2.ru");
 
@@ -162,7 +162,7 @@ class ItemServiceTest {
                 .description("хочу вещь name")
                 .created(LocalDateTime.now()).build();
 
-        Item testItem = ItemDtoMapper.toItem(itemCreateRequest);
+        Item testItem = ItemDtoMapper.toItem(creationItemRequest);
         testItem.setOwnerId(1);
         testItem.setItemRequest(testItemRequest);
 
@@ -178,14 +178,14 @@ class ItemServiceTest {
                 .when(mockItemRequestRepository.getReferenceById(Mockito.anyLong()))
                 .thenReturn(testItemRequest);
 
-        Item item = itemService.create(itemCreateRequest, 1);
+        Item item = itemService.create(creationItemRequest, 1);
 
         assertEquals(testItem, item);
     }
 
     @Test
     void createItemUserNotFound() {
-        ItemCreateRequest itemCreateRequest = new ItemCreateRequest("name", "description", true, 0);
+        CreationItemRequest creationItemRequest = new CreationItemRequest("name", "description", true, 0);
 
         Mockito
                 .when(mockUserRepository.findById(Mockito.anyLong()))
@@ -193,7 +193,7 @@ class ItemServiceTest {
 
         final NotFoundException exception = Assertions.assertThrows(
                 NotFoundException.class,
-                () -> itemService.create(itemCreateRequest, 1));
+                () -> itemService.create(creationItemRequest, 1));
 
         Assertions.assertEquals("Пользователь 1 не найден", exception.getMessage());
     }

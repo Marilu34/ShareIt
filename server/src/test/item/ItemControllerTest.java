@@ -10,14 +10,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.common.Constants;
 import ru.practicum.shareit.item.ItemController;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.comment.Comment;
-import ru.practicum.shareit.item.dto.CommentDtoMapper;
-import ru.practicum.shareit.item.dto.ItemCreateRequest;
+import ru.practicum.shareit.item.comment.CommentDtoMapper;
+import ru.practicum.shareit.item.dto.CreationItemRequest;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -42,18 +42,18 @@ class ItemControllerTest {
     @Test
     void createItemEndpointTest() throws Exception {
         Mockito
-                .when(itemService.create(any(ItemCreateRequest.class), anyLong()))
+                .when(itemService.create(any(CreationItemRequest.class), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    ItemCreateRequest itemCreateRequest = invocationOnMock.getArgument(0, ItemCreateRequest.class);
-                    Item item = ItemDtoMapper.toItem(itemCreateRequest);
+                    CreationItemRequest creationItemRequest = invocationOnMock.getArgument(0, CreationItemRequest.class);
+                    Item item = ItemDtoMapper.toItem(creationItemRequest);
                     item.setId(1);
                     return item;
                 });
 
-        ItemCreateRequest itemCreateRequest = new ItemCreateRequest("вещь 1", "очень хорошая вещь 1 почти новая", true, 0);
+        CreationItemRequest creationItemRequest = new CreationItemRequest("вещь 1", "очень хорошая вещь 1 почти новая", true, 0);
 
         mvc.perform(post("/items")
-                        .content(mapper.writeValueAsString(itemCreateRequest))
+                        .content(mapper.writeValueAsString(creationItemRequest))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)

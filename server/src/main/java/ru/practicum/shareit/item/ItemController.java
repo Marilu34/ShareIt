@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.common.Constants;
+import ru.practicum.shareit.item.comment.CommentDto;
+import ru.practicum.shareit.item.comment.CommentDtoMapper;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -21,10 +24,10 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto create(@RequestBody ItemCreateRequest itemCreateRequest,
+    public ItemDto create(@RequestBody CreationItemRequest creationItemRequest,
                           @RequestHeader(value = Constants.X_HEADER_NAME) int ownerId) {
-        log.info("Create item, owner {}: " + itemCreateRequest.toString(), ownerId);
-        return ItemDtoMapper.toItemDto(itemService.create(itemCreateRequest, ownerId));
+        log.info("Create item, owner {}: " + creationItemRequest.toString(), ownerId);
+        return ItemDtoMapper.toItemDto(itemService.create(creationItemRequest, ownerId));
     }
 
 

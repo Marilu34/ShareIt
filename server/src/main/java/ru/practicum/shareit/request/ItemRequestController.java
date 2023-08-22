@@ -8,6 +8,7 @@ import ru.practicum.shareit.common.Constants;
 import ru.practicum.shareit.request.dto.ItemRequestCreateRequest;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoMapper;
+import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.List;
 

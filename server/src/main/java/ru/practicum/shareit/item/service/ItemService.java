@@ -1,22 +1,23 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.comment.Comment;
-import ru.practicum.shareit.item.comment.CommentRepository;
-import ru.practicum.shareit.item.dto.ItemCreateRequest;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.dto.CreationItemRequest;
 import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequestRepository;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.Status.APPROVED;
+import static ru.practicum.shareit.booking.model.Status.APPROVED;
 
 
 @Component
@@ -108,13 +109,13 @@ public class ItemService {
     }
 
 
-    public Item create(ItemCreateRequest itemCreateRequest, long ownerId) {
+    public Item create(CreationItemRequest creationItemRequest, long ownerId) {
         userService.getById(ownerId);
 
-        Item item = ItemDtoMapper.toItem(itemCreateRequest);
+        Item item = ItemDtoMapper.toItem(creationItemRequest);
         item.setOwnerId(ownerId);
 
-        long requestId = itemCreateRequest.getRequestId();
+        long requestId = creationItemRequest.getRequestId();
         if (requestId > 0) {
             item.setItemRequest(itemRequestRepository.getReferenceById(requestId));
         }

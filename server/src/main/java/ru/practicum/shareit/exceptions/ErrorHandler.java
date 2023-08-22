@@ -50,12 +50,12 @@ public class ErrorHandler {
         return new ErrorResponse("error", e.getMessage());
     }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.CONFLICT)
-//    public ErrorResponse handleUserEmailNotUniqueException(final UserEmailNotUniqueException e) {
-//        log.info(e.getMessage());
-//        return new ErrorResponse("error", e.getMessage());
-//    }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleUserEmailNotUniqueException(final UserEmailNotUniqueException e) {
+        log.info(e.getMessage());
+        return new ErrorResponse("error", e.getMessage());
+    }
 
     @ExceptionHandler(HttpClientErrorException.Conflict.class)
     @ResponseStatus(HttpStatus.CONFLICT)

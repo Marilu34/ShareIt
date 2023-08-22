@@ -1,14 +1,15 @@
 package item.dto;
 
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.ShortBookingDto;
 import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -188,8 +189,8 @@ class ItemDtoMapperTest {
 
     @Test
     void toItemFromItemCreateRequestTest() {
-        ItemCreateRequest itemCreateRequest = new ItemCreateRequest("name", "description", true, 0);
-        Item item = ItemDtoMapper.toItem(itemCreateRequest);
+        CreationItemRequest creationItemRequest = new CreationItemRequest("name", "description", true, 0);
+        Item item = ItemDtoMapper.toItem(creationItemRequest);
 
         assertEquals("name", item.getName());
         assertEquals("description", item.getDescription());
@@ -198,7 +199,7 @@ class ItemDtoMapperTest {
 
     @Test
     void toItemFromItemCreateRequestWhenNullTest() {
-        Item item = ItemDtoMapper.toItem((ItemCreateRequest) null);
+        Item item = ItemDtoMapper.toItem((CreationItemRequest) null);
         assertNull(item);
     }
 

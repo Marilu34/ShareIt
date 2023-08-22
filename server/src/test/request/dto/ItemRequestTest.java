@@ -14,7 +14,7 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-class ItemRequestDtoJsonTest {
+class ItemRequestTest {
     @Autowired
     private JacksonTester<ItemRequestDto> json;
 
