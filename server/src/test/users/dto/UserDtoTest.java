@@ -1,4 +1,4 @@
-package java.ru.practicum.shareit.user.dto;
+package users.dto;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package java.ru.practicum.shareit.user.dto;
+package users.dto;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.user.model.User;

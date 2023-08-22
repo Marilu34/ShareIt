@@ -1,4 +1,4 @@
-package java.ru.practicum.shareit.user;
+package users;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
