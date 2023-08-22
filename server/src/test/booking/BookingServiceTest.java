@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingCreateRequest;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.dto.CreateBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.*;
@@ -48,7 +48,7 @@ class BookingServiceTest {
         bookingService = new BookingService(mockBookingRepository, userService, itemService);
     }
 
-    private Booking makeTestBooking(BookingStatus status) {
+    private Booking makeTestBooking(Status status) {
         User booker = new User(1, "name1", "e@mail1.ru");
         Item item = Item.builder()
                 .id(1)
@@ -70,7 +70,7 @@ class BookingServiceTest {
 
     @Test
     void getByIdNormalWay() {
-        Booking testBooking = makeTestBooking(BookingStatus.APPROVED);
+        Booking testBooking = makeTestBooking(Status.APPROVED);
 
         Mockito
                 .when(mockBookingRepository.findById(Mockito.anyLong()))
@@ -98,7 +98,7 @@ class BookingServiceTest {
 
     @Test
     void getByIdBookingOfAnotherUser() {
-        Booking testBooking = makeTestBooking(BookingStatus.APPROVED);
+        Booking testBooking = makeTestBooking(Status.APPROVED);
 
         Mockito
                 .when(mockBookingRepository.findById(Mockito.anyLong()))
@@ -113,7 +113,7 @@ class BookingServiceTest {
 
     @Test
     void createBookingNormalWay() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
 
         Mockito
                 .when(mockUserRepository.findById(1L))
@@ -127,16 +127,16 @@ class BookingServiceTest {
                 .when(mockBookingRepository.save(Mockito.any(Booking.class)))
                 .thenReturn(testBooking);
 
-        BookingCreateRequest bookingCreateRequest = BookingCreateRequest.builder().itemId(1).build();
+        CreateBooking createBooking = CreateBooking.builder().itemId(1).build();
 
-        Booking booking = bookingService.create(bookingCreateRequest, 1);
+        Booking booking = bookingService.create(createBooking, 1);
 
         assertEquals(testBooking, booking);
     }
 
     @Test
     void createBookingItemUnavailable() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
         testBooking.getItem().setAvailable(false);
 
         Mockito
@@ -149,14 +149,14 @@ class BookingServiceTest {
 
         final ValidationException exception = Assertions.assertThrows(
                 ValidationException.class,
-                () -> bookingService.create(BookingCreateRequest.builder().itemId(1).build(), 1));
+                () -> bookingService.create(CreateBooking.builder().itemId(1).build(), 1));
 
         Assertions.assertEquals("Вещь с id = 1 недоступна для бронирования", exception.getMessage());
     }
 
     @Test
     void createBookingBookerIsOwner() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
 
         Mockito
                 .when(mockUserRepository.findById(Mockito.anyLong()))
@@ -168,14 +168,14 @@ class BookingServiceTest {
 
         final NotFoundException exception = Assertions.assertThrows(
                 NotFoundException.class,
-                () -> bookingService.create(BookingCreateRequest.builder().itemId(1).build(), 2));
+                () -> bookingService.create(CreateBooking.builder().itemId(1).build(), 2));
 
         Assertions.assertEquals("Вещь с id = 1 не найдена", exception.getMessage());
     }
 
     @Test
     void approveBookingNormalWayApprove() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
 
         Mockito
                 .when(mockBookingRepository.findById(1L))
@@ -187,13 +187,13 @@ class BookingServiceTest {
 
         Booking booking = bookingService.approve(1, true, 2);
 
-        testBooking.setStatus(BookingStatus.APPROVED);
+        testBooking.setStatus(Status.APPROVED);
         assertEquals(testBooking, booking);
     }
 
     @Test
     void approveBookingNormalWayReject() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
 
         Mockito
                 .when(mockBookingRepository.findById(1L))
@@ -205,13 +205,13 @@ class BookingServiceTest {
 
         Booking booking = bookingService.approve(1, false, 2);
 
-        testBooking.setStatus(BookingStatus.REJECTED);
+        testBooking.setStatus(Status.REJECTED);
         assertEquals(testBooking, booking);
     }
 
     @Test
     void approveBookingWhenIncorrectStatus() {
-        Booking testBooking = makeTestBooking(BookingStatus.APPROVED);
+        Booking testBooking = makeTestBooking(Status.APPROVED);
 
         Mockito
                 .when(mockBookingRepository.findById(1L))
@@ -226,7 +226,7 @@ class BookingServiceTest {
 
     @Test
     void approveBookingIncorrectOwner() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
 
         Mockito
                 .when(mockBookingRepository.findById(1L))
@@ -254,14 +254,14 @@ class BookingServiceTest {
 
     @Test
     void getBookingsByBookerIdUnsupportedStatus() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
 
         Mockito
                 .when(mockUserRepository.findById(1L))
                 .thenReturn(Optional.of(testBooking.getBooker()));
 
-        final BookingUnsupportedStatusException exception = Assertions.assertThrows(
-                BookingUnsupportedStatusException.class,
+        final UnknownStateException exception = Assertions.assertThrows(
+                UnknownStateException.class,
                 () -> bookingService.getBookingsByBookerId(1, "UNSUPPORTED", 0, 20));
 
         Assertions.assertEquals("Unknown state: UNSUPPORTED", exception.getMessage());
@@ -282,14 +282,14 @@ class BookingServiceTest {
 
     @Test
     void getBookingsByOwnerIdUnsupportedStatus() {
-        Booking testBooking = makeTestBooking(BookingStatus.WAITING);
+        Booking testBooking = makeTestBooking(Status.WAITING);
 
         Mockito
                 .when(mockUserRepository.findById(1L))
                 .thenReturn(Optional.of(testBooking.getBooker()));
 
-        final BookingUnsupportedStatusException exception = Assertions.assertThrows(
-                BookingUnsupportedStatusException.class,
+        final UnknownStateException exception = Assertions.assertThrows(
+                UnknownStateException.class,
                 () -> bookingService.getBookingsByOwnerId(1, "UNSUPPORTED", 0, 20));
 
         Assertions.assertEquals("Unknown state: UNSUPPORTED", exception.getMessage());

@@ -31,12 +31,12 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBookingUnsupportedStatusException(final BookingUnsupportedStatusException e) {
+    public ErrorResponse handleBookingUnsupportedStatusException(final UnknownStateException e) {
         log.info(e.getMessage());
         return new ErrorResponse(e.getMessage(), e.getMessage());
     }
 
-    @ExceptionHandler({ItemAccessDeniedException.class})
+    @ExceptionHandler({ForbiddenException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleItemAccessDeniedException(final RuntimeException e) {
         log.info(e.getMessage());

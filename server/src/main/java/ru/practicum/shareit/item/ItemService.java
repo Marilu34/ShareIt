@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.ItemAccessDeniedException;
+import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.comment.Comment;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
+import static ru.practicum.shareit.booking.Status.APPROVED;
 
 
 @Component
@@ -139,7 +139,7 @@ public class ItemService {
 
                 return itemRepository.save(storageItem);
             } else {
-                throw new ItemAccessDeniedException("Вещь принадлежит другому пользователю");
+                throw new ForbiddenException("Вещь принадлежит другому пользователю");
             }
         }
         return null;
@@ -149,7 +149,7 @@ public class ItemService {
     public void delete(long itemId, long ownerId) {
         Item savedItem = getById(itemId);
         if (savedItem.getOwnerId() != ownerId) {
-            throw new ItemAccessDeniedException("Вещь принадлежит другому пользователю");
+            throw new ForbiddenException("Вещь принадлежит другому пользователю");
         }
         itemRepository.delete(savedItem);
     }

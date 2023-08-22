@@ -9,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
@@ -49,15 +49,15 @@ class BookingRepositoryTest {
         approvedBooking = em.persistAndFlush(Booking.builder().booker(bookerUser).item(itemToBook)
                 .rentStartDate(nowHour.minusHours(3))
                 .rentEndDate(nowHour.minusHours(2))
-                .status(BookingStatus.APPROVED).build());
+                .status(Status.APPROVED).build());
         waitingBooking = em.persistAndFlush(Booking.builder().booker(bookerUser).item(itemToBook)
                 .rentStartDate(nowHour.plusHours(3))
                 .rentEndDate(nowHour.plusHours(4))
-                .status(BookingStatus.WAITING).build());
+                .status(Status.WAITING).build());
         rejectedBooking = em.persistAndFlush(Booking.builder().booker(bookerUser).item(itemToBook)
                 .rentStartDate(nowHour.plusHours(1))
                 .rentEndDate(nowHour.plusHours(2))
-                .status(BookingStatus.REJECTED).build());
+                .status(Status.REJECTED).build());
     }
 
     @Test
@@ -75,7 +75,7 @@ class BookingRepositoryTest {
     void findByBooker_idAndStatusOrderByRentStartDateDescTest() {
         Pageable page = PageRequest.of(0, 20);
         List<Booking> bookingList = bookingRepository
-                .findByBooker_idAndStatusOrderByRentStartDateDesc(bookerUser.getId(), BookingStatus.REJECTED, page);
+                .findByBooker_idAndStatusOrderByRentStartDateDesc(bookerUser.getId(), Status.REJECTED, page);
 
         assertEquals(1, bookingList.size());
         assertEquals(rejectedBooking.getId(), bookingList.get(0).getId());
@@ -96,7 +96,7 @@ class BookingRepositoryTest {
     void findBookingsOfItemsByOwnerIdAndStatusTest() {
         Pageable page = PageRequest.of(0, 20);
         List<Booking> bookingList = bookingRepository
-                .findBookingsOfItemsByOwnerIdAndStatus(ownerUser.getId(), BookingStatus.APPROVED, page);
+                .findBookingsOfItemsByOwnerIdAndStatus(ownerUser.getId(), Status.APPROVED, page);
 
         assertEquals(1, bookingList.size());
         assertEquals(approvedBooking.getId(), bookingList.get(0).getId());
@@ -165,7 +165,7 @@ class BookingRepositoryTest {
     @Test
     void findByItem_idInTest() {
         List<Booking> bookingList = bookingRepository
-                .findByItem_idInAndStatus(List.of(itemToBook.getId()), BookingStatus.APPROVED);
+                .findByItem_idInAndStatus(List.of(itemToBook.getId()), Status.APPROVED);
 
         assertEquals(1, bookingList.size());
     }
@@ -174,7 +174,7 @@ class BookingRepositoryTest {
     void findByItem_idAndBooker_idAndStatusAndRentEndDateIsBefore() {
         List<Booking> bookingList = bookingRepository
                 .findByItem_idAndBooker_idAndStatusAndRentEndDateIsBefore(itemToBook.getId(), bookerUser.getId(),
-                        BookingStatus.APPROVED, LocalDateTime.now());
+                        Status.APPROVED, LocalDateTime.now());
 
         assertEquals(1, bookingList.size());
         assertEquals(approvedBooking.getId(), bookingList.get(0).getId());

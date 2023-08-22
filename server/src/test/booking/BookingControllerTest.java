@@ -11,9 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.BookingDtoMapper;
-import ru.practicum.shareit.booking.dto.BookingCreateRequest;
+import ru.practicum.shareit.booking.dto.CreateBooking;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exceptions.BookingUnsupportedStatusException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
@@ -27,8 +26,8 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
-import static ru.practicum.shareit.booking.BookingStatus.WAITING;
+import static ru.practicum.shareit.booking.Status.APPROVED;
+import static ru.practicum.shareit.booking.Status.WAITING;
 
 @WebMvcTest(controllers = BookingController.class)
 class BookingControllerTest {
@@ -49,18 +48,18 @@ class BookingControllerTest {
         Item item1 = Item.builder().id(1).ownerId(1).name("вещь1").description("описание 1").available(true).build();
 
         Mockito
-                .when(bookingService.create(any(BookingCreateRequest.class), anyLong()))
+                .when(bookingService.create(any(CreateBooking.class), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    BookingCreateRequest bookingCreateRequest = invocationOnMock.getArgument(0, BookingCreateRequest.class);
-                    return new Booking(1, item1, booker, bookingCreateRequest.getStart(), bookingCreateRequest.getEnd(), WAITING);
+                    CreateBooking createBooking = invocationOnMock.getArgument(0, CreateBooking.class);
+                    return new Booking(1, item1, booker, createBooking.getStart(), createBooking.getEnd(), WAITING);
                 });
 
-        BookingCreateRequest bookingCreateRequest = BookingCreateRequest.builder().itemId(1)
+        CreateBooking createBooking = CreateBooking.builder().itemId(1)
                 .start(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusHours(1))
                 .end(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusHours(2)).build();
 
         mvc.perform(post("/bookings")
-                        .content(mapper.writeValueAsString(bookingCreateRequest))
+                        .content(mapper.writeValueAsString(createBooking))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)

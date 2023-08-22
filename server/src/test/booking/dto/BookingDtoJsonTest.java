@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -29,7 +29,7 @@ class BookingDtoJsonTest {
         LocalDateTime bookingStart = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).minusHours(1);
         LocalDateTime bookingEnd = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS).plusHours(1);
         BookingDto bookingDto = BookingDto.builder().id(1L).item(itemDto).booker(userDto)
-                .start(bookingStart).end(bookingEnd).status(BookingStatus.APPROVED).build();
+                .start(bookingStart).end(bookingEnd).status(Status.APPROVED).build();
 
         JsonContent<BookingDto> result = json.write(bookingDto);
 

@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingCreateRequest;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.dto.CreateBooking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemCreateRequest;
@@ -43,12 +43,12 @@ class BookingServiceIntegrationTest {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         User booker = userService.create(new User(0, "booker name", "booker@name.org"));
         Booking booking1 = bookingService.create(
-                BookingCreateRequest.builder().itemId(item1.getId()).start(now.plusHours(1)).end(now.plusHours(2)).build(),
+                CreateBooking.builder().itemId(item1.getId()).start(now.plusHours(1)).end(now.plusHours(2)).build(),
                 booker.getId());
 
         Booking approvedBooking = bookingService.approve(booking1.getId(), true, owner.getId());
 
         assertEquals(booking1.getId(), approvedBooking.getId());
-        assertEquals(BookingStatus.APPROVED, approvedBooking.getStatus());
+        assertEquals(Status.APPROVED, approvedBooking.getStatus());
     }
 }

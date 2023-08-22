@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class BookingCreateRequest {
+public class CreateBooking {
     private long itemId;
 
     private LocalDateTime start;

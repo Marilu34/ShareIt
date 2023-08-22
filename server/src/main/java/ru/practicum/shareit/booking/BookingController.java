@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingCreateRequest;
+import ru.practicum.shareit.booking.dto.CreateBooking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.common.Constants;
 
-import javax.validation.ValidationException;
 import java.util.List;
 
 @RestController
@@ -22,10 +21,10 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto create(@RequestBody BookingCreateRequest bookingCreateRequest,
+    public BookingDto create(@RequestBody CreateBooking createBooking,
                              @RequestHeader(value = Constants.X_HEADER_NAME) long bookerId) {
-        log.info("Пользователем {} создано бронирование: " + bookingCreateRequest.toString(), bookerId);
-        return BookingDtoMapper.toBookingDto(bookingService.create(bookingCreateRequest, bookerId));
+        log.info("Пользователем {} создано бронирование: " + createBooking.toString(), bookerId);
+        return BookingDtoMapper.toBookingDto(bookingService.create(createBooking, bookerId));
     }
 
 

@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.ItemAccessDeniedException;
+import ru.practicum.shareit.exceptions.ForbiddenException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
+import static ru.practicum.shareit.booking.Status.APPROVED;
 
 class ItemServiceTest {
 
@@ -115,7 +115,7 @@ class ItemServiceTest {
                 .thenReturn(testCommentList);
 
         Mockito
-                .when(mockBookingRepository.findByItem_idInAndStatus(Mockito.any(List.class), Mockito.any(BookingStatus.class)))
+                .when(mockBookingRepository.findByItem_idInAndStatus(Mockito.any(List.class), Mockito.any(Status.class)))
                 .thenReturn(testBookingList);
 
         Item item = itemService.getById(1, 1);
@@ -238,8 +238,8 @@ class ItemServiceTest {
                 .when(mockItemRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(simpleTestItem));
 
-        final ItemAccessDeniedException exception = Assertions.assertThrows(
-                ItemAccessDeniedException.class,
+        final ForbiddenException exception = Assertions.assertThrows(
+                ForbiddenException.class,
                 () -> itemService.update(simpleTestItem, 2));
 
         Assertions.assertEquals("Вещь принадлежит другому пользователю", exception.getMessage());
@@ -280,8 +280,8 @@ class ItemServiceTest {
                 .when(mockItemRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(simpleTestItem));
 
-        final ItemAccessDeniedException exception = Assertions.assertThrows(
-                ItemAccessDeniedException.class,
+        final ForbiddenException exception = Assertions.assertThrows(
+                ForbiddenException.class,
                 () -> itemService.delete(1, 2));
 
         Assertions.assertEquals("Вещь принадлежит другому пользователю", exception.getMessage());
@@ -329,7 +329,7 @@ class ItemServiceTest {
                         mockBookingRepository.findByItem_idAndBooker_idAndStatusAndRentEndDateIsBefore(
                                 Mockito.anyLong(),
                                 Mockito.anyLong(),
-                                Mockito.any(BookingStatus.class),
+                                Mockito.any(Status.class),
                                 Mockito.any(LocalDateTime.class)))
                 .thenReturn(List.of(Booking.builder().id(1).item(simpleTestItem).booker(testUser).build()));
 
@@ -400,7 +400,7 @@ class ItemServiceTest {
                         mockBookingRepository.findByItem_idAndBooker_idAndStatusAndRentEndDateIsBefore(
                                 Mockito.anyLong(),
                                 Mockito.anyLong(),
-                                Mockito.any(BookingStatus.class),
+                                Mockito.any(Status.class),
                                 Mockito.any(LocalDateTime.class)))
                 .thenReturn(List.of());
 

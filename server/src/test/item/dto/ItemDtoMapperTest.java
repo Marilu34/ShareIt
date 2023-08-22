@@ -2,8 +2,8 @@ package item.dto;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.repository.BookingShortDto;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.repository.ShortBookingDto;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
@@ -26,8 +26,8 @@ class ItemDtoMapperTest {
         ItemDto itemDto = ItemDto.builder().id(1).name("name").description("description").available(true)
                 .comments(List.of(CommentDto.builder().id(10).text("comment from author")
                         .authorName("comment author").created(now.minusMinutes(1)).build()))
-                .lastBooking(new BookingShortDto(1, 2, now.minusHours(1), now))
-                .nextBooking(new BookingShortDto(2, 2, now, now.plusHours(1)))
+                .lastBooking(new ShortBookingDto(1, 2, now.minusHours(1), now))
+                .nextBooking(new ShortBookingDto(2, 2, now, now.plusHours(1)))
                 .requestId(0).build();
 
         Item item = ItemDtoMapper.toItem(itemDto);
@@ -58,9 +58,9 @@ class ItemDtoMapperTest {
         commentList.add(Comment.builder().id(2).text("item comment 2").item(item)
                 .author(itemOwner).created(now.minusMinutes(1)).build());
 
-        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.minusHours(5)).rentEndDate(now.minusHours(4)).build();
-        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.plusHours(5)).rentEndDate(now.plusHours(6)).build();
 
         item.setLastBooking(lastBooking);
@@ -101,9 +101,9 @@ class ItemDtoMapperTest {
         commentList.add(Comment.builder().id(2).text("item comment 2").item(item)
                 .author(itemOwner).created(now.minusMinutes(1)).build());
 
-        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.minusHours(5)).rentEndDate(now.minusHours(4)).build();
-        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.plusHours(5)).rentEndDate(now.plusHours(6)).build();
 
         ItemRequest itemRequest = ItemRequest.builder().requestId(12).requestAuthor(itemBooker)
@@ -156,9 +156,9 @@ class ItemDtoMapperTest {
         commentList.add(Comment.builder().id(2).text("item comment 2").item(item)
                 .author(itemOwner).created(now.minusMinutes(1)).build());
 
-        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.minusHours(5)).rentEndDate(now.minusHours(4)).build();
-        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.plusHours(5)).rentEndDate(now.plusHours(6)).build();
 
         item.setLastBooking(lastBooking);
@@ -216,9 +216,9 @@ class ItemDtoMapperTest {
         commentList.add(Comment.builder().id(2).text("item comment 2").item(item)
                 .author(itemOwner).created(now.minusMinutes(1)).build());
 
-        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.minusHours(5)).rentEndDate(now.minusHours(4)).build();
-        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.plusHours(5)).rentEndDate(now.plusHours(6)).build();
 
         item.setLastBooking(lastBooking);
@@ -248,9 +248,9 @@ class ItemDtoMapperTest {
         commentList.add(Comment.builder().id(2).text("item comment 2").item(item)
                 .author(itemOwner).created(now.minusMinutes(1)).build());
 
-        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.minusHours(5)).rentEndDate(now.minusHours(4)).build();
-        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.plusHours(5)).rentEndDate(now.plusHours(6)).build();
 
         ItemRequest itemRequest = ItemRequest.builder().requestId(12).requestAuthor(itemBooker)
@@ -290,9 +290,9 @@ class ItemDtoMapperTest {
         commentList.add(Comment.builder().id(2).text("item comment 2").item(item)
                 .author(itemOwner).created(now.minusMinutes(1)).build());
 
-        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking lastBooking = Booking.builder().id(1).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.minusHours(5)).rentEndDate(now.minusHours(4)).build();
-        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(BookingStatus.APPROVED)
+        Booking nextBooking = Booking.builder().id(2).item(item).booker(itemBooker).status(Status.APPROVED)
                 .rentStartDate(now.plusHours(5)).rentEndDate(now.plusHours(6)).build();
 
         item.setLastBooking(lastBooking);

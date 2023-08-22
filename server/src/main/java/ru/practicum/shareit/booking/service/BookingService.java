@@ -5,7 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.dto.BookingCreateRequest;
+import ru.practicum.shareit.booking.dto.CreateBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.ItemService;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.practicum.shareit.booking.BookingStatus.*;
+import static ru.practicum.shareit.booking.Status.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,9 +42,9 @@ public class BookingService {
     }
 
 
-    public Booking create(BookingCreateRequest bookingCreateRequest, long bookerId) throws ValidationException, NotFoundException {
+    public Booking create(CreateBooking createBooking, long bookerId) throws ValidationException, NotFoundException {
         User booker = userService.getById(bookerId);
-        Item item = itemService.getById(bookingCreateRequest.getItemId(), 0);
+        Item item = itemService.getById(createBooking.getItemId(), 0);
         if (!item.getAvailable()) {
             throw new ValidationException("Вещь с id = " + item.getId() + " недоступна для бронирования");
         }
@@ -53,7 +53,7 @@ public class BookingService {
             throw new NotFoundException("Вещь с id = " + item.getId() + " не найдена");
         }
 
-        Booking booking = new Booking(0, item, booker, bookingCreateRequest.getStart(), bookingCreateRequest.getEnd(), WAITING);
+        Booking booking = new Booking(0, item, booker, createBooking.getStart(), createBooking.getEnd(), WAITING);
         booking = bookingRepository.save(booking);
         return booking;
     }
@@ -74,7 +74,7 @@ public class BookingService {
     }
 
 
-    public List<Booking> getBookingsByBookerId(long bookerId, String state, int from, int size) throws BookingUnsupportedStatusException {
+    public List<Booking> getBookingsByBookerId(long bookerId, String state, int from, int size) throws UnknownStateException {
         userService.getById(bookerId);
         Pageable page = PageRequest.of(from / size, size);
 
@@ -98,7 +98,7 @@ public class BookingService {
                 return bookingRepository.findByBooker_idOrderByRentStartDateDesc(bookerId, page);
 
             default:
-                throw new BookingUnsupportedStatusException("Unknown state: " + state);
+                throw new UnknownStateException("Unknown state: " + state);
         }
     }
 
@@ -127,7 +127,7 @@ public class BookingService {
                 return bookingRepository.findBookingsOfItemsByOwnerId(ownerId, page);
 
             default:
-                throw new BookingUnsupportedStatusException("Unknown state: " + state);
+                throw new UnknownStateException("Unknown state: " + state);
         }
     }
 }

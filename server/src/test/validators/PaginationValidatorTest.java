@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PageRequestTest {
+class PaginationValidatorTest {
     @Test
     void validatePaginationNormalWay() {
         Pageable page =  PageRequest.of(20, 20);

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.dto.BookingCreateRequest;
+import ru.practicum.shareit.booking.dto.CreateBooking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.comment.Comment;
@@ -47,12 +47,12 @@ class ItemServiceIntegrationTest {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         User booker = userService.create(new User(0, "booker name", "booker1@name.org"));
         Booking booking1 = bookingService.create(
-                BookingCreateRequest.builder().itemId(item1.getId()).start(now.plusHours(1)).end(now.plusHours(2)).build(),
+                CreateBooking.builder().itemId(item1.getId()).start(now.plusHours(1)).end(now.plusHours(2)).build(),
                 booker.getId());
         bookingService.approve(booking1.getId(), true, owner.getId());
 
         Booking booking2 = bookingService.create(
-                BookingCreateRequest.builder().itemId(item1.getId()).start(now.minusHours(2)).end(now.minusHours(1)).build(),
+                CreateBooking.builder().itemId(item1.getId()).start(now.minusHours(2)).end(now.minusHours(1)).build(),
                 booker.getId());
         bookingService.approve(booking2.getId(), true, owner.getId());
 
