@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/items")
@@ -57,6 +58,9 @@ public class ItemController {
     public ResponseEntity<Object> search(@PositiveOrZero @RequestParam(defaultValue = "0") int from,
                                          @Positive @RequestParam(defaultValue = "20") int size,
                                          @RequestParam(defaultValue = "") String text) {
+        if (text.trim().isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
         log.info("Search text '{}', from {}, size {}", text, from, size);
         return itemClient.search(text, from, size);
     }
